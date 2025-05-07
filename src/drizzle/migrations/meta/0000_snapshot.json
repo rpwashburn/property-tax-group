@@ -1,0 +1,610 @@
+{
+  "id": "7ca78843-981a-4578-bdd2-0d453f9cedce",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.fixtures": {
+      "name": "fixtures",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "acct": {
+          "name": "acct",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bld_num": {
+          "name": "bld_num",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_dscr": {
+          "name": "type_dscr",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "units": {
+          "name": "units",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "fixtures_acct_bld_type_idx": {
+          "name": "fixtures_acct_bld_type_idx",
+          "columns": [
+            {
+              "expression": "acct",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "bld_num",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.neighborhood_codes": {
+      "name": "neighborhood_codes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "group_code": {
+          "name": "group_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.property_data": {
+      "name": "property_data",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "acct": {
+          "name": "acct",
+          "type": "varchar(13)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "str_num": {
+          "name": "str_num",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "str": {
+          "name": "str",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "str_sfx": {
+          "name": "str_sfx",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "str_sfx_dir": {
+          "name": "str_sfx_dir",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "site_addr_1": {
+          "name": "site_addr_1",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "site_addr_2": {
+          "name": "site_addr_2",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "site_addr_3": {
+          "name": "site_addr_3",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state_class": {
+          "name": "state_class",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "school_dist": {
+          "name": "school_dist",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "neighborhood_code": {
+          "name": "neighborhood_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "neighborhood_grp": {
+          "name": "neighborhood_grp",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "market_area_1": {
+          "name": "market_area_1",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "market_area_1_dscr": {
+          "name": "market_area_1_dscr",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "market_area_2": {
+          "name": "market_area_2",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "market_area_2_dscr": {
+          "name": "market_area_2_dscr",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "econ_area": {
+          "name": "econ_area",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "econ_bld_class": {
+          "name": "econ_bld_class",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "yr_impr": {
+          "name": "yr_impr",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "yr_annexed": {
+          "name": "yr_annexed",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bld_ar": {
+          "name": "bld_ar",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_ar": {
+          "name": "land_ar",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "acreage": {
+          "name": "acreage",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "land_val": {
+          "name": "land_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bld_val": {
+          "name": "bld_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "x_features_val": {
+          "name": "x_features_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ag_val": {
+          "name": "ag_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "assessed_val": {
+          "name": "assessed_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tot_appr_val": {
+          "name": "tot_appr_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tot_mkt_val": {
+          "name": "tot_mkt_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_land_val": {
+          "name": "prior_land_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_bld_val": {
+          "name": "prior_bld_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_x_features_val": {
+          "name": "prior_x_features_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_ag_val": {
+          "name": "prior_ag_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_tot_appr_val": {
+          "name": "prior_tot_appr_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prior_tot_mkt_val": {
+          "name": "prior_tot_mkt_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_construction_val": {
+          "name": "new_construction_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tot_rcn_val": {
+          "name": "tot_rcn_val",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value_status": {
+          "name": "value_status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "noticed": {
+          "name": "noticed",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notice_dt": {
+          "name": "notice_dt",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "protested": {
+          "name": "protested",
+          "type": "varchar(1)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certified_date": {
+          "name": "certified_date",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rev_dt": {
+          "name": "rev_dt",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rev_by": {
+          "name": "rev_by",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_own_dt": {
+          "name": "new_own_dt",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lgl_1": {
+          "name": "lgl_1",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "jurs": {
+          "name": "jurs",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "acct_idx": {
+          "name": "acct_idx",
+          "columns": [
+            {
+              "expression": "acct",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.structural_elements": {
+      "name": "structural_elements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "acct": {
+          "name": "acct",
+          "type": "varchar(13)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bld_num": {
+          "name": "bld_num",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adj": {
+          "name": "adj",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type_dscr": {
+          "name": "type_dscr",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category_dscr": {
+          "name": "category_dscr",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dor_cd": {
+          "name": "dor_cd",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "se_acct_bld_type_idx": {
+          "name": "se_acct_bld_type_idx",
+          "columns": [
+            {
+              "expression": "acct",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "bld_num",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

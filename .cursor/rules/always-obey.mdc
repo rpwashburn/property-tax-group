@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Server Calls vs API Routes
+We are using latest nextjs server side logic and should never use API routes for accessing data when we can use server side functions instead
+
+## Data Access
+reference [data-access-layer.mdc](mdc:.cursor/rules/data-access-layer.mdc) for guidelines anytime you are trying to manipulate data
+
+## Drizzle Commands
+- `npx drizzle-kit generate --name <migration-name>` to generate a new migration
+- `npx drizzle-kit migrate` to migrate the database
+- Do not inclue :pg on any of the commands 

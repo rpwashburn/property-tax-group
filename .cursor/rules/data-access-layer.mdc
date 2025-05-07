@@ -1,0 +1,15 @@
+---
+description: 
+globs: lib/*
+alwaysApply: false
+---
+
+## Data Access and Mutations
+- ALWAYS use server side actions for data mutations over API routes
+- Database access requires environment variables to be set which means you cannot access the database in the client side.
+- when handling a certain domain (e.g. cost-codes, leads, etc.)
+  - create a directory in `lib`
+  - create a server.ts file to handle server side data fetching and mutations. Ensure that the actions are done server side.
+  - create a types.ts file to handle data types. If there are many domain types, create a new file in `lib/<domain>/types` with a filename that matches the domain (e.g. `lib/leads/types/lead.ts`, `lib/leads/types/lead-status.ts`)
+  - We are using drizzle for our database ORM and the schema can be found and changed in [schema.ts](mdc:drizzle/schema.ts)
+  - The database file can be accessed at [db.ts](mdc:drizzle/db.ts)
