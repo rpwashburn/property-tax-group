@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 interface DeleteButtonProps {
   id: string | number;
-  deleteAction: (id: any) => Promise<{ success: boolean; error?: string }>;
+  deleteAction: (id: string | number) => Promise<{ success: boolean; error?: string }>;
   itemType: string; // e.g., 'Neighborhood', 'Property'
 }
 

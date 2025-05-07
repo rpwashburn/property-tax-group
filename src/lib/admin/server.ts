@@ -3,7 +3,7 @@
 
 import { db } from '@/drizzle/db';
 import * as schema from '@/drizzle/schema';
-import { eq, desc, asc, sql, count } from 'drizzle-orm';
+import { eq, desc, asc, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type {
   NeighborhoodCode,
@@ -92,12 +92,16 @@ export async function getAllPropertyData(limit: number = 50, offset: number = 0)
       .orderBy(desc(schema.propertyData.createdAt)) // Example ordering
       .limit(limit)
       .offset(offset);
-    // Consider adding count for pagination
-    // const countResult = await db.select({ count: sql`count(*)` }).from(schema.propertyData);
-    // const totalCount = countResult[0]?.count ?? 0;
-    return { success: true, data: data as PropertyData[] };
+    
+    // Get total count
+    const countResult = await db.select({ total: count() }).from(schema.propertyData);
+    const totalCount = countResult[0]?.total ?? 0;
+
+    return { success: true, data: data as PropertyData[], totalCount };
   } catch (error) {
-    return handleError('fetch property data', error);
+    // Ensure consistent return type on error
+    const result = handleError('fetch property data', error);
+    return { ...result, data: [], totalCount: 0 }; 
   }
 }
 
@@ -148,8 +152,6 @@ export async function deletePropertyData(id: string) {
   }
 }
 
-// --- Structural Elements --- //
-
 export async function getAllStructuralElements(limit: number = 50, offset: number = 0) {
   try {
     const data = await db.select()
@@ -157,9 +159,15 @@ export async function getAllStructuralElements(limit: number = 50, offset: numbe
       .orderBy(desc(schema.structuralElements.createdAt)) // Example ordering
       .limit(limit)
       .offset(offset);
-    return { success: true, data: data as StructuralElement[] };
+    
+    // Get total count
+    const countResult = await db.select({ total: count() }).from(schema.structuralElements);
+    const totalCount = countResult[0]?.total ?? 0;
+
+    return { success: true, data: data as StructuralElement[], totalCount };
   } catch (error) {
-    return handleError('fetch structural elements', error);
+    const result = handleError('fetch structural elements', error);
+    return { ...result, data: [], totalCount: 0 };
   }
 }
 
@@ -219,9 +227,16 @@ export async function getAllFixtures(limit: number = 50, offset: number = 0) {
       .orderBy(desc(schema.fixtures.createdAt)) // Example ordering
       .limit(limit)
       .offset(offset);
-    return { success: true, data: data as Fixture[] };
+    
+    // Get total count
+    const countResult = await db.select({ total: count() }).from(schema.fixtures);
+    const totalCount = countResult[0]?.total ?? 0;
+
+    return { success: true, data: data as Fixture[], totalCount };
   } catch (error) {
-    return handleError('fetch fixtures', error);
+    // Ensure consistent return type on error if needed, though current page checks success first
+    const result = handleError('fetch fixtures', error);
+    return { ...result, data: [], totalCount: 0 }; // Added data and totalCount for consistency
   }
 }
 

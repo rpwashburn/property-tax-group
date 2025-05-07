@@ -82,7 +82,7 @@ function PriorYearValues({ propertyData }: { propertyData: PropertyData }) {
         </div>
         <div>
           <h3 className="font-semibold text-lg">Prior Year Values</h3>
-          <p className="text-sm text-muted-foreground">Last year's property valuation</p>
+          <p className="text-sm text-muted-foreground">Last year&apos;s property valuation</p>
         </div>
       </div>
 

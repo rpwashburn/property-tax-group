@@ -109,9 +109,13 @@ export function OpenAIAnalysis({ subjectProperty }: OpenAIAnalysisProps) {
       } else {
         setError("Analysis completed but returned no content.")
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error calling performAnalysisAction:", err)
-      setError(`An unexpected error occurred: ${err.message || "Unknown client error"}`)
+      if (err instanceof Error) {
+        setError(`An unexpected error occurred: ${err.message}`)
+      } else {
+        setError("An unexpected error occurred: Unknown client error")
+      }
       setPromptUsed(promptUsed ?? "Prompt state unknown due to client error.")
     } finally {
       setIsLoading(false)

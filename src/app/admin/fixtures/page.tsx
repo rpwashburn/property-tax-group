@@ -13,19 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format } from 'date-fns';
 
-// Define props for search params
-interface AdminFixturesPageProps {
-  searchParams?: {
-    page?: string;
-    limit?: string;
-  };
-}
+// Removed interface definition
 
-export default async function AdminFixturesPage({ searchParams }: AdminFixturesPageProps) {
-  const limit = parseInt(searchParams?.limit || '25', 10);
-  const page = parseInt(searchParams?.page || '1', 10);
+export default async function AdminFixturesPage({ searchParams }: {
+  searchParams?: Promise<{ page?: string; limit?: string; }>; // Wrap searchParams in Promise
+}) {
+  // Await searchParams if needed, otherwise access directly (might need try/catch or refinement)
+  const searchParamsResolved = searchParams ? await searchParams : {}; 
+  const limit = parseInt(searchParamsResolved?.limit || '25', 10);
+  const page = parseInt(searchParamsResolved?.page || '1', 10);
   const offset = (page - 1) * limit;
 
   // Fetch data with pagination
@@ -84,7 +81,7 @@ export default async function AdminFixturesPage({ searchParams }: AdminFixturesP
                       </Button>
                       <DeleteButton 
                         id={fix.id} 
-                        deleteAction={deleteFixture} // Direct server action
+                        deleteAction={deleteFixture as (id: string | number) => Promise<{ success: boolean; error?: string }>} // Direct server action
                         itemType="Fixture"
                       />
                     </div>

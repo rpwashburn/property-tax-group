@@ -6,10 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
-interface ComparablesAdminPageProps {
-    searchParams?: { [key: string]: string | string[] | undefined };
-}
-
 function LoadingSkeleton() {
     return (
         <div className="container max-w-7xl py-10">
@@ -42,9 +38,12 @@ function LoadingSkeleton() {
     );
 }
 
-export default function ComparablesPage({ searchParams }: ComparablesAdminPageProps) {
+export default async function ComparablesPage({ searchParams }: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   // Read subjectAcct directly from server component props
-  const subjectAcct = searchParams?.subjectAcct as string | undefined;
+  const resolvedSearchParams = await searchParams;
+  const subjectAcct = resolvedSearchParams?.subjectAcct as string | undefined;
 
   return (
     <div className="container max-w-7xl py-10">
@@ -73,7 +72,7 @@ export default function ComparablesPage({ searchParams }: ComparablesAdminPagePr
       {subjectAcct ? (
           <Suspense fallback={<LoadingSkeleton />}>
               {/* ComparablesDataFetcher reads from its own searchParams prop */}
-              <ComparablesDataFetcher searchParams={searchParams} />
+              <ComparablesDataFetcher searchParams={resolvedSearchParams} />
           </Suspense>
       ) : (
          <div className="text-center text-muted-foreground py-10 border rounded-lg bg-white">

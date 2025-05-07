@@ -40,7 +40,7 @@ export default function AdjustmentsPage() {
     ],
   })
 
-  const [originalValues, setOriginalValues] = useState<Record<CompId, number>>({
+  const [originalValues] = useState<Record<CompId, number>>({
     comp1: 485000,
     comp2: 510000,
     comp3: 475000,
@@ -145,8 +145,8 @@ export default function AdjustmentsPage() {
         </p>
         <p className="mb-2">
           Adjustments account for differences between comparable properties and your property. This creates a more
-          accurate and fair comparison by answering the question: "What would this comparable property be worth if it
-          had the same features as my property?"
+          accurate and fair comparison by answering the question: &quot;What would this comparable property be worth if it
+          had the same features as my property?&quot;
         </p>
         <p>
           <strong>Example:</strong> If a comparable property has a larger lot size than yours, its value should be

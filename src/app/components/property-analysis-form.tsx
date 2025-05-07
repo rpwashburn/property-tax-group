@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getPropertyDataByAccountNumber } from "@/lib/property-analysis/server"
@@ -12,7 +12,6 @@ export function PropertyAnalysisForm() {
   const [accountNumber, setAccountNumber] = useState(searchParams.get("accountNumber") || "")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "")
@@ -26,20 +25,12 @@ export function PropertyAnalysisForm() {
     try {
       const data = await getPropertyDataByAccountNumber(accountNumber)
       if (!data) {
-        toast({
-          title: "Error",
-          description: "Property not found",
-          variant: "destructive",
-        })
+        toast.error("Property not found")
         return
       }
       router.push(`/start?accountNumber=${accountNumber}`)
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load property data",
-        variant: "destructive",
-      })
+    } catch {
+      toast.error("Failed to load property data")
     } finally {
       setIsLoading(false)
     }

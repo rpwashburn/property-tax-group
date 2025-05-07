@@ -10,16 +10,6 @@ import { getPropertyByAcct, type SubjectProperty } from '@/lib/comparables/serve
 import { notFound } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
 
-interface ReportAnalysisPageProps {
-  params: {
-    accountNumber: string
-  }
-  searchParams: {
-    overrideYrImpr?: string;
-    overrideBldAr?: string;
-  };
-}
-
 function LoadingSkeleton() {
   return (
     <Card>
@@ -51,9 +41,18 @@ const parseMarketValue = (value: string | null | undefined): number => {
   return parseInt(value.replace(/[^0-9]/g, ''), 10) || 0
 }
 
-export default async function ReportAnalysisPage({ params, searchParams }: ReportAnalysisPageProps) {
-  const { accountNumber } = params
-  const { overrideYrImpr, overrideBldAr } = searchParams
+export default async function ReportAnalysisPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ accountNumber: string }>;
+  searchParams?: Promise<{ overrideYrImpr?: string; overrideBldAr?: string; }>;
+}) {
+  const { accountNumber } = await params;
+  // Access specific search params directly
+  const resolvedSearchParams = await searchParams;
+  const overrideYrImpr = resolvedSearchParams?.overrideYrImpr;
+  const overrideBldAr = resolvedSearchParams?.overrideBldAr;
 
   let subjectProperty: SubjectProperty | null = null
 

@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowLeft, ArrowRight, Check, CreditCard, FileText, RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -99,9 +100,9 @@ export default function SubscriptionPage() {
                   {paymentMethod === "paypal" && (
                     <div className="border rounded-lg p-6 flex flex-col items-center justify-center text-center">
                       <p className="text-sm text-muted-foreground mb-4">
-                        You'll be redirected to PayPal to complete your purchase securely.
+                        You&apos;ll be redirected to PayPal to complete your purchase securely.
                       </p>
-                      <img src="/placeholder.svg?height=40&width=150" alt="PayPal" className="h-10 mb-4" />
+                      <Image src="/placeholder.svg" width={150} height={40} alt="PayPal" className="h-10 mb-4" />
                     </div>
                   )}
 
@@ -109,7 +110,7 @@ export default function SubscriptionPage() {
                     <Label htmlFor="email">Email for Receipt</Label>
                     <Input id="email" type="email" placeholder="john@example.com" required />
                     <p className="text-xs text-muted-foreground">
-                      We'll send your receipt and access information to this email
+                      We&apos;ll send your receipt and access information to this email
                     </p>
                   </div>
 
@@ -156,7 +157,7 @@ export default function SubscriptionPage() {
                 </div>
 
                 <div className="space-y-2 pt-4">
-                  <h3 className="text-sm font-medium">What's Included:</h3>
+                  <h3 className="text-sm font-medium">What&apos;s Included:</h3>
                   <ul className="space-y-2 text-sm">
                     <li className="flex gap-2 items-start">
                       <Check className="h-4 w-4 text-primary mt-0.5" />

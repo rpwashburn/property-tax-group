@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, ChevronDown, Info, MapPin, Plus, Home, Copy, Download, Sparkles } from "lucide-react"; // Added Sparkles
+import { ArrowLeft, Check, ChevronDown, Info, Plus, Home, Copy, Download, Sparkles } from "lucide-react"; // Removed MapPin, Added Sparkles
 
 // UI Imports
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -21,18 +20,15 @@ import type { ComparableProperty, PropertySearchCriteria } from "@/lib/comparabl
 import type { SubjectProperty } from "@/lib/comparables/server"; // Import SubjectProperty type
 // Import calculation functions and types
 import { 
-    calculateAdjustments, 
-    calculateMedianAdjustedValue, 
     safeParseInt, // <<< Import safeParseInt
-    type AdjustmentCalculations, // Import type if needed elsewhere
     type MedianCalculationResult,
     type GroupMembershipIds, // <<< Import GroupMembershipIds type
-} from "@/lib/comparables/calculations";
-import type { PropertyWithAdjustments } from "./ComparablesDataFetcher"; // Import type for enhanced properties
+} from "@/lib/comparables/calculations"; // Removed calculateAdjustments, calculateMedianAdjustedValue, AdjustmentCalculations
+import type { AdjustedComparable } from "@/lib/comparables/types"; // Import type for enhanced properties
 
 // Props interface
 interface ComparablesViewProps {
-  initialProperties: PropertyWithAdjustments[]; // Expect adjustments pre-calculated
+  initialProperties: AdjustedComparable[]; // Expect adjustments pre-calculated
   initialCriteria: PropertySearchCriteria;
   subjectProperty: SubjectProperty | null; 
   medianResult: MedianCalculationResult; // <<< Ensure this prop is defined
@@ -81,9 +77,9 @@ export function ComparablesView({
   // Function to format numbers with sign
   const formatSignedCurrency = (value: number | null | undefined) => { // Allow null/undefined
       if (value === null || value === undefined) return 'N/A';
-      const sign = value >= 0 ? '+' : '';
+      // const sign = value >= 0 ? '+' : ''; // Removed unused variable 'sign'
       // Use formatCurrency which already handles locale and options
-      const formatted = (value === 0 ? 0 : value).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+      // const formatted = (value === 0 ? 0 : value).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }); // Removed unused variable 'formatted'
       // Remove currency symbol if present before adding sign, then re-add if needed (or adjust formatCurrency)
       // Simpler: rely on browser default for sign placement with currency format
       return value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0, signDisplay: 'exceptZero' });
@@ -101,7 +97,7 @@ export function ComparablesView({
       'Adjusted Improvement Value', 'Total Adjusted Value', 
       'Group Membership' // <<< New Header
     ];
-    const escapeCsvField = (field: any): string => { /* Reuse existing helper */ 
+    const escapeCsvField = (field: unknown): string => { /* Reuse existing helper */ 
         const stringField = field === null || field === undefined ? '' : String(field);
         if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
             return `"${stringField.replace(/"/g, '""')}"`;
@@ -112,7 +108,7 @@ export function ComparablesView({
     const csvRows = [
       headers.join(','), // Header row
       ...initialProperties.map(prop => {
-        const adjustments = prop.adjustments; 
+        const { adjustments: propAdjustments, ...restOfProp } = prop;
         
         // Determine group membership for this property
         const groups: string[] = [];
@@ -122,16 +118,15 @@ export function ComparablesView({
         const groupString = groups.join(', '); // Combine group names
 
         const rowData = {
-            ...prop,
-            'Comp Impr PSF': adjustments?.compImprPSF ?? '',
-            'Size Adjustment': adjustments?.sizeAdjustment ?? '',
-            'Age Adjustment': adjustments?.ageAdjustment ?? '',
-            'Land Adjustment Amount': adjustments?.landAdjustmentAmount ?? '',
-            'Adjusted Improvement Value': adjustments?.adjustedImprovementValue ?? '',
-            'Total Adjusted Value': adjustments?.totalAdjustedValue ?? '',
+            ...restOfProp,
+            'Comp Impr PSF': propAdjustments?.compImprPSF ?? '',
+            'Size Adjustment': propAdjustments?.sizeAdjustment ?? '',
+            'Age Adjustment': propAdjustments?.ageAdjustment ?? '',
+            'Land Adjustment Amount': propAdjustments?.landAdjustmentAmount ?? '',
+            'Adjusted Improvement Value': propAdjustments?.adjustedImprovementValue ?? '',
+            'Total Adjusted Value': propAdjustments?.totalAdjustedValue ?? '',
             'Group Membership': groupString // <<< Add group data
         };
-        delete (rowData as any).adjustments;
         
         return headers.map(header => 
             escapeCsvField(rowData[header as keyof typeof rowData])
@@ -176,7 +171,7 @@ export function ComparablesView({
       'Adjusted Improvement Value', 'Total Adjusted Value', 
       'Group Membership' 
     ];
-    const escapeCsvField = (field: any): string => { /* Reuse existing helper */ 
+    const escapeCsvField = (field: unknown): string => { /* Reuse existing helper */ 
         const stringField = field === null || field === undefined ? '' : String(field);
         if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
             return `"${stringField.replace(/"/g, '""')}"`;
@@ -188,7 +183,7 @@ export function ComparablesView({
     const csvRows = [
       headers.join(','), // Header row
       ...filteredProperties.map(prop => {
-        const adjustments = prop.adjustments; 
+        const { adjustments: propAdjustments, ...restOfProp } = prop; 
         const groups: string[] = [];
         if (groupMembershipIds.closestByAgeIds.has(prop.id)) groups.push('Age');
         if (groupMembershipIds.closestBySqFtIds.has(prop.id)) groups.push('SqFt');
@@ -196,16 +191,15 @@ export function ComparablesView({
         const groupString = groups.join(', '); 
 
         const rowData = {
-            ...prop,
-            'Comp Impr PSF': adjustments?.compImprPSF ?? '',
-            'Size Adjustment': adjustments?.sizeAdjustment ?? '',
-            'Age Adjustment': adjustments?.ageAdjustment ?? '',
-            'Land Adjustment Amount': adjustments?.landAdjustmentAmount ?? '',
-            'Adjusted Improvement Value': adjustments?.adjustedImprovementValue ?? '',
-            'Total Adjusted Value': adjustments?.totalAdjustedValue ?? '',
+            ...restOfProp,
+            'Comp Impr PSF': propAdjustments?.compImprPSF ?? '',
+            'Size Adjustment': propAdjustments?.sizeAdjustment ?? '',
+            'Age Adjustment': propAdjustments?.ageAdjustment ?? '',
+            'Land Adjustment Amount': propAdjustments?.landAdjustmentAmount ?? '',
+            'Adjusted Improvement Value': propAdjustments?.adjustedImprovementValue ?? '',
+            'Total Adjusted Value': propAdjustments?.totalAdjustedValue ?? '',
             'Group Membership': groupString 
         };
-        delete (rowData as any).adjustments;
         
         return headers.map(header => 
             escapeCsvField(rowData[header as keyof typeof rowData])
@@ -464,7 +458,6 @@ Use bullet points or a table—whichever is clearer.`;
                      <h3 className="font-medium">Grade & Condition</h3>
                      <div className="grid gap-2">
                         <Label htmlFor="grade">Grade</Label>
-                        {/* @ts-ignore - defaultValue type mismatch with null */}
                         <Select name="grade" {...(initialCriteria.grade ? { defaultValue: initialCriteria.grade as string } : {})}>
                           <SelectTrigger id="grade">
                             <SelectValue placeholder="Any Grade" />
@@ -478,7 +471,6 @@ Use bullet points or a table—whichever is clearer.`;
                      </div>
                       <div className="grid gap-2">
                         <Label htmlFor="condition">Condition</Label>
-                        {/* @ts-ignore - defaultValue type mismatch with null */}
                         <Select name="condition" {...(initialCriteria.condition ? { defaultValue: initialCriteria.condition as string } : {})}>
                           <SelectTrigger id="condition">
                             <SelectValue placeholder="Any Condition" />
@@ -506,13 +498,8 @@ Use bullet points or a table—whichever is clearer.`;
                         <Label htmlFor="maxYearBuilt">Max Year Built</Label>
                         <input type="number" id="maxYearBuilt" name="maxYearBuilt" defaultValue={initialCriteria.maxYearBuilt || ''} className="p-2 border rounded" placeholder="e.g., 2005" />
                     </div>
-                    {/* TODO: Add Bed/Bath Filters (requires data or schema change) */}
-                    {/* <div className="grid gap-2">... Bed/Bath Radios ...</div> */}
                   </div>
                   <Separator />
-
-                  {/* TODO: Add Additional Filters (Pool, Garage, Lot, Style) */}
-                  {/* <div className="space-y-4"> ... Additional Checkboxes ... </div> */}
 
                   {/* Submit Button */}
                   <div className="pt-2">

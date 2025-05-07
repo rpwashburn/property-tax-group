@@ -13,19 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { format } from 'date-fns';
 
-// Define props for search params
-interface AdminStructuralElementsPageProps {
-  searchParams?: {
-    page?: string;
-    limit?: string;
-  };
-}
-
-export default async function AdminStructuralElementsPage({ searchParams }: AdminStructuralElementsPageProps) {
-  const limit = parseInt(searchParams?.limit || '25', 10);
-  const page = parseInt(searchParams?.page || '1', 10);
+export default async function AdminStructuralElementsPage({ searchParams }: {
+  searchParams?: Promise<{ page?: string; limit?: string; }>; // Wrap searchParams in Promise
+}) {
+  // Await searchParams if needed
+  const searchParamsResolved = searchParams ? await searchParams : {};
+  const limit = parseInt(searchParamsResolved?.limit || '25', 10);
+  const page = parseInt(searchParamsResolved?.page || '1', 10);
   const offset = (page - 1) * limit;
 
   // Fetch data with pagination
@@ -86,7 +81,7 @@ export default async function AdminStructuralElementsPage({ searchParams }: Admi
                       </Button>
                       <DeleteButton 
                         id={el.id} 
-                        deleteAction={deleteStructuralElement} // Direct server action
+                        deleteAction={deleteStructuralElement as (id: string | number) => Promise<{ success: boolean; error?: string }>} // Direct server action
                         itemType="Structural Element"
                       />
                     </div>

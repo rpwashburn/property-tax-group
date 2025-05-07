@@ -31,7 +31,7 @@ function PropertyAnalysisContent() {
           return
         }
         setPropertyData(data)
-      } catch (error) {
+      } catch {
         toast.error("Failed to load property data")
       } finally {
         setIsLoading(false)
@@ -101,7 +101,7 @@ function PropertyAnalysisContent() {
           <SearchX className="h-24 w-24 mx-auto text-red-400" />
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">Property Not Found</h1>
           <p className="text-lg text-slate-600">
-            We couldn't find any property data matching the account number you provided.
+            We couldn&apos;t find any property data matching the account number you provided.
           </p>
           <div className="bg-slate-100 border border-slate-200 rounded-lg p-4 inline-block">
             <p className="text-sm font-medium text-slate-500 mb-1">Account Number Searched</p>

@@ -1,6 +1,6 @@
 import type { ComparableProperty } from "./types";
 import type { SubjectProperty } from "./server";
-import type { PropertyWithAdjustments } from "@/app/(consumer)/comparables/ComparablesDataFetcher";
+import type { AdjustedComparable } from "./types";
 
 // --- Interfaces ---
 
@@ -32,9 +32,9 @@ export interface MedianCalculationResult {
 
 // Interface for the grouped comparables result
 export interface GroupedComparables {
-    closestByAge: PropertyWithAdjustments[];
-    closestBySqFt: PropertyWithAdjustments[];
-    lowestByValue: PropertyWithAdjustments[];
+    closestByAge: AdjustedComparable[];
+    closestBySqFt: AdjustedComparable[];
+    lowestByValue: AdjustedComparable[];
 }
 
 // Interface for the group membership IDs result
@@ -131,7 +131,7 @@ export function calculateMedianAdjustedValue(
 // Function to get the top 5 comparables for each group
 export function getGroupedComparables(
     subjectProperty: SubjectProperty | null,
-    propertiesWithAdjustments: PropertyWithAdjustments[]
+    propertiesWithAdjustments: AdjustedComparable[]
 ): GroupedComparables {
     const groups: GroupedComparables = {
         closestByAge: [],
@@ -182,7 +182,7 @@ export function getGroupedComparables(
 // Function to get Sets of IDs for each group
 export function getGroupMembershipIds(
     subjectProperty: SubjectProperty | null,
-    propertiesWithAdjustments: PropertyWithAdjustments[]
+    propertiesWithAdjustments: AdjustedComparable[]
 ): GroupMembershipIds {
     const ids: GroupMembershipIds = {
         closestByAgeIds: new Set(),

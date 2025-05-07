@@ -200,7 +200,7 @@ export function SupportingEvidenceStep({ onBack, subjectProperty }: SupportingEv
                 description="Upload photos showing current condition"
                 file={additionalEvidence.conditionPhotos}
                 onChange={(e) => handleAdditionalEvidenceUpload("conditionPhotos", e)}
-                icon={<Image className="h-5 w-5" />}
+                icon={<Image className="h-5 w-5" aria-label="Upload photos icon" />}
                 multiple
               />
               <EvidenceUploader

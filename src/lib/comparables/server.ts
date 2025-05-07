@@ -3,8 +3,8 @@
 import { db } from '@/drizzle/db';
 import { propertyData, structuralElements } from '@/drizzle/schema';
 import type { ComparableProperty, PropertySearchCriteria, AdjustedComparable } from './types';
-import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, gt, isNotNull } from 'drizzle-orm';
-import { calculateAdjustments, type AdjustmentCalculations } from './calculations';
+import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
+import { calculateAdjustments } from './calculations';
 
 // Select specific columns for efficiency
 const selectedColumns = {

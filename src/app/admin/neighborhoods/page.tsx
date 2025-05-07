@@ -14,17 +14,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Define props for search params
-interface AdminNeighborhoodsPageProps {
-  searchParams?: {
-    page?: string;
-    limit?: string;
-  };
-}
-
-export default async function AdminNeighborhoodsPage({ searchParams }: AdminNeighborhoodsPageProps) {
-  const limit = parseInt(searchParams?.limit || '15', 10);
-  const page = parseInt(searchParams?.page || '1', 10);
+export default async function AdminNeighborhoodsPage({ searchParams }: {
+  searchParams?: Promise<{ page?: string; limit?: string; }>;
+}) {
+  const searchParamsResolved = searchParams ? await searchParams : {};
+  const limit = parseInt(searchParamsResolved?.limit || '15', 10);
+  const page = parseInt(searchParamsResolved?.page || '1', 10);
   const offset = (page - 1) * limit;
 
   const result = await getNeighborhoodCodes(limit, offset);
@@ -78,7 +73,7 @@ export default async function AdminNeighborhoodsPage({ searchParams }: AdminNeig
                       </Button>
                       <DeleteButton 
                         id={nbh.id} 
-                        deleteAction={deleteNeighborhoodCode}
+                        deleteAction={deleteNeighborhoodCode as (id: string | number) => Promise<{ success: boolean; error?: string }>}
                         itemType="Neighborhood"
                       />
                     </div>

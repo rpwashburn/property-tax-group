@@ -15,17 +15,13 @@ import {
 } from "@/components/ui/table";
 import { format } from 'date-fns'; // For date formatting
 
-// Define props for search params
-interface AdminPropertiesPageProps {
-  searchParams?: {
-    page?: string;
-    limit?: string;
-  };
-}
-
-export default async function AdminPropertiesPage({ searchParams }: AdminPropertiesPageProps) {
-  const limit = parseInt(searchParams?.limit || '25', 10); // Default limit 25
-  const page = parseInt(searchParams?.page || '1', 10);
+export default async function AdminPropertiesPage({ searchParams }: {
+  searchParams?: Promise<{ page?: string; limit?: string; }>; // Wrap searchParams in Promise
+}) {
+  // Await searchParams if needed
+  const searchParamsResolved = searchParams ? await searchParams : {};
+  const limit = parseInt(searchParamsResolved?.limit || '25', 10); // Default limit 25
+  const page = parseInt(searchParamsResolved?.page || '1', 10);
   const offset = (page - 1) * limit;
 
   // Fetch data with pagination
@@ -84,7 +80,7 @@ export default async function AdminPropertiesPage({ searchParams }: AdminPropert
                       </Button>
                       <DeleteButton 
                         id={prop.id} 
-                        deleteAction={deletePropertyData} // Direct server action
+                        deleteAction={deletePropertyData as (id: string | number) => Promise<{ success: boolean; error?: string }>} // Direct server action
                         itemType="Property"
                       />
                     </div>

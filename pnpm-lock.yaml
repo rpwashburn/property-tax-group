@@ -61,7 +61,7 @@ importers:
         version: 4.1.0
       drizzle-orm:
         specifier: ^0.42.0
-        version: 0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.11.13)(pg@8.14.1)
+        version: 0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1)
       lucide-react:
         specifier: ^0.501.0
         version: 0.501.0(react@19.1.0)
@@ -99,6 +99,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.17.30
+      '@types/pg':
+        specifier: ^8.15.0
+        version: 8.15.0
       '@types/react':
         specifier: ^19
         version: 19.1.2
@@ -1268,8 +1271,8 @@ packages:
   '@types/node@22.14.1':
     resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
 
-  '@types/pg@8.11.13':
-    resolution: {integrity: sha512-6kXByGkvRvwXLuyaWzsebs2du6+XuAB2CuMsuzP7uaihQahshVgSmB22Pmh0vQMkQ1h5+PZU0d+Di1o+WpVWJg==}
+  '@types/pg@8.15.0':
+    resolution: {integrity: sha512-JFxVIO0hZCbQXQGbRBQjbRWNCG3CujfEUBD4Ny2l0QqDyE0vqAPiMSyx0AIszMS0KdLZxz2GxZUUF3FBUXhOXA==}
 
   '@types/react-dom@19.1.2':
     resolution: {integrity: sha512-XGJkWF41Qq305SKWEILa1O8vzhb3aOo3ogBlSmiqNko/WmRb6QIaweuZCXjKygVDXpzXb5wyxKTSOsmkuqj+Qw==}
@@ -3285,7 +3288,7 @@ snapshots:
   '@neondatabase/serverless@1.0.0':
     dependencies:
       '@types/node': 22.14.1
-      '@types/pg': 8.11.13
+      '@types/pg': 8.15.0
 
   '@next/env@15.3.1': {}
 
@@ -3863,7 +3866,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/pg@8.11.13':
+  '@types/pg@8.15.0':
     dependencies:
       '@types/node': 20.17.30
       pg-protocol: 1.8.0
@@ -4268,10 +4271,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.11.13)(pg@8.14.1):
+  drizzle-orm@0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.0
-      '@types/pg': 8.11.13
+      '@types/pg': 8.15.0
       pg: 8.14.1
 
   dunder-proto@1.0.1:

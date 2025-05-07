@@ -1,7 +1,7 @@
 "use server";
 
 import OpenAI from 'openai';
-import { getPropertyByAcct, type SubjectProperty } from '@/lib/comparables/server';
+import { type SubjectProperty } from '@/lib/comparables/server';
 import { getGroupedComparables, getGroupMembershipIds, type GroupedComparables, type GroupMembershipIds } from '@/lib/comparables/calculations';
 import { getAdjustedComparablesForReport } from './server';
 import type { AdjustedComparable } from '@/lib/comparables/types';
@@ -52,8 +52,8 @@ export async function performAnalysisAction(
         }
 
         // Use the effective subject property for grouping comparables
-        const groupedComparables: GroupedComparables = getGroupedComparables(effectiveSubjectProperty, allAdjustedComparables as any);
-        const groupMembershipIds: GroupMembershipIds = getGroupMembershipIds(effectiveSubjectProperty, allAdjustedComparables as any); // Also use effective property here if needed
+        const groupedComparables: GroupedComparables = getGroupedComparables(effectiveSubjectProperty, allAdjustedComparables);
+        const groupMembershipIds: GroupMembershipIds = getGroupMembershipIds(effectiveSubjectProperty, allAdjustedComparables);
 
         const uniqueGroupedComps = new Map<string, AdjustedComparable>();
         groupedComparables.closestByAge.forEach(comp => uniqueGroupedComps.set(comp.id, comp));
@@ -134,10 +134,14 @@ excluded:             # exactly two items (the would‑be #6 and #7)
         const analysis = response.choices[0]?.message?.content?.trim() || 'No response content received from AI.';
         return { analysis, prompt }; // Return both analysis and prompt
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error during AI Analysis Action:", err);
+        let errorMessage = 'Unknown error';
+        if (err instanceof Error) {
+            errorMessage = err.message;
+        }
         // Return error and the prompt if it was generated before the error
         // Ensure prompt is included if it was successfully generated using the passed subjectProperty
-        return { error: `Failed to perform analysis: ${err.message || 'Unknown error'}`, prompt: prompt.startsWith('\nYou are a valuation analyst') ? prompt : undefined };
+        return { error: `Failed to perform analysis: ${errorMessage}`, prompt: prompt.startsWith('\nYou are a valuation analyst') ? prompt : undefined };
     }
 } 

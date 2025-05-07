@@ -1,15 +1,13 @@
 import { 
     calculateMedianAdjustedValue, 
-    getGroupedComparables,
     getGroupMembershipIds,
     type MedianCalculationResult, 
-    type GroupedComparables,
     type GroupMembershipIds
 } from "@/lib/comparables/calculations";
 // Import the server functions
 import { fetchAndAdjustComparables, getPropertyByAcct, type SubjectProperty } from "@/lib/comparables/server"; 
 // Import types directly from types.ts
-import type { ComparableProperty, PropertySearchCriteria, AdjustedComparable } from "@/lib/comparables/types";
+import type { PropertySearchCriteria, AdjustedComparable } from "@/lib/comparables/types";
 import { ComparablesView } from "./ComparablesView"; 
 
 interface ComparablesDataFetcherProps {
@@ -22,7 +20,7 @@ export async function ComparablesDataFetcher({ searchParams }: ComparablesDataFe
 
   const subjectAcct = resolvedSearchParams?.subjectAcct as string | undefined;
   // Fetch subject property separately IF needed for median calculation or other view logic
-  const subjectProperty = subjectAcct ? await getPropertyByAcct(subjectAcct) : null;
+  const subjectProperty: SubjectProperty | null = subjectAcct ? await getPropertyByAcct(subjectAcct) : null;
   console.log("[Fetcher] Fetched Subject Property:", subjectProperty?.acct);
 
   // Determine filters (same logic as before)
@@ -56,14 +54,14 @@ export async function ComparablesDataFetcher({ searchParams }: ComparablesDataFe
   // Calculate median and group memberships using the results
   // Note: calculateMedianAdjustedValue might need the raw properties, not adjusted ones?
   // Let's pass the adjusted ones for now, but review calculateMedianAdjustedValue if needed.
-  const medianResult = calculateMedianAdjustedValue(subjectProperty, propertiesWithAdjustments);
+  const medianResult: MedianCalculationResult = calculateMedianAdjustedValue(subjectProperty, propertiesWithAdjustments);
   console.log("[Fetcher] Calculated Median Result:", medianResult);
 
   // Calculate grouped comparables (if still needed)
   // const groupedComparables = getGroupedComparables(subjectProperty, propertiesWithAdjustments);
 
   // Get Group Membership IDs
-  const groupMembershipIds = getGroupMembershipIds(subjectProperty, propertiesWithAdjustments);
+  const groupMembershipIds: GroupMembershipIds = getGroupMembershipIds(subjectProperty, propertiesWithAdjustments);
 
   // Pass data to the client component
   return (

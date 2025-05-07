@@ -2,7 +2,7 @@
 
 import { db } from '@/drizzle/db';
 import { propertyData, neighborhoodCodes, structuralElements, fixtures } from '@/drizzle/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, type InferSelectModel } from 'drizzle-orm';
 import type { PropertyData } from './types';
 // Import functions and types needed for comparables calculation
 import { getPropertyByAcct, fetchAndAdjustComparables } from '@/lib/comparables/server';
@@ -36,7 +36,7 @@ export async function getPropertyDataByAccountNumber(accountNumber: string): Pro
       throw new Error('Property data missing required neighborhoodCode');
     }
 
-    const mappedFixtures = fixturesResult.map((fixture: any) => ({
+    const mappedFixtures = fixturesResult.map((fixture: InferSelectModel<typeof fixtures>) => ({
       bldNum: fixture.bldNum,
       type: fixture.type,
       typeDscr: fixture.typeDscr,
@@ -48,7 +48,7 @@ export async function getPropertyDataByAccountNumber(accountNumber: string): Pro
     return {
       ...property.property_data,
       neighborhoodDescription: property.neighborhood_codes?.description,
-      structuralElements: structuralElementsResult.map((element: any) => ({
+      structuralElements: structuralElementsResult.map((element: InferSelectModel<typeof structuralElements>) => ({
         bldNum: element.bldNum,
         code: element.code,
         adj: element.adj,

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowLeft, Check, Download, FileText, Lock, MapPin, Printer } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -56,7 +57,7 @@ export default function ReportPage() {
     },
   ]
 
-  const [evidence, setEvidence] = useState({
+  const [evidence] = useState({
     propertyMeasurement: { name: "Property_Measurement.pdf" },
     conditionPhotos: { name: "Property_Condition_Photos.zip" },
     repairQuotes: { name: "Foundation_Repair_Quote.pdf" },
@@ -225,8 +226,8 @@ export default function ReportPage() {
                         your current assessment of $204 per square foot.
                       </p>
                       <p className="text-sm">
-                        Additionally, we've identified discrepancies in the appraisal district's records regarding your
-                        property's characteristics that further support a reduction in assessed value.
+                        Additionally, we&apos;ve identified discrepancies in the appraisal district&apos;s records regarding your
+                        property&apos;s characteristics that further support a reduction in assessed value.
                       </p>
                     </>
                   ) : (
@@ -263,7 +264,7 @@ export default function ReportPage() {
                       <li className="flex gap-2">
                         <Check className="h-5 w-5 text-green-600 shrink-0" />
                         <span>
-                          The appraisal district's records incorrectly list your property as having 2,500 square feet,
+                          The appraisal district&apos;s records incorrectly list your property as having 2,500 square feet,
                           when it actually has 2,450 square feet.
                         </span>
                       </li>
@@ -318,10 +319,10 @@ export default function ReportPage() {
                       </li>
                       <li>
                         Present your case calmly and factually, focusing on the comparable properties and any errors in
-                        the appraisal district's records.
+                        the appraisal district&apos;s records.
                       </li>
                       <li>
-                        If the informal hearing doesn't result in a satisfactory reduction, file a formal protest before
+                        If the informal hearing doesn&apos;t result in a satisfactory reduction, file a formal protest before
                         the deadline.
                       </li>
                     </ol>
@@ -336,7 +337,7 @@ export default function ReportPage() {
                   <p className="text-sm mb-4">
                     The following properties are similar to yours in terms of location, size, age, and features, but
                     have lower assessed values. These comparables provide strong evidence for a reduction in your
-                    property's assessed value.
+                    property&apos;s assessed value.
                   </p>
                 </div>
 
@@ -345,9 +346,11 @@ export default function ReportPage() {
                     <div key={comp.id} className="border rounded-lg p-4">
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="md:w-1/4">
-                          <img
+                          <Image
                             src={comp.image || "/placeholder.svg"}
                             alt={comp.address}
+                            width={250}
+                            height={150}
                             className="w-full h-auto rounded-md object-cover"
                           />
                         </div>
@@ -509,7 +512,7 @@ export default function ReportPage() {
                           <div className="flex-1">
                             <h4 className="font-medium">Repair Quotes</h4>
                             <p className="text-sm text-muted-foreground mb-2">
-                              Estimates for necessary repairs that impact your property's value
+                              Estimates for necessary repairs that impact your property&apos;s value
                             </p>
                             <Button variant="outline" size="sm">
                               View Document
@@ -528,7 +531,7 @@ export default function ReportPage() {
                           <div className="flex-1">
                             <h4 className="font-medium">Inspection Reports</h4>
                             <p className="text-sm text-muted-foreground mb-2">
-                              Professional inspections detailing your property's condition
+                              Professional inspections detailing your property&apos;s condition
                             </p>
                             <Button variant="outline" size="sm">
                               View Document
@@ -641,7 +644,7 @@ export default function ReportPage() {
       {isPurchased && (
         <Card>
           <CardHeader>
-            <CardTitle>What's Next?</CardTitle>
+            <CardTitle>What&apos;s Next?</CardTitle>
             <CardDescription>Steps to complete your property tax appeal</CardDescription>
           </CardHeader>
           <CardContent>
@@ -702,7 +705,7 @@ export default function ReportPage() {
               <div className="space-y-2">
                 <h3 className="font-medium">4. If Necessary, File a Formal Protest</h3>
                 <p className="text-sm text-muted-foreground">
-                  If you're not satisfied with the result of your informal hearing, file a formal protest before the
+                  If you&apos;re not satisfied with the result of your informal hearing, file a formal protest before the
                   deadline.
                 </p>
                 <div className="bg-muted p-3 rounded-md text-sm mt-2">

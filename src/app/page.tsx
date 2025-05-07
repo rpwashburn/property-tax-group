@@ -8,7 +8,7 @@ import Link from "next/link"
 import { Search, FileText, BarChart3, Building, ArrowRight, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function PropertyAnalysisPage() {
   const router = useRouter()
@@ -79,7 +79,7 @@ export default function PropertyAnalysisPage() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">How It Works</h2>
           <p className="mx-auto mt-4 max-w-[700px] text-muted-foreground md:text-xl/relaxed">
-            See if you're paying too much in property taxes and build your appeal case in 5 simple steps
+            See if you&apos;re paying too much in property taxes and build your appeal case in 5 simple steps
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
@@ -106,7 +106,7 @@ export default function PropertyAnalysisPage() {
               <CardTitle className="text-xl">Review Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Verify your property's information and identify any discrepancies</p>
+              <p className="text-muted-foreground">Verify your property&apos;s information and identify any discrepancies</p>
             </CardContent>
           </Card>
           <Card className="border-slate-200">
@@ -193,11 +193,11 @@ export default function PropertyAnalysisPage() {
               </div>
               <div className="mt-4 space-y-2">
                 <blockquote className="border-l-4 border-primary/50 pl-4 italic">
-                  "Using this tool, I was able to identify that my property was overvalued by nearly $50,000. The
+                  &quot;Using this tool, I was able to identify that my property was overvalued by nearly $50,000. The
                   comparable properties feature was especially helpful in building my case. After submitting my appeal,
-                  my property taxes were reduced by over $1,200 per year!"
+                  my property taxes were reduced by over $1,200 per year!&quot;
                 </blockquote>
-                <p className="text-sm text-muted-foreground">— Michael R., Houston Homeowner</p>
+                <p className="text-sm text-muted-foreground">&quot;— Michael R., Houston Homeowner&quot;</p>
               </div>
             </div>
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">

@@ -258,7 +258,7 @@ function BuildingElements({ propertyData }: { propertyData: PropertyData }) {
                                   </TooltipTrigger>
                                   <TooltipContent className="p-3 max-w-xs">
                                     <p className="font-medium mb-1">Adjustment Factor</p>
-                                    <p className="text-sm">This adjustment affects the property's value</p>
+                                    <p className="text-sm">This adjustment affects the property&apos;s value</p>
                                     {Number.parseFloat(element.adj) > 1 && (
                                       <p className="text-sm text-green-600 mt-1">
                                         Higher than standard ({Number.parseFloat(element.adj).toFixed(1)}x)
