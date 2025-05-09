@@ -61,7 +61,7 @@ importers:
         version: 4.1.0
       drizzle-orm:
         specifier: ^0.42.0
-        version: 0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1)
+        version: 0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1)(postgres@3.4.5)
       lucide-react:
         specifier: ^0.501.0
         version: 0.501.0(react@19.1.0)
@@ -74,6 +74,9 @@ importers:
       openai:
         specifier: ^4.95.1
         version: 4.95.1
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.5
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -2576,6 +2579,10 @@ packages:
   postgres-range@1.1.4:
     resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
+  postgres@3.4.5:
+    resolution: {integrity: sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==}
+    engines: {node: '>=12'}
+
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -4271,11 +4278,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1):
+  drizzle-orm@0.42.0(@neondatabase/serverless@1.0.0)(@types/pg@8.15.0)(pg@8.14.1)(postgres@3.4.5):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.0
       '@types/pg': 8.15.0
       pg: 8.14.1
+      postgres: 3.4.5
 
   dunder-proto@1.0.1:
     dependencies:
@@ -5290,6 +5298,8 @@ snapshots:
   postgres-interval@3.0.0: {}
 
   postgres-range@1.1.4: {}
+
+  postgres@3.4.5: {}
 
   prelude-ls@1.2.1: {}
 

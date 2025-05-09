@@ -14,20 +14,20 @@ services:
     networks:
       - default
 
-  pg_proxy:
-    image: ghcr.io/neondatabase/wsproxy:latest
-    environment:
-      APPEND_PORT: 'propertytaxgroup-db:5432'
-      ALLOW_ADDR_REGEX: '.*'
-      LOG_TRAFFIC: 'true'
-    ports:
-      # Expose the WebSocket proxy port to the host machine,
-      # this is where @vercel/postgres will connect
-      - '54331:80'
-    depends_on:
-      - propertytaxgroup-db
-    networks:
-        - default
+  # pg_proxy:
+  #   image: ghcr.io/neondatabase/wsproxy:latest
+  #   environment:
+  #     APPEND_PORT: 'propertytaxgroup-db:5432'
+  #     ALLOW_ADDR_REGEX: '.*'
+  #     LOG_TRAFFIC: 'true'
+  #   ports:
+  #     # Expose the WebSocket proxy port to the host machine,
+  #     # this is where @vercel/postgres will connect
+  #     - '54331:80'
+  #   depends_on:
+  #     - propertytaxgroup-db
+  #   networks:
+  #       - default
 
 networks:
   default:
