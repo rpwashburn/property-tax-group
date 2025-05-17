@@ -16,15 +16,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Type Imports
-import type { ComparableProperty, PropertySearchCriteria } from "@/lib/comparables/types";
-import type { SubjectProperty } from "@/lib/comparables/server"; // Import SubjectProperty type
+import type { PropertySearchCriteria } from "@/lib/comparables/types";
+import type { SubjectProperty, ComparableProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 // Import calculation functions and types
 import { 
     safeParseInt, // <<< Import safeParseInt
     type MedianCalculationResult,
     type GroupMembershipIds, // <<< Import GroupMembershipIds type
 } from "@/lib/comparables/calculations"; // Removed calculateAdjustments, calculateMedianAdjustedValue, AdjustmentCalculations
-import type { AdjustedComparable } from "@/lib/comparables/types"; // Import type for enhanced properties
 
 // Props interface
 interface ComparablesViewProps {

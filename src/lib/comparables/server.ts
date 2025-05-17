@@ -2,7 +2,7 @@
 
 import { db } from '@/drizzle/db';
 import { propertyData, structuralElements } from '@/drizzle/schema';
-import type { ComparableProperty, PropertySearchCriteria, AdjustedComparable } from './types';
+import type { ComparableProperty, PropertySearchCriteria, AdjustedComparable, SubjectProperty } from '@/lib/property-analysis/types';
 import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
 import { calculateAdjustments } from './calculations';
 
@@ -23,12 +23,6 @@ const selectedColumns = {
     totMktVal: propertyData.totMktVal,
     xFeaturesVal: propertyData.xFeaturesVal,
 };
-
-// Update SubjectProperty type to include optional grade and condition
-export type SubjectProperty = ComparableProperty & {
-    grade?: string | null;
-    condition?: string | null;
-}; 
 
 // Function to fetch a single property by account number, including grade and condition via separate queries
 export async function getPropertyByAcct(acct: string): Promise<SubjectProperty | null> {

@@ -1,3 +1,6 @@
+import type { propertyData } from '@/drizzle/schema';
+import type { InferSelectModel } from 'drizzle-orm';
+
 export interface PropertyData {
   id: string;
   acct: string;
@@ -66,4 +69,41 @@ export interface PropertyData {
     typeDscr: string;
     units: number;
   }>;
-} 
+}
+
+export type ComparableProperty = Pick<
+  InferSelectModel<typeof propertyData>,
+  |
+  'id' |
+  'acct' |
+  'siteAddr1' |
+  'siteAddr3'
+  |
+  'stateClass' |
+  'neighborhoodCode' |
+  'yrImpr' |
+  'bldAr'
+  |
+  'landAr'
+  |
+  'acreage' |
+  'landVal'
+  |
+  'totMktVal'
+  |
+  'bldVal'
+  |
+  'xFeaturesVal'
+> & {
+  grade?: string | null;
+  condition?: string | null;
+};
+
+export type SubjectProperty = ComparableProperty & {
+    grade?: string | null;
+    condition?: string | null;
+};
+
+export type AdjustedComparable = ComparableProperty & { 
+    adjustments: import('../comparables/calculations').AdjustmentCalculations | null 
+}; 

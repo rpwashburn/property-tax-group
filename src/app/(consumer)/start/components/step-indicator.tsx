@@ -7,11 +7,13 @@ interface StepIndicatorProps {
 }
 
 export function StepIndicator({ currentStep, totalSteps, className = "" }: StepIndicatorProps) {
-  const steps = [
-    { name: "Property Values", description: "Review current and prior values" },
-    { name: "Property Details", description: "Review property information" },
-    { name: "Supporting Evidence", description: "Upload supporting documents" },
+  const definedSteps = [
+    { name: "Review Details", description: "Confirm property information" },
+    { name: "Correct & Analyze", description: "Adjust details & run AI analysis" },
   ]
+
+  // Ensure we only use the number of steps indicated by totalSteps
+  const stepsToDisplay = definedSteps.slice(0, totalSteps);
 
   return (
     <div className={`${className}`}>
@@ -20,13 +22,13 @@ export function StepIndicator({ currentStep, totalSteps, className = "" }: StepI
         <div className="absolute top-5 left-0 w-full h-1 bg-slate-200">
           <div
             className="h-full bg-primary transition-all duration-300 ease-in-out"
-            style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
+            style={{ width: `${totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1)) * 100 : 0}%` }}
           ></div>
         </div>
 
         {/* Steps */}
         <div className="relative flex justify-between">
-          {steps.map((step, index) => {
+          {stepsToDisplay.map((step, index) => {
             const stepNumber = index + 1
             const isActive = currentStep >= stepNumber
             const isCurrentStep = currentStep === stepNumber

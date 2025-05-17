@@ -46,24 +46,36 @@ export function IndicatedValueAnalysisCard({ comparables, subjectPropertyValue }
   const difference = medianCompValue - subjectPropertyValue
   const percentageDifference = subjectPropertyValue !== 0 ? difference / subjectPropertyValue : 0
 
-  const getDifferenceColor = () => {
-    if (difference > 0) return "text-green-600"
-    if (difference < 0) return "text-red-600"
-    return "text-muted-foreground"
-  }
+  const getDifferenceAttributes = () => {
+    if (difference < 0) { // Median Comp is LOWER than Subject's value (GOOD for protest)
+      return {
+        color: "text-green-600",
+        icon: <TrendingDown className="h-4 w-4 text-green-600" />, // Shows subject value is trending down compared to comps
+        text: "This suggests your property may be valued higher than similar properties, supporting your protest.",
+      };
+    }
+    if (difference > 0) { // Median Comp is HIGHER than Subject's value (BAD for protest)
+      return {
+        color: "text-red-600",
+        icon: <TrendingUp className="h-4 w-4 text-red-600" />, // Shows subject value is trending up compared to comps
+        text: "This suggests your property's assessed value is lower than similar properties, which may not support a protest based on this metric.",
+      };
+    }
+    return {
+      color: "text-muted-foreground",
+      icon: <Minus className="h-4 w-4 text-muted-foreground" />,
+      text: "The median adjusted comparable value is similar to your property's market value.",
+    };
+  };
 
-  const getDifferenceIcon = () => {
-    if (difference > 0) return <TrendingUp className="h-4 w-4 text-green-600" />
-    if (difference < 0) return <TrendingDown className="h-4 w-4 text-red-600" />
-    return <Minus className="h-4 w-4 text-muted-foreground" />
-  }
+  const diffAttrs = getDifferenceAttributes();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Indicated Value Analysis</CardTitle>
         <CardDescription>
-          Median adjusted value of the top {comparables.length} AI-selected comparables vs. your property.
+          Median adjusted value of the top {comparables.length > 0 ? comparables.length : 'selected'} AI-selected comparables vs. your property.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -75,18 +87,20 @@ export function IndicatedValueAnalysisCard({ comparables, subjectPropertyValue }
           <span className="text-sm text-muted-foreground">Your Property Market Value:</span>
           <span className="text-lg font-semibold">{formatCurrency(subjectPropertyValue)}</span>
         </div>
-        <div className="flex justify-between items-center p-3 bg-slate-100 rounded-md border border-slate-200">
-          <span className="text-sm text-muted-foreground flex items-center gap-1">
-            {getDifferenceIcon()}
-            Difference:
-          </span>
-          <span className={`text-lg font-semibold ${getDifferenceColor()}`}>
-            {formatCurrency(difference)} ({formatPercent(percentageDifference, { signDisplay: "exceptZero" })})
-          </span>
+        <div className="flex flex-col p-3 bg-slate-100 rounded-md border border-slate-200 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground flex items-center gap-1">
+              {diffAttrs.icon}
+              Potential Difference:
+            </span>
+            <span className={`text-lg font-semibold ${diffAttrs.color}`}>
+              {formatCurrency(difference)} ({formatPercent(percentageDifference, { signDisplay: "exceptZero" })})
+            </span>
+          </div>
+          <p className={`text-xs ${diffAttrs.color === "text-muted-foreground" ? "text-muted-foreground" : diffAttrs.color} text-center`}>
+            {diffAttrs.text}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground text-center pt-2">
-          This indicates the potential market value based on adjusted comparables.
-        </p>
       </CardContent>
     </Card>
   )

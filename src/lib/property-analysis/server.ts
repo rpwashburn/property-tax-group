@@ -3,10 +3,9 @@
 import { db } from '@/drizzle/db';
 import { propertyData, neighborhoodCodes, structuralElements, fixtures } from '@/drizzle/schema';
 import { eq, and, type InferSelectModel } from 'drizzle-orm';
-import type { PropertyData } from './types';
-// Import functions and types needed for comparables calculation
+import type { PropertyData, AdjustedComparable } from './types';
 import { getPropertyByAcct, fetchAndAdjustComparables } from '@/lib/comparables/server';
-import type { PropertySearchCriteria, AdjustedComparable } from '@/lib/comparables/types';
+import type { PropertySearchCriteria } from '@/lib/comparables/types';
 
 export async function getPropertyDataByAccountNumber(accountNumber: string): Promise<PropertyData | null> {
   try {
@@ -27,8 +26,6 @@ export async function getPropertyDataByAccountNumber(accountNumber: string): Pro
         .where(and(eq(fixtures.acct, accountNumber), eq(fixtures.bldNum, '1')))
     ]);
 
-    console.log('Fixtures raw result:', fixturesResult);
-
     if (!propertyResult.length) return null;
 
     const property = propertyResult[0];
@@ -42,8 +39,6 @@ export async function getPropertyDataByAccountNumber(accountNumber: string): Pro
       typeDscr: fixture.typeDscr,
       units: Number(fixture.units),
     }));
-
-    console.log('Mapped fixtures:', mappedFixtures);
 
     return {
       ...property.property_data,
@@ -114,7 +109,6 @@ export async function getPropertyDataByAccountNumbers(accountNumbers: string[]):
  * @returns A promise resolving to an array of adjusted comparable properties.
  */
 export async function getAdjustedComparablesForReport(accountNumber: string): Promise<AdjustedComparable[]> {
-  console.log(`[analysis/server.ts] Getting adjusted comps for report: ${accountNumber}`);
   
   try {
     // 1. Fetch the subject property details needed for criteria
@@ -130,22 +124,14 @@ export async function getAdjustedComparablesForReport(accountNumber: string): Pr
       neighborhoodCode: subjectProperty.neighborhoodCode ?? undefined,
       grade: subjectProperty.grade ?? undefined,
       condition: subjectProperty.condition ?? undefined,
-      // Consider adding default sqft/year ranges if desired
-      // minSqft: subjectProperty.sqft ? Math.round(parseInt(subjectProperty.sqft) * 0.8) : undefined,
-      // maxSqft: subjectProperty.sqft ? Math.round(parseInt(subjectProperty.sqft) * 1.2) : undefined,
-      // minYearBuilt: subjectProperty.yrImpr ? parseInt(subjectProperty.yrImpr) - 10 : undefined,
-      // maxYearBuilt: subjectProperty.yrImpr ? parseInt(subjectProperty.yrImpr) + 10 : undefined,
     };
-    console.log('[analysis/server.ts] Default Report Criteria:', criteria);
 
     // 3. Call the centralized function to fetch and adjust comparables
     const adjustedComparables = await fetchAndAdjustComparables(accountNumber, criteria, 50); // Limit to 50 for report
 
-    console.log(`[analysis/server.ts] Returning ${adjustedComparables.length} adjusted comps for report.`);
     return adjustedComparables;
 
   } catch (error) {
-    console.error('[analysis/server.ts] Error getting adjusted comparables for report:', error);
     return []; 
   }
 } 

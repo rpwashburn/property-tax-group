@@ -4,8 +4,10 @@ import OpenAI from 'openai';
 import { type SubjectProperty } from '@/lib/comparables/server';
 import { getGroupedComparables, getGroupMembershipIds, type GroupedComparables, type GroupMembershipIds } from '@/lib/comparables/calculations';
 import { getAdjustedComparablesForReport } from './server';
-import type { AdjustedComparable } from '@/lib/comparables/types';
-import { formatCurrency } from '@/lib/utils'; // Import the shared helper
+import type { MedianCalculationResult, GroupedComparables, GroupMembershipIds } from "./calculations";
+import type { AnalysisResult } from "../ai/types";
+import { formatCurrency } from "@/lib/utils";
+import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 
 const openai = new OpenAI(); // Ensure OPENAI_API_KEY is set
 

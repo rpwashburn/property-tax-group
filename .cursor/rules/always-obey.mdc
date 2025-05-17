@@ -12,4 +12,20 @@ reference [data-access-layer.mdc](mdc:.cursor/rules/data-access-layer.mdc) for g
 ## Drizzle Commands
 - `npx drizzle-kit generate --name <migration-name>` to generate a new migration
 - `npx drizzle-kit migrate` to migrate the database
-- Do not inclue :pg on any of the commands 
+- Do not inclue :pg on any of the commands
+
+## Server Components for Data Fetching
+In the Next.js App Router, prefer using Server Components for data fetching. This allows you to fetch data directly on the server and pass it down to client components.
+Refer to the pattern used in @src/app/(consumer)/start/page.tsx/start/page.tsx), where data is fetched using `getPropertyDataByAccountNumber` in the `StartPage` Server Component.
+
+## Client Components for Interactivity
+Use Client Components for managing state, handling user interactions, and using browser-specific APIs (like `useSearchParams` or `window`). Pass data fetched in Server Components down to Client Components as props.
+See the implementation in @src/app/(consumer)/start/start-client.tsx/start/start-client.tsx) for an example of a Client Component handling UI logic and state.
+
+## Loading States with `loading.tsx` or Suspense Boundaries
+Implement loading states using the `loading.tsx` convention in the App Router. This file exports a loading skeleton or indicator that is automatically shown while the page segment is loading data.
+An example loading skeleton is provided in @src/app/(consumer)/start/loading.tsx/start/loading.tsx). Alternatively - wrap server components in Suspense Boundaries with loading skeletons when data fetching
+
+## Handling `searchParams`
+In Server Components, `searchParams` are represented as a Promise. Be mindful of this and `await` them
+Refer to how `searchParams` are accessed in @src/app/(consumer)/start/page.tsx/start/page.tsx).

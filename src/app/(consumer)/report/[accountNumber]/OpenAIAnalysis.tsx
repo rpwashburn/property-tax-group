@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { IndicatedValueAnalysisCard } from "@/components/shared/IndicatedValueAnalysisCard"
 import { performAnalysisAction } from "@/lib/property-analysis/actions"
 import yaml from "js-yaml"
-import type { SubjectProperty } from '@/lib/comparables/server'; // Import SubjectProperty type
+import type { SubjectProperty } from '@/lib/property-analysis/types';
 import { useSearchParams } from "next/navigation"
 
 interface OpenAIAnalysisProps {

@@ -8,6 +8,13 @@
       "when": 1745074493483,
       "tag": "0000_new_edwin_jarvis",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747276476845,
+      "tag": "0001_add_structural_elements_acct_bld_code_idx",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,4 @@
-import type { ComparableProperty } from "./types";
-import type { SubjectProperty } from "./server";
-import type { AdjustedComparable } from "./types";
+import type { ComparableProperty, SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 
 // --- Interfaces ---
 

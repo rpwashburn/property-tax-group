@@ -5,10 +5,12 @@ import {
     type GroupMembershipIds
 } from "@/lib/comparables/calculations";
 // Import the server functions
-import { fetchAndAdjustComparables, getPropertyByAcct, type SubjectProperty } from "@/lib/comparables/server"; 
+import { fetchAndAdjustComparables, getPropertyByAcct } from "@/lib/comparables/server"; 
 // Import types directly from types.ts
-import type { PropertySearchCriteria, AdjustedComparable } from "@/lib/comparables/types";
+import type { PropertySearchCriteria } from "@/lib/comparables/types";
 import { ComparablesView } from "./ComparablesView"; 
+// Update import for SubjectProperty from comparables/server, and other types from property-analysis/types
+import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 
 interface ComparablesDataFetcherProps {
   searchParams?: { [key: string]: string | string[] | undefined };

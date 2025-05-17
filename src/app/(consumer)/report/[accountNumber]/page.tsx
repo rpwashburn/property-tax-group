@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getPropertyByAcct, type SubjectProperty } from '@/lib/comparables/server'
+import { getPropertyByAcct } from '@/lib/comparables/server'
+import type { SubjectProperty } from '@/lib/property-analysis/types'
 import { notFound } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
 
