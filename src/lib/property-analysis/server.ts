@@ -132,6 +132,8 @@ export async function getAdjustedComparablesForReport(accountNumber: string): Pr
     return adjustedComparables;
 
   } catch (error) {
+    console.error(`[analysis/server.ts] Error fetching adjusted comparables for report (${accountNumber}):`, error);
+    // For report generation, we might want to be more resilient and return empty array rather than throwing.
     return []; 
   }
 } 

@@ -15,13 +15,13 @@ import {
   Building2,
   Ruler,
   Layers,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import type { PropertyData } from "@/lib/property-analysis/types"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useState } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -119,7 +119,7 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
                 Next: Correct Characteristics
               </h3>
               <p className="text-slate-700 text-sm mb-4 max-w-lg mx-auto">
-                After reviewing your property's current values and characteristics, proceed to the next step if you need to make corrections to details like year built or square footage. You can upload supporting documents for any changes.
+                After reviewing your property&apos;s current values and characteristics, proceed to the next step if you need to make corrections to details like year built or square footage. You can upload supporting documents for any changes.
               </p>
               <Button onClick={onNext} className="gap-2 px-8 py-3 text-base">
                 Proceed to Corrections <ArrowRight className="h-5 w-5 ml-2" />
@@ -203,7 +203,7 @@ function PriorYearValues({ propertyData }: { propertyData: PropertyData }) {
         </div>
         <div>
           <h3 className="font-semibold text-lg">Prior Year Values</h3>
-          <p className="text-sm text-muted-foreground">These were your property's values for the previous tax year.</p>
+          <p className="text-sm text-muted-foreground">These were your property&apos;s values for the previous tax year.</p>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ function ValueComparison({ propertyData }: { propertyData: PropertyData }) {
     >
       <CardHeader className="bg-white border-b py-4">
         <CardTitle className="text-lg">Year-over-Year Change</CardTitle>
-        <CardDescription>This is how your property's appraised value has changed since last year.</CardDescription>
+        <CardDescription>This is how your property&apos;s appraised value has changed since last year.</CardDescription>
       </CardHeader>
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
@@ -313,23 +313,37 @@ interface ValueCardProps {
 }
 
 function ValueCard({ label, value, formatAsCurrency = false, highlight = false }: ValueCardProps) {
-  const formattedValue = formatAsCurrency ? `$${value.toLocaleString()}` : value.toLocaleString()
+  const formattedValue = formatAsCurrency
+    ? value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    : value.toLocaleString();
+
+  // Check if the value is supposed to be a currency but is 0, then display N/A
+  const displayValue = (formatAsCurrency && value === 0 && label.toLowerCase().includes('value')) ? "N/A" : formattedValue;
 
   return (
-    <div
-      className={`p-3 rounded-lg border ${
-        highlight ? "border-primary/20 bg-primary/5" : "border-slate-100 bg-white"
-      } hover:border-slate-300 transition-colors`}
-    >
+    <div className={`p-3 rounded-md ${highlight ? 'bg-primary/10 border border-primary/20' : 'bg-slate-100 border border-slate-200'}`}>
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className={`text-lg font-bold ${highlight ? "text-primary" : ""}`}>{formattedValue}</p>
+        <p className={`text-lg font-bold ${highlight ? "text-primary" : ""}`}>{displayValue}</p>
       </div>
     </div>
   )
 }
 
 function PropertyInformation({ propertyData }: { propertyData: PropertyData }) {
+  const infoItems = [
+    { label: "Account Number", value: propertyData.acct, icon: <FileText className="h-4 w-4 text-muted-foreground" /> },
+    { label: "Site Address", value: propertyData.siteAddr1, icon: <Home className="h-4 w-4 text-muted-foreground" /> },
+    {
+      label: "Neighborhood",
+      value: `${propertyData.neighborhoodCode} - ${propertyData.neighborhoodDescription || 'N/A'}`,
+      icon: <MapPin className="h-4 w-4 text-muted-foreground" />
+    },
+    { label: "Market Area", value: propertyData.marketArea1Dscr, icon: <Building2 className="h-4 w-4 text-muted-foreground" /> },
+    { label: "State Class", value: propertyData.stateClass, icon: <Layers className="h-4 w-4 text-muted-foreground" /> },
+    { label: "Legal Description", value: propertyData.lgl1, icon: <Ruler className="h-4 w-4 text-muted-foreground" /> },
+  ];
+
   return (
     <div className="p-6 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-200 shadow-sm">
       <div className="flex items-start gap-4 mb-4">
@@ -343,31 +357,17 @@ function PropertyInformation({ propertyData }: { propertyData: PropertyData }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Address</p>
-            <p className="font-medium text-lg">{propertyData.siteAddr1}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Account Number</p>
-            <p className="font-medium">{propertyData.acct}</p>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Neighborhood</p>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="font-mono">
-                {propertyData.neighborhoodCode}
-              </Badge>
-              <p className="font-medium">{propertyData.neighborhoodDescription}</p>
+        {infoItems.map((item, index) => (
+          <div key={index} className="space-y-4">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+              <div className="flex items-center gap-2">
+                {item.icon}
+                <p className="font-medium">{item.value}</p>
+              </div>
             </div>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Market Area</p>
-            <p className="font-medium">{propertyData.marketArea1Dscr}</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )

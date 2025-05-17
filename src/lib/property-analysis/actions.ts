@@ -1,22 +1,12 @@
 "use server";
 
 import OpenAI from 'openai';
-import { type SubjectProperty } from '@/lib/comparables/server';
 import { getGroupedComparables, getGroupMembershipIds, type GroupedComparables, type GroupMembershipIds } from '@/lib/comparables/calculations';
 import { getAdjustedComparablesForReport } from './server';
-import type { MedianCalculationResult, GroupedComparables, GroupMembershipIds } from "./calculations";
-import type { AnalysisResult } from "../ai/types";
 import { formatCurrency } from "@/lib/utils";
 import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 
 const openai = new OpenAI(); // Ensure OPENAI_API_KEY is set
-
-// Helper (can be shared or duplicated from component)
-// const formatCurrency = (value: number | null | undefined) => {
-//     if (value === null || value === undefined) return 'N/A';
-//     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-// }
-// Removed local helper, using shared one from utils now
 
 interface AnalysisResult {
     analysis?: string;

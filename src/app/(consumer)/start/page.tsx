@@ -1,5 +1,3 @@
-import Link from "next/link"
-import { ArrowLeft, FileText, SearchX } from "lucide-react"
 import { getPropertyDataByAccountNumber } from "@/lib/property-analysis/server"
 import type { PropertyData } from "@/lib/property-analysis/types"
 import { StartClient } from "./start-client"

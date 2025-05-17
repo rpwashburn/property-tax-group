@@ -41,12 +41,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { IndicatedValueAnalysisCard } from "@/components/shared/IndicatedValueAnalysisCard"
 import { performAnalysisAction } from "@/lib/property-analysis/actions"
 import yaml from "js-yaml"
 import type { PropertyData, SubjectProperty } from "@/lib/property-analysis/types"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
-import type { AnalysisData, ExcludedProperty } from "@/lib/property-analysis/types/analysis-types"
+import type { AnalysisData /*, ExcludedProperty*/ } from "@/lib/property-analysis/types/analysis-types"
 import { AiAnalysisSummary } from "./ai-analysis-summary"
 import { Comparable } from "@/lib/comparables/types"
 
@@ -115,11 +114,6 @@ export function AiAnalyzerStep({ onBack, onNext, subjectProperty }: AiAnalyzerSt
   
   const yrImprChanged = editableOverrides.yearBuilt.value !== (subjectProperty.yrImpr || "")
   const bldArChanged = editableOverrides.buildingSqFt.value !== (subjectProperty.bldAr || "")
-
-  const parseMarketValue = (value: string | null | undefined): number => {
-    if (!value) return 0
-    return parseInt(value.replace(/[^0-9]/g, ""), 10) || 0
-  }
 
   const handleGenerateAnalysis = async () => {
     if (!subjectProperty) {

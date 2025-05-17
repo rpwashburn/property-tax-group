@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, FileText, SearchX, Info } from "lucide-react"
 import type { PropertyData } from "@/lib/property-analysis/types"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
-import type { AnalysisData } from "@/lib/property-analysis/types/analysis-types"
+import type { AnalysisData, ExcludedProperty } from "@/lib/property-analysis/types/analysis-types"
+import type { Comparable } from "@/lib/comparables/types"
 import { StepIndicator } from "./components/step-indicator"
 import { PropertyValuesStep } from "./components/property-values-step"
 import { AiAnalyzerStep } from "./components/ai-analyzer-step"
@@ -90,7 +91,7 @@ export function StartClient({
       reportContent += `--- AI Comparables Analysis ---\n`;
       if (aiAnalysisData.top_comps && aiAnalysisData.top_comps.length > 0) {
         reportContent += `Top Comparable Properties:\n`;
-        aiAnalysisData.top_comps.forEach((comp: any, index: number) => {
+        aiAnalysisData.top_comps.forEach((comp: Comparable, index: number) => {
           reportContent += `  ${index + 1}. Account: ${comp.acct}\n`;
           reportContent += `     Address: ${comp.address}\n`;
           reportContent += `     Adjusted Value: ${comp.adjusted_value}\n`;
@@ -101,7 +102,7 @@ export function StartClient({
       }
       if (aiAnalysisData.excluded && aiAnalysisData.excluded.length > 0) {
         reportContent += `Excluded Properties:\n`;
-        aiAnalysisData.excluded.forEach((ex: any) => {
+        aiAnalysisData.excluded.forEach((ex: ExcludedProperty) => {
           reportContent += `  Account: ${ex.acct} - Note: ${ex.note}\n`;
         });
         reportContent += `\n`;

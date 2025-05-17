@@ -2,7 +2,8 @@
 
 import { db } from '@/drizzle/db';
 import { propertyData, structuralElements } from '@/drizzle/schema';
-import type { ComparableProperty, PropertySearchCriteria, AdjustedComparable, SubjectProperty } from '@/lib/property-analysis/types';
+import type { ComparableProperty, AdjustedComparable, SubjectProperty } from '@/lib/property-analysis/types';
+import type { PropertySearchCriteria } from '@/lib/comparables/types';
 import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
 import { calculateAdjustments } from './calculations';
 
