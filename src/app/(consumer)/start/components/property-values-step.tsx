@@ -116,13 +116,13 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
 
             <div className="bg-primary/10 border border-primary/20 rounded-lg p-6 text-center">
               <h3 className="font-semibold text-xl mb-3 text-primary flex items-center justify-center gap-2">
-                Next: Correct Characteristics
+                Next: Run AI Comparables Analysis
               </h3>
               <p className="text-slate-700 text-sm mb-4 max-w-lg mx-auto">
-                After reviewing your property&apos;s current values and characteristics, proceed to the next step if you need to make corrections to details like year built or square footage. You can upload supporting documents for any changes.
+                After reviewing your property&apos;s current values and characteristics, proceed to the next step to run an AI-powered comparable property analysis. You will be able to edit key characteristics like year built or square footage before the analysis runs.
               </p>
               <Button onClick={onNext} className="gap-2 px-8 py-3 text-base">
-                Proceed to Corrections <ArrowRight className="h-5 w-5 ml-2" />
+                Run AI Comparables Analysis <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
 
@@ -156,7 +156,7 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <Button onClick={onNext} className="gap-2 px-6">
-            Correct Characteristics <ArrowRight className="h-4 w-4" />
+            Run AI Comparables Analysis <ArrowRight className="h-4 w-4" />
           </Button>
         </CardFooter>
       </Card>
