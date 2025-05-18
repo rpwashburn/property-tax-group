@@ -3,11 +3,16 @@ import type { PropertyData } from "@/lib/property-analysis/types"
 import { StartClient } from "./start-client"
 import { ReportErrorPage } from "./components/report-error-page"
 
-type SearchParams = { [key: string]: string | string[] | undefined }
+// Define the shape of the resolved search parameters
+type ResolvedSearchParams = { [key: string]: string | string[] | undefined }
 
 // This is now a Server Component
-export default async function StartPage({ searchParams }: { searchParams: SearchParams }) {
-  const accountNumber = searchParams.accountNumber as string | undefined
+// As per the type error, PageProps expects the searchParams property to be a Promise.
+export default async function StartPage(
+  { searchParams }: { searchParams: Promise<ResolvedSearchParams> }
+) {
+  const resolvedParams = await searchParams; // Await the promise to get the actual parameters
+  const accountNumber = resolvedParams.accountNumber as string | undefined;
 
   if (!accountNumber) {
     return <ReportErrorPage errorType="noAccountNumber" />

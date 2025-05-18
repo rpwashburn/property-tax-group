@@ -8,10 +8,12 @@ import type { PropertyData } from "@/lib/property-analysis/types"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
 import type { AnalysisData, ExcludedProperty } from "@/lib/property-analysis/types/analysis-types"
 import type { Comparable } from "@/lib/comparables/types"
+import type { Deduction, EvidenceFile as DeductionEvidenceFile, QuoteFile as DeductionQuoteFile } from "@/lib/property-analysis/types/deduction-types"
+import { deductionTypes as allDeductionTypes } from "@/lib/property-analysis/types/deduction-types"
 import { StepIndicator } from "./components/step-indicator"
 import { PropertyValuesStep } from "./components/property-values-step"
 import { AiAnalyzerStep } from "./components/ai-analyzer-step"
-import { SupportingEvidenceStep } from "./components/supporting-evidence-step"
+import { AdditionalDeductionsStep } from "./components/additional-deductions-step"
 import { GenerateReportStep } from "./components/generate-report-step"
 import { Button } from "@/components/ui/button"
 
@@ -28,8 +30,7 @@ export function StartClient({
   const router = useRouter();
 
   const [finalOverrides, setFinalOverrides] = useState<OverrideState | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [testimonialEvidence, setTestimonialEvidence] = useState<string>("");
+  const [additionalDeductions, setAdditionalDeductions] = useState<Deduction[]>([]);
   const [aiAnalysisData, setAiAnalysisData] = useState<AnalysisData | null>(null);
 
   const handleNext = () => {
@@ -46,9 +47,8 @@ export function StartClient({
     handleNext();
   };
 
-  const handleSupportingEvidenceNext = (files: File[], testimonial: string) => {
-    setUploadedFiles(files);
-    setTestimonialEvidence(testimonial);
+  const handleAdditionalDeductionsNext = (deductions: Deduction[]) => {
+    setAdditionalDeductions(deductions);
     handleNext();
   };
 
@@ -88,12 +88,14 @@ export function StartClient({
       if (aiAnalysisData.top_comps && aiAnalysisData.top_comps.length > 0) {
         reportContent += `Top Comparable Properties:\n`;
         aiAnalysisData.top_comps.forEach((comp: Comparable, index: number) => {
+          const adjustedValue = comp.adjusted_value !== undefined && comp.adjusted_value !== null ? parseInt(comp.adjusted_value as unknown as string).toLocaleString() : 'N/A';
+          const adjustedPsf = comp.adjusted_psf !== undefined && comp.adjusted_psf !== null ? parseFloat(comp.adjusted_psf as unknown as string).toFixed(2) : 'N/A';
           reportContent += `  ${index + 1}. Account: ${comp.acct}\n`;
           reportContent += `     Address: ${comp.address}\n`;
-          reportContent += `     Adjusted Value: ${comp.adjusted_value}\n`;
-          reportContent += `     Adjusted PSF: ${comp.adjusted_psf}\n`;
-          reportContent += `     Rank: ${comp.rank}\n`;
-          reportContent += `     Rationale: ${comp.rationale}\n\n`;
+          reportContent += `     Adjusted Value: $${adjustedValue}\n`;
+          reportContent += `     Adjusted PSF: $${adjustedPsf}\n`;
+          reportContent += `     Rank: ${comp.rank || 'N/A'}\n`;
+          reportContent += `     Rationale: ${comp.rationale || 'N/A'}\n\n`;
         });
       }
       if (aiAnalysisData.excluded && aiAnalysisData.excluded.length > 0) {
@@ -105,17 +107,39 @@ export function StartClient({
       }
     }
     
-    reportContent += `--- Supporting Evidence ---\n`;
-    if (uploadedFiles.length > 0) {
-      reportContent += `Uploaded Documents:\n`;
-      uploadedFiles.forEach(file => {
-        reportContent += `  - ${file.name} (${(file.size / 1024).toFixed(1)} KB)\n`;
+    if (additionalDeductions.length > 0) {
+      reportContent += `--- Additional Deductions ---\n`;
+      let totalDeductionAmount = 0;
+      additionalDeductions.forEach((deduction, index) => {
+        const deductionTypeLabel = allDeductionTypes.find(dt => dt.value === deduction.type)?.label || deduction.type;
+        reportContent += `\nDeduction ${index + 1}: ${deductionTypeLabel}\n`;
+        reportContent += `  Description: ${deduction.description}\n`;
+        reportContent += `  Estimated Cost: $${deduction.amount.toLocaleString()}\n`;
+        totalDeductionAmount += deduction.amount;
+
+        if (deduction.evidence.length > 0) {
+          reportContent += `  Attached Evidence:\n`;
+          deduction.evidence.forEach((ev: DeductionEvidenceFile) => {
+            reportContent += `    - ${ev.name} (${ev.type})\n`;
+          });
+        } else {
+          reportContent += `  Attached Evidence: None\n`;
+        }
+
+        if (deduction.quotes.length > 0) {
+          reportContent += `  Attached Quotes:\n`;
+          deduction.quotes.forEach((quote: DeductionQuoteFile) => {
+            reportContent += `    - ${quote.company}: $${quote.amount.toLocaleString()} (File: ${quote.name})\n`;
+          });
+        } else {
+          reportContent += `  Attached Quotes: None\n`;
+        }
       });
+      reportContent += `\nTotal Estimated Deduction Value: $${totalDeductionAmount.toLocaleString()}\n`;
     } else {
-      reportContent += `No documents uploaded.\n`;
+      reportContent += `--- Additional Deductions ---\n`;
+      reportContent += `No additional deductions specified.\n`;
     }
-    reportContent += `\nTestimonial/Additional Notes:\n`;
-    reportContent += `${testimonialEvidence || 'No testimonial provided.'}\n`;
     reportContent += `\n\n--- End of Report ---\n`;
 
     // Create a blob and trigger download
@@ -182,11 +206,10 @@ export function StartClient({
       }
 
       {step === 3 &&
-        <SupportingEvidenceStep
+        <AdditionalDeductionsStep
           onBack={handleBack}
-          onNext={handleSupportingEvidenceNext}
-          initialFiles={uploadedFiles}
-          initialTestimonial={testimonialEvidence}
+          onNext={handleAdditionalDeductionsNext}
+          initialDeductions={additionalDeductions}
         />
       }
 
@@ -198,8 +221,7 @@ export function StartClient({
           propertyData={propertyData}
           overrides={finalOverrides}
           aiAnalysisData={aiAnalysisData}
-          evidenceFiles={uploadedFiles}
-          testimonial={testimonialEvidence}
+          additionalDeductions={additionalDeductions}
         />
       }
 

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, FileText, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SearchX, ArrowLeft } from "lucide-react";
 
 interface ReportErrorPageProps {
   accountNumber?: string | null;

@@ -1,6 +1,5 @@
 import type React from "react"
-import Link from "next/link"
-import { ArrowLeft, ArrowRight, FileSearch, HelpCircle, Info, Search } from "lucide-react"
+import { ArrowRight, FileSearch, HelpCircle, Info, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,7 +23,7 @@ export default function StartPage() {
             <AlertTitle>What happens next?</AlertTitle>
             <AlertDescription>
               After entering your account number, our AI will analyze your property assessment and find comparable
-              properties to build your case. You'll then be guided through a step-by-step process to complete your
+              properties to build your case. You&apos;ll then be guided through a step-by-step process to complete your
               protest.
             </AlertDescription>
           </Alert>
@@ -73,7 +72,7 @@ export default function StartPage() {
                     <h3 className="font-medium">On Your Tax Statement</h3>
                     <p className="text-sm text-muted-foreground">
                       Look at the top right corner of your property tax statement. The account number is typically
-                      labeled as "Account Number" or "Property ID".
+                      labeled as &quot;Account Number&quot; or &quot;Property ID&quot;.
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted p-3">
@@ -95,7 +94,7 @@ export default function StartPage() {
                   <div className="rounded-lg border p-3">
                     <h3 className="font-medium">County Tax Website</h3>
                     <p className="text-sm text-muted-foreground">
-                      Visit your county tax assessor's website and search for your property by address. The account
+                      Visit your county tax assessor&apos;s website and search for your property by address. The account
                       number will be displayed in the property details.
                     </p>
                   </div>
@@ -130,10 +129,10 @@ export default function StartPage() {
             <CardFooter className="flex flex-col items-start">
               <div className="flex items-center gap-2 text-sm">
                 <FileSearch className="h-4 w-4 text-primary" />
-                <span className="font-medium">Still can't find it?</span>
+                <span className="font-medium">Still can&apos;t find it?</span>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Contact your local tax assessor's office or check your property deed records.
+                Contact your local tax assessor&apos;s office or check your property deed records.
               </p>
             </CardFooter>
           </Card>

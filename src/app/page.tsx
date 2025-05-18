@@ -221,7 +221,7 @@ export default function HomePage() {
                       <p className="text-sm text-muted-foreground">{testimonial.location}</p>
                     </div>
                   </div>
-                  <p className="flex-1 text-muted-foreground">"{testimonial.quote}"</p>
+                  <p className="flex-1 text-muted-foreground">&quot;{testimonial.quote}&quot;</p>
                   <div className="mt-4 flex items-center justify-between border-t pt-4">
                     <span className="text-sm font-medium">Annual Savings:</span>
                     <span className="font-bold text-primary">{testimonial.savings}</span>
