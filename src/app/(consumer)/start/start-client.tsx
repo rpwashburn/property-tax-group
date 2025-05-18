@@ -165,7 +165,7 @@ export function StartClient({
 
   if (!initialPropertyData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-theme(spacing.20))]">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-(--spacing(20)))]">
         <div className="text-center space-y-6 max-w-lg">
           <SearchX className="h-24 w-24 mx-auto text-red-400" />
           <h1 className="text-4xl font-bold tracking-tight text-slate-900">Property Not Found</h1>
@@ -205,8 +205,8 @@ export function StartClient({
         </Link>
       </div>
 
-      <div className="mb-8 bg-gradient-to-r from-slate-50 to-slate-100 p-8 rounded-xl border shadow-sm">
-        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+      <div className="mb-8 bg-linear-to-r from-slate-50 to-slate-100 p-8 rounded-xl border shadow-sm">
+        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-slate-900 to-slate-700">
           Property Tax Analysis
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl">

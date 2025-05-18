@@ -43,7 +43,7 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
   return (
     <div className="">
       <Card className="mb-8 shadow-md border-slate-200 overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">
+        <CardHeader className="bg-linear-to-r from-slate-50 to-white border-b">
           <div className="flex items-center gap-2 text-primary mb-1">
             <Building className="h-5 w-5" />
             <Badge variant="outline" className="text-xs font-normal">
@@ -61,7 +61,7 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
             {/* Appeal potential indicator */}
             {isIncrease && percentChange > 5 && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-medium text-amber-800">Potential Appeal Opportunity</h3>
                   <p className="text-sm text-amber-700">
@@ -91,20 +91,20 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
               </h3>
               <ul className="space-y-3 text-sm">
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                   <span>The appraised value is what the county believes your property is worth</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                   <span>Your property taxes are calculated based on this appraised value</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                   <span>If you can prove the appraised value is too high, you may reduce your tax burden</span>
                 </li>
                 {isIncrease && (
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
                     <span>
                       Your {percentChange.toFixed(1)}% increase may be challenged if it exceeds market trends or
                       contains errors
@@ -251,7 +251,7 @@ function ValueComparison({ propertyData }: { propertyData: PropertyData }) {
             <p className="text-2xl font-bold">${priorTotal.toLocaleString()}</p>
           </div>
 
-          <div className="flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center justify-center shrink-0">
             <div
               className={`rounded-full p-3 ${isIncrease ? "bg-red-100 text-red-600" : isDecrease ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-600"}`}
             >
@@ -345,7 +345,7 @@ function PropertyInformation({ propertyData }: { propertyData: PropertyData }) {
   ];
 
   return (
-    <div className="p-6 bg-gradient-to-r from-slate-50 to-white rounded-xl border border-slate-200 shadow-sm">
+    <div className="p-6 bg-linear-to-r from-slate-50 to-white rounded-xl border border-slate-200 shadow-sm">
       <div className="flex items-start gap-4 mb-4">
         <div className="bg-primary/10 p-2 rounded-lg">
           <Home className="h-6 w-6 text-primary" />

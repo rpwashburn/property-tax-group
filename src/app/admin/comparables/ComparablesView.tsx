@@ -536,7 +536,7 @@ Use bullet points or a table—whichever is clearer.`;
                                  <Button 
                                     variant="default" 
                                     size="sm" 
-                                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                                    className="bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                                  >
                                     <Sparkles className="mr-2 h-4 w-4" /> Generate AI Analysis
                                 </Button>

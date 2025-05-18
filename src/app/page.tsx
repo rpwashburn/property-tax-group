@@ -218,7 +218,7 @@ export default function PropertyAnalysisPage() {
 
       <div className="py-12 md:py-16 border-t">
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-50 to-white p-6 md:p-8 border-b">
+          <div className="bg-linear-to-r from-slate-50 to-white p-6 md:p-8 border-b">
             <div className="grid gap-4 md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-2xl font-bold">Ready to Lower Your Property Taxes?</h3>

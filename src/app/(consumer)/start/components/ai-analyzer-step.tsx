@@ -277,7 +277,7 @@ export function AiAnalyzerStep({ onBack, onNext, subjectProperty }: AiAnalyzerSt
 
   return (
     <Card className="mb-8 shadow-md border-slate-200 overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b">
+      <CardHeader className="bg-linear-to-r from-slate-50 to-white border-b">
         <div className="flex items-center gap-2 text-primary mb-1">
           <BrainCircuit className="h-5 w-5" />
           <Badge variant="outline" className="text-xs font-normal">
@@ -374,7 +374,7 @@ export function AiAnalyzerStep({ onBack, onNext, subjectProperty }: AiAnalyzerSt
             <AlertTitle>Analysis Error</AlertTitle>
             <AlertDescription className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <span>{error || parseError}</span>
-              <Button variant="outline" size="sm" onClick={handleGenerateAnalysis} className="mt-2 sm:mt-0 sm:ml-4 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={handleGenerateAnalysis} className="mt-2 sm:mt-0 sm:ml-4 shrink-0">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Re-run Analysis
               </Button>

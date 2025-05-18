@@ -107,10 +107,10 @@ export function SupportingEvidenceStep({
                 {uploadedFiles.map(file => (
                   <li key={file.name} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
                     <div className="w-0 flex-1 flex items-center">
-                      <FileText className="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
+                      <FileText className="shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
                       <span className="ml-2 flex-1 w-0 truncate">{file.name}</span>
                     </div>
-                    <div className="ml-4 flex-shrink-0">
+                    <div className="ml-4 shrink-0">
                       <button type="button" onClick={() => handleRemoveFile(file.name)} className="font-medium text-red-600 hover:text-red-500">
                         <Trash2 className="h-4 w-4"/>
                       </button>

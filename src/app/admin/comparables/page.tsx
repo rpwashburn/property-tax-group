@@ -53,7 +53,7 @@ export default async function ComparablesPage({ searchParams }: {
 
       {/* Input Form (uses GET method to update searchParams) */}
       <form method="GET" action="/admin/comparables" className="mb-8 flex items-end gap-4 p-4 border rounded-lg bg-slate-50">
-        <div className="flex-grow space-y-1">
+        <div className="grow space-y-1">
           <Label htmlFor="subjectAcctInput">Subject Property Account Number</Label>
           <Input
             id="subjectAcctInput"
