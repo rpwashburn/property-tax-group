@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { FloatingAdminButton } from '@/components/floating-admin-button';
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +36,11 @@ export default function RootLayout({
           "antialiased relative bg-background"
         )}
       >
-        {children}
+        <Header />
+        <main className="flex flex-col flex-grow items-center justify-center">
+          {children}
+        </main>
+        <Footer />
         <Toaster richColors />
         <FloatingAdminButton />
       </body>

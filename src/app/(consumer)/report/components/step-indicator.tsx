@@ -9,7 +9,9 @@ interface StepIndicatorProps {
 export function StepIndicator({ currentStep, totalSteps, className = "" }: StepIndicatorProps) {
   const definedSteps = [
     { name: "Review Details", description: "Confirm property information" },
-    { name: "Correct & Analyze", description: "Adjust details & run AI analysis" },
+    { name: "Update and Analyze", description: "Adjust details & run AI analysis"},
+    { name: "Additional Deductions", description: "Add deductions to your property"},
+    { name: "Generate Report", description: "Generate a report"}
   ]
 
   // Ensure we only use the number of steps indicated by totalSteps
