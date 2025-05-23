@@ -14,7 +14,7 @@ import {
   formatComparablesForPrompt 
 } from "@/lib/property-analysis/services/prompt-service"
 import { performAIAnalysis } from "@/lib/property-analysis/services/ai-service"
-import { parseAndValidateAnalysis, validateAnalysisResults } from "@/lib/property-analysis/services/analysis-service"
+import { calculateMedianAssessment } from "@/lib/property-analysis/services/analysis-service"
 
 export interface UseAiAnalysisReturn {
   // State
@@ -59,74 +59,101 @@ export function useAiAnalysis(): UseAiAnalysisReturn {
     setIsLoading(true)
     resetAnalysis()
 
-    try {
-      // Step 1: Apply overrides to create effective subject property
-      const effectiveSubjectProperty = applySubjectPropertyOverrides(subjectProperty, overrides)
+    const MAX_RETRIES = 3
+    let retryCount = 0
 
-      // Step 2: Fetch and process comparable properties using the effective property
-      const comparableData = await fetchAndProcessComparables(effectiveSubjectProperty)
+    while (retryCount < MAX_RETRIES) {
+      try {
+        // Step 1: Apply overrides to create effective subject property
+        const effectiveSubjectProperty = applySubjectPropertyOverrides(subjectProperty, overrides)
 
-      // Step 3: Format comparables for the AI prompt
-      const formattedComparables = formatComparablesForPrompt(
-        comparableData.finalComparables,
-        comparableData.groupMembershipIds
-      )
+        // Step 2: Fetch and process comparable properties using the effective property
+        const comparableData = await fetchAndProcessComparables(effectiveSubjectProperty)
 
-      // Step 4: Generate the complete analysis prompt
-      const prompt = generateAnalysisPrompt(effectiveSubjectProperty, formattedComparables, overrides)
-      setPromptUsed(prompt)
+        // Step 3: Format comparables for the AI prompt
+        const formattedComparables = formatComparablesForPrompt(
+          comparableData.finalComparables,
+          comparableData.groupMembershipIds
+        )
 
-      // Step 5: Call AI with the prompt
-      const aiResult = await performAIAnalysis(prompt)
+        // Step 4: Generate the complete analysis prompt with retry strategy
+        const prompt = generateAnalysisPromptWithRetryStrategy(
+          effectiveSubjectProperty, 
+          formattedComparables, 
+          overrides, 
+          retryCount
+        )
+        setPromptUsed(prompt)
 
-      if (aiResult.error) {
-        setError(aiResult.error)
-        return
+        // Step 5: Call AI with the prompt (now handles parsing internally)
+        const aiResult = await performAIAnalysis(prompt, subjectProperty)
+
+        if (aiResult.error) {
+          setError(aiResult.error)
+          return
+        }
+
+        if (!aiResult.analysisData) {
+          setError("Analysis completed but returned no data.")
+          return
+        }
+
+        // Step 6: Store raw analysis result and parsed data
+        setAnalysisResult(aiResult.rawResponse || "Analysis completed successfully")
+        
+        // Step 7: Calculate median to check if retry is needed
+        const medianData = calculateMedianAssessment(aiResult.analysisData, subjectProperty)
+        
+        // Step 8: Check if we need to retry (current assessment lower than recommended)
+        if (medianData && medianData.potentialSavings <= 0 && retryCount < MAX_RETRIES - 1) {
+          console.log(`Analysis attempt ${retryCount + 1}: Current assessment (${medianData.currentValue}) is at or below median (${medianData.medianValue}). Retrying with different strategy...`)
+          retryCount++
+          continue // Try again with different strategy
+        }
+
+        // Step 9: Set the cleaned and validated data and mark as complete
+        setParsedData(aiResult.analysisData)
+        setIsComplete(true)
+        break // Success - exit retry loop
+
+      } catch (err: unknown) {
+        console.error("Error during analysis:", err)
+        if (retryCount === MAX_RETRIES - 1) {
+          // Final attempt failed
+          setError(err instanceof Error ? err.message : "Unknown error during analysis")
+          break
+        }
+        retryCount++
       }
-
-      if (!aiResult.analysis) {
-        setError("Analysis completed but returned no content.")
-        return
-      }
-
-      // Step 6: Store raw analysis result
-      setAnalysisResult(aiResult.analysis)
-      
-      // Step 7: Parse and validate the AI response
-      const parseResult = parseAndValidateAnalysis(aiResult.analysis, subjectProperty)
-      
-      if (!parseResult.success) {
-        setParseError(parseResult.error || "Failed to parse analysis results")
-        return
-      }
-
-      if (!parseResult.data) {
-        setParseError("No data returned from parsing")
-        return
-      }
-
-      // Step 8: Validate the analysis has meaningful results
-      const validationResult = validateAnalysisResults(parseResult.data)
-      
-      if (!validationResult.isValid) {
-        setParseError(validationResult.message || "Analysis results are not valid")
-        return
-      }
-
-      // Step 9: Set the cleaned and validated data
-      setParsedData(parseResult.data)
-      setIsComplete(true)
-
-    } catch (err: unknown) {
-      console.error("Error during AI analysis:", err)
-      if (err instanceof Error) {
-        setError(`Analysis failed: ${err.message}`)
-      } else {
-        setError("An unexpected error occurred during analysis")
-      }
-    } finally {
-      setIsLoading(false)
     }
+
+    setIsLoading(false)
+  }
+
+  // Helper function to modify prompt strategy based on retry attempt
+  const generateAnalysisPromptWithRetryStrategy = (
+    subjectProperty: SubjectProperty,
+    formattedComparables: string,
+    overrides?: { bldAr?: string; yrImpr?: string },
+    retryCount: number = 0
+  ): string => {
+    // Get the base prompt
+    const basePrompt = generateAnalysisPrompt(subjectProperty, formattedComparables, overrides)
+    
+    // Add retry-specific instructions
+    if (retryCount === 0) {
+      return basePrompt // First attempt - use original strategy
+    } else if (retryCount === 1) {
+      return basePrompt + `
+
+⧉ **RETRY STRATEGY 1**: The previous analysis selected comparables that were too low. For this attempt, prioritize selecting comparables that are closer to the middle or upper range of the provided list. Focus on properties that would support a median value closer to or above the subject property's current assessment.`
+    } else if (retryCount === 2) {
+      return basePrompt + `
+
+⧉ **RETRY STRATEGY 2**: Previous attempts selected comparables that were too low. For this final attempt, be more aggressive in selecting higher-value comparables from the provided list. Prioritize comparables that would result in a median assessment value that exceeds the subject property's current assessment, even if they are less similar in some characteristics.`
+    }
+    
+    return basePrompt
   }
 
   return {
