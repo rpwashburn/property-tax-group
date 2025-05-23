@@ -34,3 +34,59 @@ export const formatPercent = (value: number | string | null | undefined, options
   }
   return new Intl.NumberFormat('en-US', defaultOptions).format(numericValue)
 }
+
+// File utility functions
+export const fileUtils = {
+  /**
+   * Validates if a file is an acceptable image type
+   */
+  isValidImageFile: (file: File): boolean => {
+    const acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    return acceptedTypes.includes(file.type)
+  },
+
+  /**
+   * Formats file size for display
+   */
+  formatFileSize: (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  },
+
+  /**
+   * Gets a shortened display name for a file
+   */
+  getDisplayFileName: (fileName: string, maxLength: number = 20): string => {
+    if (fileName.length <= maxLength) return fileName
+    const extension = fileName.split('.').pop()
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'))
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4)
+    return `${truncatedName}...${extension}`
+  },
+
+  /**
+   * Validates file size (max 10MB)
+   */
+  isValidFileSize: (file: File, maxSizeMB: number = 10): boolean => {
+    const maxSizeBytes = maxSizeMB * 1024 * 1024
+    return file.size <= maxSizeBytes
+  },
+
+  /**
+   * Creates a comprehensive file validation result
+   */
+  validateFile: (file: File): { isValid: boolean; error?: string } => {
+    if (!fileUtils.isValidImageFile(file)) {
+      return { isValid: false, error: 'Please select a valid image file (JPEG, PNG, GIF, or WebP)' }
+    }
+    
+    if (!fileUtils.isValidFileSize(file)) {
+      return { isValid: false, error: 'File size must be less than 10MB' }
+    }
+    
+    return { isValid: true }
+  }
+}

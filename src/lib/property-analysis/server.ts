@@ -3,8 +3,9 @@
 import { db } from '@/drizzle/db';
 import { propertyData, neighborhoodCodes, structuralElements, fixtures } from '@/drizzle/schema';
 import { eq, and, type InferSelectModel } from 'drizzle-orm';
-import type { PropertyData, AdjustedComparable } from './types';
-import { getPropertyByAcct, fetchAndAdjustComparables } from '@/lib/comparables/server';
+import type { PropertyData, AdjustedComparable, SubjectProperty, ComparableProperty } from './types';
+import { searchProperties } from '@/lib/comparables/server';
+import { calculateAdjustments } from '@/lib/comparables/calculations';
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
 
 export async function getPropertyDataByAccountNumber(accountNumber: string): Promise<PropertyData | null> {
@@ -103,36 +104,67 @@ export async function getPropertyDataByAccountNumbers(accountNumbers: string[]):
 }
 
 /**
+ * Fetches comparable properties based on search criteria
+ */
+async function fetchComparables(
+  subjectProperty: SubjectProperty,
+  criteria: PropertySearchCriteria,
+  limit: number = 50
+) {
+  console.log(`[analysis/server.ts] Fetching comparables for: ${subjectProperty.acct}`);
+  
+  // Search for comparable properties, excluding the subject
+  const comparableProperties = await searchProperties(criteria, limit, subjectProperty.acct);
+  console.log(`[analysis/server.ts] Found ${comparableProperties.length} raw comparables.`);
+  
+  return comparableProperties;
+}
+
+/**
+ * Applies adjustments to comparable properties
+ */
+function adjustComparables(
+  subjectProperty: SubjectProperty,
+  comparableProperties: ComparableProperty[]
+): AdjustedComparable[] {
+  console.log(`[analysis/server.ts] Calculating adjustments for ${comparableProperties.length} comparables.`);
+  
+  // Calculate adjustments for each comparable
+  const adjustedComparables: AdjustedComparable[] = comparableProperties.map(prop => ({
+    ...prop,
+    adjustments: calculateAdjustments(subjectProperty, prop)
+  }));
+  
+  console.log(`[analysis/server.ts] Calculated adjustments for ${adjustedComparables.length} comps.`);
+  return adjustedComparables;
+}
+
+/**
  * Fetches adjusted comparables specifically for the AI report generation.
  * It derives default search criteria from the subject property.
- * @param accountNumber Account number of the subject property.
+ * @param subjectProperty The subject property object (potentially with overrides applied).
  * @returns A promise resolving to an array of adjusted comparable properties.
  */
-export async function getAdjustedComparablesForReport(accountNumber: string): Promise<AdjustedComparable[]> {
+export async function getAdjustedComparablesForReport(subjectProperty: SubjectProperty): Promise<AdjustedComparable[]> {
   
   try {
-    // 1. Fetch the subject property details needed for criteria
-    //    We only need a subset of fields here for criteria generation
-    const subjectProperty = await getPropertyByAcct(accountNumber);
-    if (!subjectProperty) {
-      console.error(`[analysis/server.ts] Subject property not found for report: ${accountNumber}`);
-      return []; 
-    }
-
-    // 2. Define default search criteria based *only* on the subject property
+    // Step 1: Define search criteria based on the subject property
     const criteria: PropertySearchCriteria = {
       neighborhoodCode: subjectProperty.neighborhoodCode ?? undefined,
       grade: subjectProperty.grade ?? undefined,
       condition: subjectProperty.condition ?? undefined,
     };
 
-    // 3. Call the centralized function to fetch and adjust comparables
-    const adjustedComparables = await fetchAndAdjustComparables(accountNumber, criteria, 50); // Limit to 50 for report
+    // Step 2: Fetch comparable properties
+    const comparableProperties = await fetchComparables(subjectProperty, criteria, 50);
+
+    // Step 3: Apply adjustments to the comparables
+    const adjustedComparables = adjustComparables(subjectProperty, comparableProperties);
 
     return adjustedComparables;
 
   } catch (error) {
-    console.error(`[analysis/server.ts] Error fetching adjusted comparables for report (${accountNumber}):`, error);
+    console.error(`[analysis/server.ts] Error fetching adjusted comparables for report (${subjectProperty.acct}):`, error);
     // For report generation, we might want to be more resilient and return empty array rather than throwing.
     return []; 
   }

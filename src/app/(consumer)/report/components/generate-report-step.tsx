@@ -125,7 +125,7 @@ export function GenerateReportStep({
                 {(aiAnalysisData && aiAnalysisData.top_comps && aiAnalysisData.top_comps.length > 0) ? (
                     <ul className="space-y-1 list-disc list-inside pl-2 font-medium text-gray-700">
                         {aiAnalysisData.top_comps.slice(0,3).map((comp: Comparable) => 
-                            <li key={comp.acct}>Acct: {comp.acct} - Adjusted Value: ${comp.adjusted_value ? parseInt(comp.adjusted_value as unknown as string).toLocaleString() : 'N/A'}</li>
+                            <li key={comp.acct}>Acct: {comp.acct} - Adjusted Value: {comp.adjusted_value || 'N/A'}</li>
                         )}
                         {aiAnalysisData.top_comps.length > 3 && <li className='text-xs text-gray-500'>...and {aiAnalysisData.top_comps.length - 3} more in the report.</li>}
                     </ul>

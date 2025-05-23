@@ -14,4 +14,20 @@ export interface AnalysisData {
   // For example, if the YAML includes a summary or overall recommendation directly:
   // recommended_value?: string;
   // analysis_summary_text?: string;
+}
+
+export interface ParseAnalysisResult {
+  success: boolean
+  data?: AnalysisData
+  error?: string
+}
+
+export interface MedianAssessmentResult {
+  medianValue: number
+  currentValue: number
+  potentialSavings: number
+  percentageDifference: number
+  minValue: number
+  maxValue: number
+  comparableCount: number
 } 
