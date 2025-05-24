@@ -13,7 +13,7 @@ import type { Comparable } from "@/lib/comparables/types"
  */
 export function calculateMedianAssessment(
   parsedData: AnalysisData | null,
-  subjectProperty?: { totMktVal?: string | null }
+  subjectProperty?: { totMktVal?: string | null; totApprVal?: string | null }
 ): MedianAssessmentResult | null {
   if (!parsedData?.top_comps || parsedData.top_comps.length === 0) {
     return null
@@ -42,13 +42,16 @@ export function calculateMedianAssessment(
     medianValue = adjustedValues[mid]
   }
 
-  const currentValue = subjectProperty?.totMktVal ? parseMarketValue(subjectProperty.totMktVal) : 0
-  const potentialSavings = currentValue > medianValue ? currentValue - medianValue : 0
-  const percentageDifference = currentValue > 0 ? ((currentValue - medianValue) / medianValue) * 100 : 0
+  const marketValue = subjectProperty?.totMktVal ? parseMarketValue(subjectProperty.totMktVal) : 0
+  const appraisedValue = subjectProperty?.totApprVal ? parseMarketValue(subjectProperty.totApprVal) : 0
+  const potentialSavings = appraisedValue > medianValue ? appraisedValue - medianValue : 0
+  const percentageDifference = appraisedValue > 0 ? ((appraisedValue - medianValue) / medianValue) * 100 : 0
 
   return {
     medianValue,
-    currentValue,
+    currentValue: appraisedValue,
+    marketValue,
+    appraisedValue,
     potentialSavings,
     percentageDifference,
     minValue: adjustedValues[0],

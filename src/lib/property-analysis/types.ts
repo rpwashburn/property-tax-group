@@ -91,6 +91,8 @@ export type ComparableProperty = Pick<
   |
   'totMktVal'
   |
+  'totApprVal'
+  |
   'bldVal'
   |
   'xFeaturesVal'

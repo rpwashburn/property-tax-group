@@ -24,7 +24,9 @@ export interface ParseAnalysisResult {
 
 export interface MedianAssessmentResult {
   medianValue: number
-  currentValue: number
+  currentValue: number // Keep for backward compatibility (same as appraisedValue)
+  marketValue: number
+  appraisedValue: number
   potentialSavings: number
   percentageDifference: number
   minValue: number

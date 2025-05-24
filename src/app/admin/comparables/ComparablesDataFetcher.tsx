@@ -20,14 +20,14 @@ export async function ComparablesDataFetcher({ searchParams }: ComparablesDataFe
   const resolvedSearchParams = await searchParams;
   console.log("[Fetcher] Resolved searchParams:", resolvedSearchParams);
 
-  const subjectAcct = resolvedSearchParams?.subjectAcct as string | undefined;
+  const subjectAcctNumber = resolvedSearchParams?.subjectAcct as string | undefined;
   // Fetch subject property separately IF needed for median calculation or other view logic
-  const subjectProperty: SubjectProperty | null = subjectAcct ? await getPropertyByAcct(subjectAcct) : null;
+  const subjectProperty: SubjectProperty | null = subjectAcctNumber ? await getPropertyByAcct(subjectAcctNumber) : null;
   console.log("[Fetcher] Fetched Subject Property:", subjectProperty?.acct);
 
   // Determine filters (same logic as before)
   let applyNeighborhoodFilter = false;
-  if (resolvedSearchParams?.sameNeighborhood === 'on' || (resolvedSearchParams?.sameNeighborhood === undefined && subjectAcct)) {
+  if (resolvedSearchParams?.sameNeighborhood === 'on' || (resolvedSearchParams?.sameNeighborhood === undefined && subjectAcctNumber)) {
     applyNeighborhoodFilter = true;
   }
   const filterGrade = resolvedSearchParams?.grade as string | undefined ?? subjectProperty?.grade ?? undefined;
@@ -49,8 +49,8 @@ export async function ComparablesDataFetcher({ searchParams }: ComparablesDataFe
   console.log("[Fetcher] Final Search Criteria:", criteria);
 
   // Use the NEW centralized function to get adjusted comparables
-  const propertiesWithAdjustments: AdjustedComparable[] = subjectAcct 
-    ? await fetchAndAdjustComparables(subjectAcct, criteria, 1000) // Use a higher limit for the view
+  const propertiesWithAdjustments: AdjustedComparable[] = subjectAcctNumber 
+    ? await fetchAndAdjustComparables(subjectAcctNumber, criteria, 1000) // Use a higher limit for the view
     : [];
 
   // Calculate median and group memberships using the results

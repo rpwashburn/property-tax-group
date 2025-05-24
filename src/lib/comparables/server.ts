@@ -22,6 +22,7 @@ const selectedColumns = {
     landVal: propertyData.landVal,
     acreage: propertyData.acreage,
     totMktVal: propertyData.totMktVal,
+    totApprVal: propertyData.totApprVal,
     xFeaturesVal: propertyData.xFeaturesVal,
 };
 

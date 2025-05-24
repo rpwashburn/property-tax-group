@@ -57,18 +57,22 @@ export function generateAnalysisPrompt(
   const subjectPropertyText = formatSubjectPropertyForPrompt(subjectProperty, overrides);
 
   return `
-You are a valuation analyst choosing the best adjusted comparable sales for a single commercial subject property.
+You are a property tax protest expert. You are given a subject property and a list of comparable properties.
+You are tasked with choosing the best five comparables for a property tax appeal.
+You are also tasked with choosing the next two comparables that were nearly chosen.
+You are also tasked with choosing the comparables that optimize for tax savings while still being relevant to the subject property.
 
 Inputs you will receive:
   1. A Subject Property block:
      ${subjectPropertyText}
 
-  2. The following list of pre‑filtered comparable properties. These represent the top 5 closest in age, top 5 closest in building square footage, and top 5 lowest by total adjusted value relative to the subject. Key details and group memberships are included:
+  2. The following list of pre‑filtered comparable properties. These represent properties that are close in age and square footage to the subject property. Key details and group memberships are included:
 
 ${formattedComparables}
 
 Deliverable: Choose the best **five** comps for a property‑tax appeal, then list the next two that were nearly chosen.
 Your goal is to choose the comparables that optimize for tax savings while still being relevant to the subject property.
+You need to optimize for a median value of adjusted comparables that beat ${formatCurrency(subjectProperty.totApprVal ? parseInt(subjectProperty.totApprVal, 10) : null)}.
 
 ⧉ **Return only valid YAML** (no extra text, commentary, or Markdown).
 ⧉ Schema to follow exactly:

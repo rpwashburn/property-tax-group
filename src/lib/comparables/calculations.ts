@@ -6,10 +6,11 @@ import type { ComparableProperty, SubjectProperty, AdjustedComparable } from "@/
 export interface AdjustmentCalculations {
     sizeAdjustment: number;
     ageAdjustment: number;
+    featuresAdjustment: number;
     adjustedImprovementValue: number;
     totalAdjustedValue: number;
     compImprPSF: number;
-    landAdjustmentAmount: number; // Add this
+    landAdjustmentAmount: number;
     // Intermediate values for display/tooltips
     subjBldAr: number;
     compBldAr: number;
@@ -17,7 +18,9 @@ export interface AdjustmentCalculations {
     compYrImpr: number;
     compBldVal: number;
     subjLandVal: number;
-    compLandVal: number; // Add this
+    compLandVal: number;
+    subjXFeaturesVal: number;
+    compXFeaturesVal: number;
 }
 
 // Interface for median calculation results
@@ -67,18 +70,26 @@ export function calculateAdjustments(
     const compYrImpr = safeParseInt(comp.yrImpr);
     const compBldVal = safeParseInt(comp.bldVal);
     const subjLandVal = safeParseInt(subject.landVal);
-    const compLandVal = safeParseInt(comp.landVal); // Parse comp land value
+    const compLandVal = safeParseInt(comp.landVal); 
+    const subjXFeaturesVal = safeParseInt(subject.xFeaturesVal);
+    const compXFeaturesVal = safeParseInt(comp.xFeaturesVal);
 
     const compImprPSF = compBldAr > 0 ? compBldVal / compBldAr : 0;
     const sizeAdjustment = compImprPSF * (subjBldAr - compBldAr) / 2;
     const ageAdjustment = 0.005 * (subjYrImpr - compYrImpr) * compBldVal; // 0.5% = 0.005
-    const adjustedImprovementValue = compBldVal + sizeAdjustment + ageAdjustment;
+    const featuresAdjustment = subjXFeaturesVal - compXFeaturesVal;
+    const adjustedImprovementValue = compBldVal + sizeAdjustment + ageAdjustment + featuresAdjustment;
     const totalAdjustedValue = adjustedImprovementValue + subjLandVal;
     const landAdjustmentAmount = subjLandVal - compLandVal;
 
     return {
-        compImprPSF, sizeAdjustment, ageAdjustment, adjustedImprovementValue,
-        totalAdjustedValue, landAdjustmentAmount, // Include land adjustment amount
+        compImprPSF, 
+        sizeAdjustment, 
+        ageAdjustment, 
+        featuresAdjustment,
+        adjustedImprovementValue,
+        totalAdjustedValue, 
+        landAdjustmentAmount,
         // Include intermediate values
         subjBldAr,
         compBldAr,
@@ -86,7 +97,9 @@ export function calculateAdjustments(
         compYrImpr,
         compBldVal,
         subjLandVal,
-        compLandVal // Include comp land val
+        compLandVal,
+        subjXFeaturesVal,
+        compXFeaturesVal
     };
 }
 

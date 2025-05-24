@@ -35,7 +35,7 @@ function getLowestValueComparables(comparables: AdjustedComparable[]): AdjustedC
 }
 
 /**
- * Gets the top 5 comparables closest to subject property by age
+ * Gets all comparables within +/- 10 years of the subject property
  */
 function getClosestByAgeComparables(
   subjectProperty: SubjectProperty,
@@ -44,16 +44,21 @@ function getClosestByAgeComparables(
   const subjYrImpr = safeParseInt(subjectProperty.yrImpr);
   
   return [...comparables]
+    .filter(comp => {
+      const compYear = safeParseInt(comp.yrImpr);
+      const ageDiff = Math.abs(compYear - subjYrImpr);
+      return ageDiff <= 10;
+    })
     .sort((a, b) => {
       const ageDiffA = Math.abs(safeParseInt(a.yrImpr) - subjYrImpr);
       const ageDiffB = Math.abs(safeParseInt(b.yrImpr) - subjYrImpr);
       return ageDiffA - ageDiffB;
-    })
-    .slice(0, 5);
+    });
 }
 
 /**
- * Gets the top 5 comparables closest to subject property by square footage
+ * Gets all comparables within an explicit square footage range of the subject property
+ * Uses tiered ranges: ≤1500 (±150), 1500-2500 (±300), 2500-3500 (±450), >3500 (no limit)
  */
 function getClosestBySquareFootageComparables(
   subjectProperty: SubjectProperty,
@@ -61,13 +66,37 @@ function getClosestBySquareFootageComparables(
 ): AdjustedComparable[] {
   const subjBldAr = safeParseInt(subjectProperty.bldAr);
   
+  // Calculate explicit range based on property size tiers
+  const calculateSqFtRange = (subjectSqFt: number): number => {
+    if (subjectSqFt <= 1500) {
+      return 150;
+    } else if (subjectSqFt <= 2500) {
+      return 300;
+    } else if (subjectSqFt <= 3500) {
+      return 450;
+    } else {
+      return Infinity; // No limit for properties > 3500 sqft
+    }
+  };
+  
+  const allowedRange = calculateSqFtRange(subjBldAr);
+  
   return [...comparables]
+    .filter(comp => {
+      // If range is Infinity (>3500 sqft), include all comparables
+      if (allowedRange === Infinity) {
+        return true;
+      }
+      
+      const compSqFt = safeParseInt(comp.bldAr);
+      const sqFtDiff = Math.abs(compSqFt - subjBldAr);
+      return sqFtDiff <= allowedRange;
+    })
     .sort((a, b) => {
       const sqFtDiffA = Math.abs(safeParseInt(a.bldAr) - subjBldAr);
       const sqFtDiffB = Math.abs(safeParseInt(b.bldAr) - subjBldAr);
       return sqFtDiffA - sqFtDiffB;
-    })
-    .slice(0, 5);
+    });
 }
 
 /**

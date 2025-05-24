@@ -19,7 +19,7 @@ interface AnalysisResultsProps {
   parsedData: AnalysisData | null
   promptUsed: string | null
   subjectProperty?: {
-    totMktVal?: string | null
+    totApprVal?: string | null
   }
 }
 
@@ -109,12 +109,21 @@ export function AnalysisResults({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div className="bg-white p-4 rounded-lg border border-green-200 text-center">
-                <div className="text-sm text-muted-foreground mb-1">Your Current Assessment</div>
-                <div className="text-xl font-bold text-red-600">
-                  ${medianData.currentValue.toLocaleString()}
+                <div className="text-sm text-muted-foreground mb-1">Market Value</div>
+                <div className="text-xl font-bold text-blue-600">
+                  ${medianData.marketValue.toLocaleString()}
                 </div>
+                <div className="text-xs text-muted-foreground mt-1">County's market assessment</div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg border border-green-200 text-center">
+                <div className="text-sm text-muted-foreground mb-1">Appraised Value</div>
+                <div className="text-xl font-bold text-red-600">
+                  ${medianData.appraisedValue.toLocaleString()}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">What you're taxed on</div>
               </div>
               
               <div className="bg-white p-4 rounded-lg border border-green-200 text-center">
@@ -148,10 +157,10 @@ export function AnalysisResults({
               <p>
                 The comparable properties range from ${medianData.minValue.toLocaleString()} to ${medianData.maxValue.toLocaleString()}.
                 {medianData.potentialSavings > 0 ? (
-                  ` Your current assessment appears to be ${medianData.percentageDifference.toFixed(1)}% higher than the median, 
+                  ` Your current appraised value appears to be ${medianData.percentageDifference.toFixed(1)}% higher than the median, 
                   indicating potential for a property tax reduction through an appeal.`
                 ) : (
-                  ` Your current assessment is at or below the median of comparable properties.`
+                  ` Your current appraised value is at or below the median of comparable properties.`
                 )}
               </p>
             </div>

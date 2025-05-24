@@ -31,7 +31,7 @@ export async function performAIAnalysis(
 ⧉ **IMPORTANT**: Return ONLY valid YAML without any markdown code blocks, backticks, or extra text. Do not wrap the YAML in \`\`\`yaml or any other formatting. Start directly with "top_comps:" and end with the excluded section.`;
 
       const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         stream: false,
         messages: [{ role: 'user', content: finalPrompt }],
       });

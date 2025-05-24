@@ -659,7 +659,7 @@ Use bullet points or a table—whichever is clearer.`;
                                                   {adjustments && (
                                                     <div className="mt-3 pt-3 border-t">
                                                       <h4 className="text-sm font-medium mb-2">Adjustments vs Subject</h4>
-                                                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                                                          {/* Size Adjustment with Tooltip */}
                                                          <TooltipProvider>
                                                             <Tooltip>
@@ -699,6 +699,25 @@ Use bullet points or a table—whichever is clearer.`;
                                                                </TooltipContent>
                                                             </Tooltip>
                                                           </TooltipProvider>
+
+                                                         {/* Features Adjustment with Tooltip */}
+                                                         <TooltipProvider>
+                                                            <Tooltip>
+                                                               <TooltipTrigger asChild>
+                                                                 <div className="space-y-0.5 cursor-help">
+                                                                    <p className="text-xs text-muted-foreground">Features Adj.</p>
+                                                                    <p className={`font-medium ${adjustments?.featuresAdjustment >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                                                      {formatSignedCurrency(adjustments?.featuresAdjustment)}
+                                                                    </p>
+                                                                 </div>
+                                                               </TooltipTrigger>
+                                                               <TooltipContent className="text-xs">
+                                                                   <p>Subj Extra Features Val: {formatCurrency(adjustments?.subjXFeaturesVal)}</p>
+                                                                   <p>Comp Extra Features Val: {formatCurrency(adjustments?.compXFeaturesVal)}</p>
+                                                                   <p className="mt-1">Formula: Subj Extra Features Val - Comp Extra Features Val</p>
+                                                               </TooltipContent>
+                                                            </Tooltip>
+                                                         </TooltipProvider>
                                                          
                                                          {/* Land Adjustment with Tooltip */}
                                                          <TooltipProvider>
@@ -732,13 +751,6 @@ Use bullet points or a table—whichever is clearer.`;
                                                                    <p>Adj Impr Val: {formatCurrency(adjustments?.adjustedImprovementValue)}</p>
                                                                    <p>Subj Land Val: {formatCurrency(adjustments?.subjLandVal)}</p>
                                                                    <p className="mt-1">Formula: Adj Impr Val + Subj Land Val</p>
-                                                                   {/* Alternative Formula Display: 
-                                                                   <p>Comp Total Mkt Val: {formatCurrency(adjustments?.compBldVal ? adjustments?.compLandVal ? adjustments.compBldVal + adjustments.compLandVal : null : null)}</p>
-                                                                   <p>Size Adj: {formatSignedCurrency(adjustments?.sizeAdjustment)}</p>
-                                                                   <p>Age Adj: {formatSignedCurrency(adjustments?.ageAdjustment)}</p>
-                                                                   <p>Land Adj Amt: {formatSignedCurrency(adjustments?.landAdjustmentAmount)}</p>
-                                                                   <p className="mt-1">Formula: Comp Total Mkt Val + Size Adj + Age Adj + Land Adj Amt</p>
-                                                                   */}
                                                                  </TooltipContent>
                                                              </Tooltip>
                                                           </TooltipProvider>
