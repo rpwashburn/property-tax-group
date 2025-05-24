@@ -151,27 +151,34 @@ export async function fetchAndProcessComparables(
     throw new Error('No initial comparable data found to analyze.');
   }
 
-  // Step 2: Get top 5 lowest value comparables
+  // Step 2: Get top 5 lowest value comparables (for grouping display)
   const lowestValueComparables = getLowestValueComparables(allAdjustedComparables);
   
-  // Step 3: Get closest comparables by age and square footage from original list
+  // Step 3: Get closest comparables by age and square footage from original list (for grouping display)
   const closestByAge = getClosestByAgeComparables(effectiveSubjectProperty, allAdjustedComparables);
   const closestBySqFt = getClosestBySquareFootageComparables(effectiveSubjectProperty, allAdjustedComparables);
   
-  // Step 4: Create grouped comparables structure
+  // Step 4: Create grouped comparables structure (for display in Grouped Comparables tab)
   const groupedComparables = createGroupedComparables(closestByAge, closestBySqFt, lowestValueComparables);
   const groupMembershipIds = createGroupMembershipIds(closestByAge, closestBySqFt, lowestValueComparables);
 
-  // Step 5: Deduplicate the final list from all groups
+  // Step 5: Combine and deduplicate the groups to get quality comparables
   const allGroupedComparables = [
     ...closestByAge,
     ...closestBySqFt,
     ...lowestValueComparables
   ];
-  const finalComparables = deduplicateComparables(allGroupedComparables);
+  const deduplicatedComparables = deduplicateComparables(allGroupedComparables);
+  
+  if (deduplicatedComparables.length === 0) {
+    throw new Error('No relevant comparables found after grouping.');
+  }
+
+  // Step 6: Intelligently select final comparables using score and value criteria
+  const finalComparables = selectIntelligentComparables(deduplicatedComparables, 3, 15);
   
   if (finalComparables.length === 0) {
-    throw new Error('No relevant comparables found after grouping.');
+    throw new Error('No comparables found with valid comparable scores after grouping.');
   }
 
   return {
@@ -193,4 +200,74 @@ export function applySubjectPropertyOverrides(
     ...(overrides?.bldAr && { bldAr: overrides.bldAr }),
     ...(overrides?.yrImpr && { yrImpr: overrides.yrImpr }),
   };
+}
+
+/**
+ * Intelligently selects comparable properties based on score and value criteria
+ * 1. Finds at least minCount comparables (default 3)
+ * 2. Expands set by including lower-value properties within score threshold
+ * @param comparables - Array of comparable properties with scores
+ * @param minCount - Minimum number of comparables to include (default 3)
+ * @param scoreThresholdPercent - Percentage threshold for score proximity (default 15%)
+ * @returns Selected comparable properties
+ */
+function selectIntelligentComparables(
+  comparables: AdjustedComparable[], 
+  minCount: number = 3,
+  scoreThresholdPercent: number = 15
+): AdjustedComparable[] {
+  // Filter and sort by score (highest first)
+  const scoredComparables = comparables
+    .filter(comp => comp.adjustments?.comparableScore !== undefined && comp.adjustments?.comparableScore !== null)
+    .sort((a, b) => {
+      const scoreA = a.adjustments?.comparableScore || 0;
+      const scoreB = b.adjustments?.comparableScore || 0;
+      return scoreB - scoreA; // Descending order (highest scores first)
+    });
+
+  if (scoredComparables.length < minCount) {
+    // If we don't have enough comparables with scores, return what we have
+    return scoredComparables;
+  }
+
+  // Step 1: Get the initial set (top minCount by score)
+  const initialSet = scoredComparables.slice(0, minCount);
+  const lowestInitialScore = initialSet[initialSet.length - 1].adjustments?.comparableScore || 0;
+  
+  // Calculate score threshold (percentage below the lowest score in initial set)
+  const scoreThreshold = lowestInitialScore * (1 - scoreThresholdPercent / 100);
+  
+  // Step 2: Find the highest adjusted value in the initial set
+  const highestInitialAdjustedValue = Math.max(
+    ...initialSet.map(comp => comp.adjustments?.totalAdjustedValue || 0)
+  );
+
+  // Step 3: Check remaining comparables for inclusion
+  const remainingComparables = scoredComparables.slice(minCount);
+  const additionalComparables: AdjustedComparable[] = [];
+
+  for (const comp of remainingComparables) {
+    const score = comp.adjustments?.comparableScore || 0;
+    const adjustedValue = comp.adjustments?.totalAdjustedValue || 0;
+    
+    // Include if score is within threshold AND adjusted value is lower than highest in initial set
+    if (score >= scoreThreshold && adjustedValue < highestInitialAdjustedValue) {
+      additionalComparables.push(comp);
+    }
+    // Stop checking if score falls too far below threshold
+    else if (score < scoreThreshold) {
+      break; // Since list is sorted by score, no point checking further
+    }
+  }
+
+  // Combine initial set with additional qualifying comparables
+  const finalSet = [...initialSet, ...additionalComparables];
+  
+  console.log(`[selectIntelligentComparables] Selected ${finalSet.length} comparables:`);
+  console.log(`- Initial set: ${minCount} (top scores)`);
+  console.log(`- Additional: ${additionalComparables.length} (within ${scoreThresholdPercent}% of ${lowestInitialScore.toFixed(2)} and lower than highest initial value)`);
+  console.log(`- Score threshold: ${scoreThreshold.toFixed(2)} (based on lowest initial score: ${lowestInitialScore.toFixed(2)})`);
+  console.log(`- Highest initial adjusted value: $${highestInitialAdjustedValue.toLocaleString()}`);
+
+  return finalSet;
 } 

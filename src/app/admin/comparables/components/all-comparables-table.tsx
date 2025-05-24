@@ -30,7 +30,7 @@ interface AllComparablesTableProps {
   description?: string
 }
 
-type SortField = 'address' | 'yearBuilt' | 'sqft' | 'marketValue' | 'adjustedValue' | 'adjustedPSF'
+type SortField = 'address' | 'yearBuilt' | 'sqft' | 'marketValue' | 'adjustedValue' | 'adjustedPSF' | 'comparableScore'
 type SortDirection = 'asc' | 'desc'
 
 export function AllComparablesTable({ comparables, subjectProperty, title, description }: AllComparablesTableProps) {
@@ -85,6 +85,10 @@ export function AllComparablesTable({ comparables, subjectProperty, title, descr
           aVal = aSqft > 0 ? (a.adjustments?.totalAdjustedValue || 0) / aSqft : 0
           bVal = bSqft > 0 ? (b.adjustments?.totalAdjustedValue || 0) / bSqft : 0
           break
+        case 'comparableScore':
+          aVal = a.adjustments?.comparableScore || 0
+          bVal = b.adjustments?.comparableScore || 0
+          break
       }
       
       if (typeof aVal === 'string') {
@@ -129,7 +133,7 @@ export function AllComparablesTable({ comparables, subjectProperty, title, descr
       'Account', 'Address', 'Neighborhood', 'Year Built', 'Building SqFt', 'Land SqFt',
       'Grade', 'Condition', 'Market Value', 'Land Value', 'Building Value', 
       'Comp Impr PSF', 'Size Adjustment', 'Age Adjustment', 'Features Adjustment', 'Land Adjustment',
-      'Adjusted Improvement Value', 'Total Adjusted Value', 'Adjusted PSF'
+      'Adjusted Improvement Value', 'Total Adjusted Value', 'Adjusted PSF', 'Comparable Score'
     ]
 
     const csvRows = [
@@ -159,7 +163,8 @@ export function AllComparablesTable({ comparables, subjectProperty, title, descr
           comp.adjustments?.landAdjustmentAmount || '',
           comp.adjustments?.adjustedImprovementValue || '',
           comp.adjustments?.totalAdjustedValue || '',
-          adjustedPSF
+          adjustedPSF,
+          comp.adjustments?.comparableScore || 'N/A'
         ].map(field => {
           const stringField = String(field)
           return stringField.includes(',') ? `"${stringField}"` : stringField
@@ -317,6 +322,14 @@ export function AllComparablesTable({ comparables, subjectProperty, title, descr
                       Adj PSF <SortIcon field="adjustedPSF" />
                     </div>
                   </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('comparableScore')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Score <SortIcon field="comparableScore" />
+                    </div>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -361,6 +374,9 @@ export function AllComparablesTable({ comparables, subjectProperty, title, descr
                     </TableCell>
                     <TableCell className="font-medium">
                       {formatPSF(comp.adjustments?.totalAdjustedValue, comp.bldAr)}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {comp.adjustments?.comparableScore || 'N/A'}
                     </TableCell>
                   </TableRow>
                 ))}

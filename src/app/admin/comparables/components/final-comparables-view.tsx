@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +13,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table"
-import { Download, Target, Info, Clock, Ruler, TrendingDown } from "lucide-react"
+import { Download, Target, Info, Clock, Ruler, TrendingDown, SortAsc, SortDesc } from "lucide-react"
 import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types"
 
 interface FinalComparablesViewProps {
@@ -25,11 +26,80 @@ interface FinalComparablesViewProps {
   subjectProperty: SubjectProperty
 }
 
+type SortField = 'address' | 'yearBuilt' | 'sqft' | 'marketValue' | 'adjustedValue' | 'adjustedPSF' | 'comparableScore'
+type SortDirection = 'asc' | 'desc'
+
 export function FinalComparablesView({ 
   finalComparables, 
   groupMembershipIds, 
   subjectProperty 
 }: FinalComparablesViewProps) {
+  const [sortField, setSortField] = useState<SortField>('comparableScore')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc') // Start with highest scores first
+
+  // Sort the comparables based on the current sort settings
+  const sortedComparables = useMemo(() => {
+    return [...finalComparables].sort((a, b) => {
+      let aVal: number | string = 0
+      let bVal: number | string = 0
+      
+      switch (sortField) {
+        case 'address':
+          aVal = a.siteAddr1 || ''
+          bVal = b.siteAddr1 || ''
+          break
+        case 'yearBuilt':
+          aVal = parseInt(a.yrImpr || '0', 10)
+          bVal = parseInt(b.yrImpr || '0', 10)
+          break
+        case 'sqft':
+          aVal = parseInt(a.bldAr || '0', 10)
+          bVal = parseInt(b.bldAr || '0', 10)
+          break
+        case 'marketValue':
+          aVal = parseInt(a.totMktVal || '0', 10)
+          bVal = parseInt(b.totMktVal || '0', 10)
+          break
+        case 'adjustedValue':
+          aVal = a.adjustments?.totalAdjustedValue || 0
+          bVal = b.adjustments?.totalAdjustedValue || 0
+          break
+        case 'adjustedPSF':
+          const aSqft = parseInt(a.bldAr || '0', 10)
+          const bSqft = parseInt(b.bldAr || '0', 10)
+          aVal = aSqft > 0 ? (a.adjustments?.totalAdjustedValue || 0) / aSqft : 0
+          bVal = bSqft > 0 ? (b.adjustments?.totalAdjustedValue || 0) / bSqft : 0
+          break
+        case 'comparableScore':
+          aVal = a.adjustments?.comparableScore || 0
+          bVal = b.adjustments?.comparableScore || 0
+          break
+      }
+      
+      if (typeof aVal === 'string') {
+        return sortDirection === 'asc' 
+          ? aVal.localeCompare(bVal as string)
+          : (bVal as string).localeCompare(aVal)
+      } else {
+        return sortDirection === 'asc' ? aVal - (bVal as number) : (bVal as number) - aVal
+      }
+    })
+  }, [finalComparables, sortField, sortDirection])
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortDirection(field === 'comparableScore' ? 'desc' : 'asc') // Default to desc for score, asc for others
+    }
+  }
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null
+    return sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+  }
+
   const formatCurrency = (value: number | null | undefined) => {
     if (!value) return 'N/A'
     return `$${value.toLocaleString()}`
@@ -47,7 +117,8 @@ export function FinalComparablesView({
       'Account', 'Address', 'Neighborhood', 'Year Built', 'Building SqFt', 'Land SqFt',
       'Grade', 'Condition', 'Market Value', 'Land Value', 'Building Value', 
       'Comp Impr PSF', 'Size Adjustment', 'Age Adjustment', 'Land Adjustment',
-      'Adjusted Improvement Value', 'Total Adjusted Value', 'Adjusted PSF', 'Group Membership'
+      'Adjusted Improvement Value', 'Total Adjusted Value', 'Adjusted PSF', 'Group Membership',
+      'Comparable Score'
     ]
 
     const csvRows = [
@@ -83,7 +154,8 @@ export function FinalComparablesView({
           comp.adjustments?.adjustedImprovementValue || '',
           comp.adjustments?.totalAdjustedValue || '',
           adjustedPSF,
-          `"${groups.join(', ')}"`
+          `"${groups.join(', ')}"`,
+          comp.adjustments?.comparableScore || 'N/A'
         ].map(field => {
           const stringField = String(field)
           return stringField.includes(',') && !stringField.startsWith('"') ? `"${stringField}"` : stringField
@@ -128,6 +200,18 @@ export function FinalComparablesView({
     }).length
   }
 
+  // Calculate score statistics
+  const scores = finalComparables
+    .map(c => c.adjustments?.comparableScore)
+    .filter((score): score is number => score !== undefined && score !== null)
+  
+  const scoreStats = {
+    average: scores.length > 0 ? Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 100) / 100 : 0,
+    highest: scores.length > 0 ? Math.max(...scores) : 0,
+    lowest: scores.length > 0 ? Math.min(...scores) : 0,
+    count: scores.length
+  }
+
   const getGroupBadges = (comp: AdjustedComparable) => {
     const badges = []
     if (groupMembershipIds.closestByAgeIds.has(comp.id)) {
@@ -151,10 +235,11 @@ export function FinalComparablesView({
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Final Comparable Set for AI Analysis
+                Intelligently Selected Comparable Properties
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Deduplicated set of {finalComparables.length} properties that will be sent to AI for ranking and selection
+                Properties selected through intelligent criteria combining score quality and value strategy. 
+                Count varies based on data - minimum 3, expanded for lower-value properties with competitive scores.
               </p>
             </div>
             <Button onClick={handleExportFinalSet} variant="outline" size="sm">
@@ -167,12 +252,18 @@ export function FinalComparablesView({
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This is the exact dataset that gets formatted and sent to the AI for analysis. 
-              The AI will select the best comparable properties from this set based on similarity and value considerations.
+              Properties are selected through a three-step intelligent process:
+              <br />
+              <strong>Step 1:</strong> Group by age, square footage, and value criteria, then deduplicate to get quality comparables.
+              <br />
+              <strong>Step 2:</strong> Select the top 3 comparables by score (minimum set).
+              <br />
+              <strong>Step 3:</strong> Add properties with scores within 15% of the lowest initial score AND adjusted values lower than the highest in the initial set.
             </AlertDescription>
           </Alert>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-4">
+            {/* Group Statistics */}
             <div className="p-3 border rounded-lg text-center">
               <div className="text-2xl font-bold text-blue-600">{groupStats.ageOnly}</div>
               <div className="text-sm text-muted-foreground">Age Group Only</div>
@@ -189,6 +280,24 @@ export function FinalComparablesView({
               <div className="text-2xl font-bold text-purple-600">{groupStats.multipleGroups}</div>
               <div className="text-sm text-muted-foreground">Multiple Groups</div>
             </div>
+            
+            {/* Score Statistics */}
+            <div className="p-3 border rounded-lg text-center bg-emerald-50">
+              <div className="text-2xl font-bold text-emerald-600">{scoreStats.highest}</div>
+              <div className="text-sm text-muted-foreground">Highest Score</div>
+            </div>
+            <div className="p-3 border rounded-lg text-center bg-yellow-50">
+              <div className="text-2xl font-bold text-yellow-600">{scoreStats.average}</div>
+              <div className="text-sm text-muted-foreground">Average Score</div>
+            </div>
+            <div className="p-3 border rounded-lg text-center bg-red-50">
+              <div className="text-2xl font-bold text-red-600">{scoreStats.lowest}</div>
+              <div className="text-sm text-muted-foreground">Lowest Score</div>
+            </div>
+            <div className="p-3 border rounded-lg text-center bg-slate-50">
+              <div className="text-2xl font-bold text-slate-600">{scoreStats.count}</div>
+              <div className="text-sm text-muted-foreground">With Scores</div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -196,10 +305,10 @@ export function FinalComparablesView({
       {/* Final Comparables Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Complete Dataset for AI Analysis</CardTitle>
+          <CardTitle>Selected Comparable Properties Dataset</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Each property shows which selection group(s) it belongs to. Properties in multiple groups 
-            are considered stronger candidates.
+            Properties selected through intelligent criteria combining score quality and value strategy. 
+            Additional comparables must be lower than the highest value in the top-scoring set and have competitive scores.
           </p>
         </CardHeader>
         <CardContent>
@@ -207,19 +316,69 @@ export function FinalComparablesView({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Address</TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('address')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Address <SortIcon field="address" />
+                    </div>
+                  </TableHead>
                   <TableHead>Account</TableHead>
-                  <TableHead>Year Built</TableHead>
-                  <TableHead>Building SqFt</TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('yearBuilt')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Year Built <SortIcon field="yearBuilt" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('sqft')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Building SqFt <SortIcon field="sqft" />
+                    </div>
+                  </TableHead>
                   <TableHead>Grade/Condition</TableHead>
-                  <TableHead>Market Value</TableHead>
-                  <TableHead>Adjusted Value</TableHead>
-                  <TableHead>Adj PSF</TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('marketValue')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Market Value <SortIcon field="marketValue" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('adjustedValue')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Adjusted Value <SortIcon field="adjustedValue" />
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('adjustedPSF')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Adj PSF <SortIcon field="adjustedPSF" />
+                    </div>
+                  </TableHead>
                   <TableHead>Selection Groups</TableHead>
+                  <TableHead 
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => handleSort('comparableScore')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Comparable Score <SortIcon field="comparableScore" />
+                    </div>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {finalComparables.map((comp) => {
+                {sortedComparables.map((comp) => {
                   const groupBadges = getGroupBadges(comp)
                   
                   return (
@@ -261,6 +420,7 @@ export function FinalComparablesView({
                           ))}
                         </div>
                       </TableCell>
+                      <TableCell>{comp.adjustments?.comparableScore || 'N/A'}</TableCell>
                     </TableRow>
                   )
                 })}

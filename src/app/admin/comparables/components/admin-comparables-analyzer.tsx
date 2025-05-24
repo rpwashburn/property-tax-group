@@ -477,7 +477,7 @@ export function AdminComparablesAnalyzer({ subjectAcctNumber }: AdminComparables
             </TabsTrigger>
             <TabsTrigger value="final-set" className="gap-2">
               <Target className="h-4 w-4" />
-              Final Set ({pipelineData.finalComparables.length})
+              Intelligent Selection ({pipelineData.finalComparables.length})
             </TabsTrigger>
             <TabsTrigger value="ai-analysis" className="gap-2">
               <Brain className="h-4 w-4" />

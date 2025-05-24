@@ -11,6 +11,7 @@ export interface AdjustmentCalculations {
     totalAdjustedValue: number;
     compImprPSF: number;
     landAdjustmentAmount: number;
+    comparableScore: number;
     // Intermediate values for display/tooltips
     subjBldAr: number;
     compBldAr: number;
@@ -54,6 +55,73 @@ export const safeParseInt = (value: string | null | undefined, defaultValue = 0)
     return isNaN(parsed) ? defaultValue : parsed;
 };
 
+// Helper function to calculate comparable score
+/**
+ * Score a comparable for property-tax protest.
+ * Higher scores = better comps (bigger discount *and* reasonably similar).
+ */
+function calculateComparableScore(
+    subjectMarketValue: number,
+    adjustedValue: number,
+    subjectSqFt: number,
+    compSqFt: number,
+    subjectAge: number,
+    compAge: number,
+    compOriginalMarketValue: number
+  ): number {
+    /* ------------------------------------------------------------------ */
+    /* 1. VALUE-DISCOUNT SCORE  (80 % weight)                              */
+    /* ------------------------------------------------------------------ */
+    // Percent the comp is BELOW the subject. Above-subject → 0.
+    const rawDiscountPct =
+      adjustedValue < subjectMarketValue
+        ? (subjectMarketValue - adjustedValue) / subjectMarketValue
+        : 0;
+  
+    // Optional cap so one crazy low sale doesn’t swamp the list.
+    const MAX_DISCOUNT = 0.60;          // 60 % below subject ⇒ max credit
+    const cappedDiscountPct = Math.min(rawDiscountPct, MAX_DISCOUNT);
+  
+    // Convert to 0-100. 60 % discount ⇒ 100 pts, 30 % discount ⇒ 50 pts, etc.
+    const valueScore = (cappedDiscountPct / MAX_DISCOUNT) * 100;
+  
+    /* ------------------------------------------------------------------ */
+    /* 2. SQFT SIMILARITY  (10 % weight, unchanged logic)                 */
+    /* ------------------------------------------------------------------ */
+    const sqFtDiff = Math.abs(subjectSqFt - compSqFt);
+    const maxSqFtDiff = Math.max(subjectSqFt * 0.5, 500);
+    const sqFtScore = Math.max(0, 100 - (sqFtDiff / maxSqFtDiff) * 100);
+  
+    /* ------------------------------------------------------------------ */
+    /* 3. AGE SIMILARITY  (5 % weight, threshold tightened to 15 yrs)     */
+    /* ------------------------------------------------------------------ */
+    const ageDiff = Math.abs(subjectAge - compAge);
+    const maxAgeDiff = 15; // stricter because we down-weighted age
+    const ageScore = Math.max(0, 100 - (ageDiff / maxAgeDiff) * 100);
+  
+    /* ------------------------------------------------------------------ */
+    /* 4. ADJUSTMENT RELIABILITY  (5 % weight, unchanged logic)           */
+    /* ------------------------------------------------------------------ */
+    const adjustmentDelta = Math.abs(adjustedValue - compOriginalMarketValue);
+    const adjustmentPct =
+      compOriginalMarketValue > 0 ? adjustmentDelta / compOriginalMarketValue : 1;
+    const maxAdjustmentPct = 0.30;
+    const adjustmentScore = Math.max(
+      0,
+      100 - (adjustmentPct / maxAdjustmentPct) * 100
+    );
+  
+    /* ------------------------------------------------------------------ */
+    /* 5. COMBINE WEIGHTED SCORES                                         */
+    /* ------------------------------------------------------------------ */
+    const finalScore =
+      valueScore * 0.7 +
+      sqFtScore * 0.2 +
+      ageScore * 0.05 +
+      adjustmentScore * 0.05;
+  
+    return Math.round(finalScore * 100) / 100; // two decimals
+  }
 
 // --- Core Calculation Functions ---
 
@@ -73,6 +141,8 @@ export function calculateAdjustments(
     const compLandVal = safeParseInt(comp.landVal); 
     const subjXFeaturesVal = safeParseInt(subject.xFeaturesVal);
     const compXFeaturesVal = safeParseInt(comp.xFeaturesVal);
+    const subjMarketValue = safeParseInt(subject.totMktVal);
+    const compOriginalMarketValue = safeParseInt(comp.totMktVal);
 
     const compImprPSF = compBldAr > 0 ? compBldVal / compBldAr : 0;
     const sizeAdjustment = compImprPSF * (subjBldAr - compBldAr) / 2;
@@ -82,6 +152,17 @@ export function calculateAdjustments(
     const totalAdjustedValue = adjustedImprovementValue + subjLandVal;
     const landAdjustmentAmount = subjLandVal - compLandVal;
 
+    // Calculate comparable score
+    const comparableScore = calculateComparableScore(
+        subjMarketValue,
+        totalAdjustedValue,
+        subjBldAr,
+        compBldAr,
+        subjYrImpr,
+        compYrImpr,
+        compOriginalMarketValue
+    );
+
     return {
         compImprPSF, 
         sizeAdjustment, 
@@ -90,6 +171,7 @@ export function calculateAdjustments(
         adjustedImprovementValue,
         totalAdjustedValue, 
         landAdjustmentAmount,
+        comparableScore,
         // Include intermediate values
         subjBldAr,
         compBldAr,
