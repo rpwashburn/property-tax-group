@@ -9,6 +9,9 @@ We are using latest nextjs server side logic and should never use API routes for
 ## Data Access
 reference [data-access-layer.mdc](mdc:.cursor/rules/data-access-layer.mdc) for guidelines anytime you are trying to manipulate data
 
+## Node Commands
+We are using pnpm not npm
+
 ## Drizzle Commands
 - `npx drizzle-kit generate --name <migration-name>` to generate a new migration
 - `npx drizzle-kit migrate` to migrate the database

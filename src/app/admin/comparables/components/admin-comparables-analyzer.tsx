@@ -15,7 +15,7 @@ import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysi
 import type { PropertySearchCriteria } from "@/lib/comparables/types"
 
 // Import services
-import { getPropertyByAcct } from "@/lib/comparables/server"
+import { getSubjectProperty } from "@/lib/property-analysis/services/property-service"
 import { fetchAndAdjustComparables } from "@/lib/comparables/server"
 import { 
   fetchAndProcessComparables, 
@@ -108,7 +108,7 @@ export function AdminComparablesAnalyzer({ subjectAcctNumber }: AdminComparables
         setError(null)
 
         // Fetch subject property
-        const property = await getPropertyByAcct(subjectAcctNumber)
+        const property = await getSubjectProperty(subjectAcctNumber)
         if (!property) {
           throw new Error(`Property not found for account ${subjectAcctNumber}`)
         }

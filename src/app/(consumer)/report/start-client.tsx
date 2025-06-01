@@ -4,20 +4,24 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Info } from "lucide-react"
-import type { PropertyData } from "@/lib/property-analysis/types"
+import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
 import type { AnalysisData } from "@/lib/property-analysis/types/analysis-types"
 import type { Deduction } from "@/lib/property-analysis/types/deduction-types"
-import { StepIndicator } from "./components/step-indicator"
-import { PropertyValuesStep } from "./components/property-values-step"
-import { AiAnalyzerStep } from "./components/ai-analyzer-step"
-import { AdditionalDeductionsStep } from "./components/additional-deductions-step"
-import { GenerateReportStep } from "./components/generate-report-step"
+import type { ExtraFeaturesDisputeSummary } from "@/lib/property-analysis/types/extra-features-types"
+import type { HousingMarketAdjustment } from "@/lib/property-analysis/types/housing-market-types"
+import { StepIndicator } from "./components/shared/step-indicator"
+import { PropertyValuesStep } from "./components/step-1-review"
+import { AiAnalyzerStep } from "./components/step-2-analyze"
+import { ExtraFeaturesStep } from "./components/step-3-extra-features"
+import { AdditionalDeductionsStep } from "./components/step-4-deductions"
+import { HousingMarketAdjustmentStep } from "./components/step-5-housing-market-adjustment"
+import { GenerateReportStep } from "./components/step-6-generate"
 import { Button } from "@/components/ui/button"
 import { generateAndDownloadReport } from "@/lib/property-analysis/services/report-service"
 
 interface StartClientProps {
-  propertyData: PropertyData
+  propertyData: EnrichedPropertyData
   accountNumber: string
 }
 
@@ -31,6 +35,8 @@ export function StartClient({
   const [finalOverrides, setFinalOverrides] = useState<OverrideState | null>(null);
   const [additionalDeductions, setAdditionalDeductions] = useState<Deduction[]>([]);
   const [aiAnalysisData, setAiAnalysisData] = useState<AnalysisData | null>(null);
+  const [extraFeatureDisputes, setExtraFeatureDisputes] = useState<ExtraFeaturesDisputeSummary | null>(null);
+  const [housingMarketAdjustment, setHousingMarketAdjustment] = useState<HousingMarketAdjustment | null>(null);
 
   const handleNext = () => {
     setStep(prevStep => prevStep + 1)
@@ -46,8 +52,18 @@ export function StartClient({
     handleNext();
   };
 
+  const handleExtraFeaturesNext = (summary: ExtraFeaturesDisputeSummary) => {
+    setExtraFeatureDisputes(summary);
+    handleNext();
+  };
+
   const handleAdditionalDeductionsNext = (deductions: Deduction[]) => {
     setAdditionalDeductions(deductions);
+    handleNext();
+  };
+
+  const handleHousingMarketAdjustmentNext = (adjustment: HousingMarketAdjustment | null) => {
+    setHousingMarketAdjustment(adjustment);
     handleNext();
   };
 
@@ -58,6 +74,7 @@ export function StartClient({
       overrides: finalOverrides,
       aiAnalysisData,
       additionalDeductions,
+      extraFeatureDisputes: extraFeatureDisputes || undefined,
     });
   };
 
@@ -73,8 +90,8 @@ export function StartClient({
         </Link>
       </div>
 
-      <div className="mb-8 bg-linear-to-r from-slate-50 to-slate-100 p-8 rounded-xl border shadow-sm">
-        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-slate-900 to-slate-700">
+      <div className="mb-8 bg-gradient-to-r from-slate-50 to-slate-100 p-8 rounded-xl border shadow-sm">
+        <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
           Property Tax Analysis
         </h1>
         <p className="text-muted-foreground mt-2 max-w-2xl">
@@ -83,20 +100,20 @@ export function StartClient({
         </p>
 
         <div className="mt-6 flex items-center gap-2 text-sm font-medium">
-          <div className="px-3 py-1 rounded-full bg-slate-200 text-slate-700">Account: {propertyData.acct}</div>
+          <div className="px-3 py-1 rounded-full bg-slate-200 text-slate-700">Account: {accountNumber}</div>
           <div className="px-3 py-1 rounded-full bg-slate-200 text-slate-700">{propertyData.siteAddr1}</div>
         </div>
       </div>
 
       <div className="mb-8 p-4 rounded-xl border shadow-sm bg-white">
-        <StepIndicator currentStep={step} totalSteps={4} />
+        <StepIndicator currentStep={step} totalSteps={6} />
       </div>
 
       {step === 1 && (
         <PropertyValuesStep 
           propertyData={propertyData} 
           onNext={handleNext} 
-          onBack={() => router.push(`/?accountNumber=${accountNumber}`)}
+          onBack={() => router.push(`/search`)}
         />
       )}
 
@@ -109,6 +126,14 @@ export function StartClient({
       }
 
       {step === 3 &&
+        <ExtraFeaturesStep
+          onBack={handleBack}
+          onNext={handleExtraFeaturesNext}
+          propertyData={propertyData}
+        />
+      }
+
+      {step === 4 &&
         <AdditionalDeductionsStep
           onBack={handleBack}
           onNext={handleAdditionalDeductionsNext}
@@ -116,7 +141,15 @@ export function StartClient({
         />
       }
 
-      {step === 4 &&
+      {step === 5 &&
+        <HousingMarketAdjustmentStep
+          onBack={handleBack}
+          onNext={handleHousingMarketAdjustmentNext}
+          initialAdjustment={housingMarketAdjustment}
+        />
+      }
+
+      {step === 6 &&
         <GenerateReportStep
           onBack={handleBack}
           onGenerateReport={handleGenerateReport}
@@ -125,6 +158,8 @@ export function StartClient({
           overrides={finalOverrides}
           aiAnalysisData={aiAnalysisData}
           additionalDeductions={additionalDeductions}
+          extraFeatureDisputes={extraFeatureDisputes}
+          housingMarketAdjustment={housingMarketAdjustment}
         />
       }
 

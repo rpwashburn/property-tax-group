@@ -1,7 +1,7 @@
-import { getPropertyDataByAccountNumber } from "@/lib/property-analysis/server"
-import type { PropertyData } from "@/lib/property-analysis/types"
+import { getUnifiedPropertyData } from "@/lib/property-analysis/services/property-service"
+import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
 import { StartClient } from "./start-client"
-import { ReportErrorPage } from "./components/report-error-page"
+import { ReportErrorPage } from "./components/shared/report-error-page"
 
 // Define the shape of the resolved search parameters
 type ResolvedSearchParams = { [key: string]: string | string[] | undefined }
@@ -18,9 +18,9 @@ export default async function StartPage(
     return <ReportErrorPage errorType="noAccountNumber" />
   }
 
-  let propertyData: PropertyData | null = null
+  let propertyData: EnrichedPropertyData | null = null
   try {
-    propertyData = await getPropertyDataByAccountNumber(accountNumber)
+    propertyData = await getUnifiedPropertyData(accountNumber)
   } catch (error) {
     console.error("Failed to load property data on server:", error)
     // propertyData will remain null, leading to the propertyNotFound case

@@ -8,6 +8,7 @@ import {
   serial,
   numeric,
   index,
+  integer,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -118,3 +119,49 @@ export const fixtures = pgTable('fixtures', {
 }, (table) => [
   uniqueIndex('fixtures_acct_bld_type_idx').on(table.acct, table.bldNum, table.type),
 ]);
+
+export const fixturesRelations = relations(fixtures, ({ one }) => ({
+  property: one(propertyData, {
+    fields: [fixtures.acct],
+    references: [propertyData.acct],
+  }),
+}));
+
+export const extraFeaturesDetail = pgTable(
+  "extra_features_detail",
+  {
+    id: serial("id").primaryKey(),
+    acct: text("acct").notNull(),
+    cd: text("cd"),
+    dscr: text("dscr"),
+    grade: text("grade"),
+    condCd: text("cond_cd"),
+    bldNum: integer("bld_num"),
+    length: text("length"),
+    width: text("width"),
+    units: text("units"),
+    unitPrice: text("unit_price"),
+    adjUnitPrice: text("adj_unit_price"),
+    pctComp: text("pct_comp"),
+    actYr: integer("act_yr"),
+    effYr: integer("eff_yr"),
+    rollYr: integer("roll_yr"),
+    dt: text("dt"),
+    pctCond: text("pct_cond"),
+    dprVal: text("dpr_val"),
+    note: text("note"),
+    asdVal: text("asd_val"),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ([
+    index("efd_acct_idx").on(table.acct),
+  ])
+);
+
+export const extraFeaturesDetailRelations = relations(extraFeaturesDetail, ({ one }) => ({
+  property: one(propertyData, {
+    fields: [extraFeaturesDetail.acct],
+    references: [propertyData.acct],
+  }),
+}));

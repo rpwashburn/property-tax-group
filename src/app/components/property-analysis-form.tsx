@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { getPropertyDataByAccountNumber } from "@/lib/property-analysis/server"
+import { getUnifiedPropertyData } from "@/lib/property-analysis/services/property-service"
 
 export function PropertyAnalysisForm() {
   const searchParams = useSearchParams()
@@ -23,7 +23,7 @@ export function PropertyAnalysisForm() {
     setIsLoading(true)
 
     try {
-      const data = await getPropertyDataByAccountNumber(accountNumber)
+      const data = await getUnifiedPropertyData(accountNumber)
       if (!data) {
         toast.error("Property not found")
         return

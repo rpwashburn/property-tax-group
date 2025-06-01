@@ -10,7 +10,9 @@ export function StepIndicator({ currentStep, totalSteps, className = "" }: StepI
   const definedSteps = [
     { name: "Review Details", description: "Confirm property information" },
     { name: "Update and Analyze", description: "Adjust details & run AI analysis"},
+    { name: "Extra Features", description: "Review and dispute property features"},
     { name: "Additional Deductions", description: "Add deductions to your property"},
+    { name: "Market Adjustment", description: "Apply housing market decline"},
     { name: "Generate Report", description: "Generate a report"}
   ]
 

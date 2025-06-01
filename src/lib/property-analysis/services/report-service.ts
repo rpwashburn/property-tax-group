@@ -1,23 +1,25 @@
-import type { PropertyData } from "@/lib/property-analysis/types"
+import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
 import type { AnalysisData, ExcludedProperty } from "@/lib/property-analysis/types/analysis-types"
 import type { Comparable } from "@/lib/comparables/types"
 import type { Deduction, EvidenceFile as DeductionEvidenceFile, QuoteFile as DeductionQuoteFile } from "@/lib/property-analysis/types/deduction-types"
 import { deductionTypes as allDeductionTypes } from "@/lib/property-analysis/types/deduction-types"
+import type { ExtraFeaturesDisputeSummary } from "@/lib/property-analysis/types/extra-features-types"
 
 export interface ReportData {
   accountNumber: string
-  propertyData: PropertyData
+  propertyData: EnrichedPropertyData
   overrides?: OverrideState | null
   aiAnalysisData?: AnalysisData | null
   additionalDeductions?: Deduction[]
+  extraFeatureDisputes?: ExtraFeaturesDisputeSummary
 }
 
 /**
  * Generates the text content for a property tax protest report
  */
 export function generateReportContent(data: ReportData): string {
-  const { accountNumber, propertyData, overrides, aiAnalysisData, additionalDeductions = [] } = data
+  const { accountNumber, propertyData, overrides, aiAnalysisData, additionalDeductions = [], extraFeatureDisputes } = data
 
   let reportContent = `Property Tax Protest Report\n`
   reportContent += `=================================\n\n`
@@ -37,8 +39,14 @@ export function generateReportContent(data: ReportData): string {
   // Add AI comparables analysis section
   reportContent += generateAIAnalysisSection(aiAnalysisData)
 
+  // Add extra features disputes section
+  reportContent += generateExtraFeaturesSection(extraFeatureDisputes)
+
   // Add additional deductions section
   reportContent += generateDeductionsSection(additionalDeductions)
+
+  // Add final value calculation section
+  reportContent += generateFinalValueSection(data)
 
   reportContent += `\n\n--- End of Report ---\n`
 
@@ -48,7 +56,7 @@ export function generateReportContent(data: ReportData): string {
 /**
  * Generates the override section of the report
  */
-function generateOverrideSection(overrides: OverrideState | null | undefined, propertyData: PropertyData): string {
+function generateOverrideSection(overrides: OverrideState | null | undefined, propertyData: EnrichedPropertyData): string {
   if (!overrides) {
     return `--- Overridden Property Details ---\n\n`
   }
@@ -119,6 +127,50 @@ function generateAIAnalysisSection(aiAnalysisData: AnalysisData | null | undefin
 }
 
 /**
+ * Generates the extra features section of the report
+ */
+function generateExtraFeaturesSection(extraFeatureDisputes: ExtraFeaturesDisputeSummary | undefined): string {
+  let section = `--- Extra Features Review ---\n`
+  
+  if (!extraFeatureDisputes) {
+    section += `No extra features were disputed.\n\n`
+    return section
+  }
+  
+  section += `Total Extra Features Value: $${extraFeatureDisputes.totalOriginalValue.toLocaleString()}\n`
+  
+  const disputedFeatures = extraFeatureDisputes.disputes.filter(dispute => dispute.disputed)
+  
+  if (disputedFeatures.length > 0) {
+    section += `\nDisputed Extra Features (${disputedFeatures.length}):\n`
+    disputedFeatures.forEach((dispute, index) => {
+      const originalValue = Number(dispute.originalValue);
+      const disputedValue = Number(dispute.disputedValue);
+      const reduction = originalValue - disputedValue;
+      
+      section += `${index + 1}. ${dispute.description}\n`
+      section += `   Type: ${dispute.type}\n`
+      section += `   Assessed Value: $${originalValue.toLocaleString()}\n`
+      section += `   Your Estimated Fair Value: $${disputedValue.toLocaleString()}\n`
+      section += `   Value Reduction: $${reduction.toLocaleString()}\n`
+      section += `   Dispute Reason: ${dispute.reason}\n`
+      if (dispute.evidenceFiles.length > 0) {
+        section += `   Supporting Evidence: ${dispute.evidenceFiles.length} file${dispute.evidenceFiles.length !== 1 ? 's' : ''} provided\n`
+      }
+      section += `\n`
+    })
+
+    section += `Total Value Reduction: $${extraFeatureDisputes.totalValueReduction.toLocaleString()}\n`
+    section += `Adjusted Extra Features Value: $${extraFeatureDisputes.adjustedExtraFeaturesValue.toLocaleString()}\n`
+  } else {
+    section += `No extra features were disputed.\n`
+  }
+
+  section += `\n`
+  return section
+}
+
+/**
  * Generates the deductions section of the report
  */
 function generateDeductionsSection(additionalDeductions: Deduction[]): string {
@@ -158,6 +210,40 @@ function generateDeductionsSection(additionalDeductions: Deduction[]): string {
   })
 
   section += `\nTotal Estimated Deduction Value: $${totalDeductionAmount.toLocaleString()}\n`
+  return section
+}
+
+/**
+ * Generates the final value calculation section
+ */
+function generateFinalValueSection(data: ReportData): string {
+  const { propertyData, extraFeatureDisputes, additionalDeductions = [] } = data
+  
+  let section = `\n--- Final Value Calculation ---\n`
+  
+  const originalValue = Number(propertyData.totMktVal || 0)
+  section += `Original Total Market Value: $${originalValue.toLocaleString()}\n`
+  
+  // Extra Features Adjustment
+  const extraFeaturesReduction = extraFeatureDisputes ? extraFeatureDisputes.totalValueReduction : 0
+  if (extraFeaturesReduction > 0) {
+    section += `Extra Features Value Reduction: -$${extraFeaturesReduction.toLocaleString()}\n`
+  }
+  
+  // Additional Deductions
+  const totalDeductions = additionalDeductions.reduce((sum, deduction) => sum + deduction.amount, 0)
+  if (totalDeductions > 0) {
+    section += `Additional Deductions: -$${totalDeductions.toLocaleString()}\n`
+  }
+  
+  // Calculate final value
+  const finalValue = Math.max(0, originalValue - extraFeaturesReduction - totalDeductions)
+  section += `\nProposed Total Market Value: $${finalValue.toLocaleString()}\n`
+  
+  // Calculate percentage reduction
+  const percentageReduction = ((originalValue - finalValue) / originalValue) * 100
+  section += `Total Value Reduction: ${percentageReduction.toFixed(1)}%\n`
+  
   return section
 }
 

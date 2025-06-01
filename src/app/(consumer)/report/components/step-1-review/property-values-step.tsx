@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import type { PropertyData } from "@/lib/property-analysis/types"
+import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -28,7 +28,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 
 interface PropertyValuesStepProps {
-  propertyData: PropertyData
+  propertyData: EnrichedPropertyData
   onNext: () => void
   onBack: () => void
 }
@@ -164,7 +164,7 @@ export function PropertyValuesStep({ propertyData, onNext, onBack }: PropertyVal
   )
 }
 
-function CurrentYearValues({ propertyData }: { propertyData: PropertyData }) {
+function CurrentYearValues({ propertyData }: { propertyData: EnrichedPropertyData }) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-5">
       <div className="flex items-start gap-4 mb-4">
@@ -194,7 +194,7 @@ function CurrentYearValues({ propertyData }: { propertyData: PropertyData }) {
   )
 }
 
-function PriorYearValues({ propertyData }: { propertyData: PropertyData }) {
+function PriorYearValues({ propertyData }: { propertyData: EnrichedPropertyData }) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-5">
       <div className="flex items-start gap-4 mb-4">
@@ -226,7 +226,7 @@ function PriorYearValues({ propertyData }: { propertyData: PropertyData }) {
   )
 }
 
-function ValueComparison({ propertyData }: { propertyData: PropertyData }) {
+function ValueComparison({ propertyData }: { propertyData: EnrichedPropertyData }) {
   const currentTotal = Number(propertyData.totApprVal)
   const priorTotal = Number(propertyData.priorTotApprVal)
   const difference = currentTotal - priorTotal
@@ -330,7 +330,7 @@ function ValueCard({ label, value, formatAsCurrency = false, highlight = false }
   )
 }
 
-function PropertyInformation({ propertyData }: { propertyData: PropertyData }) {
+function PropertyInformation({ propertyData }: { propertyData: EnrichedPropertyData }) {
   const infoItems = [
     { label: "Account Number", value: propertyData.acct, icon: <FileText className="h-4 w-4 text-muted-foreground" /> },
     { label: "Site Address", value: propertyData.siteAddr1, icon: <Home className="h-4 w-4 text-muted-foreground" /> },
@@ -373,7 +373,7 @@ function PropertyInformation({ propertyData }: { propertyData: PropertyData }) {
   )
 }
 
-function PropertyCharacteristics({ propertyData }: { propertyData: PropertyData }) {
+function PropertyCharacteristics({ propertyData }: { propertyData: EnrichedPropertyData }) {
   return (
     <Card className="border-slate-200 shadow-sm">
       <CardHeader className="bg-slate-50 border-b">

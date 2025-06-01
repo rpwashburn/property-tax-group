@@ -1,6 +1,7 @@
 import { safeParseInt } from '@/lib/comparables/calculations';
-import { getAdjustedComparablesForReport } from '../server';
+import { fetchAndAdjustComparables } from '@/lib/comparables/server';
 import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
+import type { PropertySearchCriteria } from '@/lib/comparables/types';
 
 export interface ComparableData {
   groupedComparables: GroupedComparables;
@@ -144,25 +145,36 @@ function createGroupMembershipIds(
 export async function fetchAndProcessComparables(
   effectiveSubjectProperty: SubjectProperty
 ): Promise<ComparableData> {
-  // Step 1: Get all adjusted comparables
-  const allAdjustedComparables = await getAdjustedComparablesForReport(effectiveSubjectProperty);
+  // Step 1: Create default search criteria based on subject property
+  const searchCriteria: PropertySearchCriteria = {
+    neighborhoodCode: effectiveSubjectProperty.neighborhoodCode ?? undefined,
+    grade: effectiveSubjectProperty.grade ?? undefined,
+    condition: effectiveSubjectProperty.condition ?? undefined,
+  };
+
+  // Step 2: Get all adjusted comparables
+  const allAdjustedComparables = await fetchAndAdjustComparables(
+    effectiveSubjectProperty.acct, 
+    searchCriteria, 
+    50 // Limit to 50 comparables
+  );
   
   if (!allAdjustedComparables || allAdjustedComparables.length === 0) {
     throw new Error('No initial comparable data found to analyze.');
   }
 
-  // Step 2: Get top 5 lowest value comparables (for grouping display)
+  // Step 3: Get top 5 lowest value comparables (for grouping display)
   const lowestValueComparables = getLowestValueComparables(allAdjustedComparables);
   
-  // Step 3: Get closest comparables by age and square footage from original list (for grouping display)
+  // Step 4: Get closest comparables by age and square footage from original list (for grouping display)
   const closestByAge = getClosestByAgeComparables(effectiveSubjectProperty, allAdjustedComparables);
   const closestBySqFt = getClosestBySquareFootageComparables(effectiveSubjectProperty, allAdjustedComparables);
   
-  // Step 4: Create grouped comparables structure (for display in Grouped Comparables tab)
+  // Step 5: Create grouped comparables structure (for display in Grouped Comparables tab)
   const groupedComparables = createGroupedComparables(closestByAge, closestBySqFt, lowestValueComparables);
   const groupMembershipIds = createGroupMembershipIds(closestByAge, closestBySqFt, lowestValueComparables);
 
-  // Step 5: Combine and deduplicate the groups to get quality comparables
+  // Step 6: Combine and deduplicate the groups to get quality comparables
   const allGroupedComparables = [
     ...closestByAge,
     ...closestBySqFt,
@@ -174,7 +186,7 @@ export async function fetchAndProcessComparables(
     throw new Error('No relevant comparables found after grouping.');
   }
 
-  // Step 6: Intelligently select final comparables using score and value criteria
+  // Step 7: Intelligently select final comparables using score and value criteria
   const finalComparables = selectIntelligentComparables(deduplicatedComparables, 3, 15);
   
   if (finalComparables.length === 0) {

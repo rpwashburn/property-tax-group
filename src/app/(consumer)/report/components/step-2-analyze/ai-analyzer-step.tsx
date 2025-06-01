@@ -21,24 +21,28 @@ import {
   ArrowLeft,
   ArrowRight
 } from "lucide-react"
-import type { SubjectProperty } from "@/lib/property-analysis/types"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
 import type { AnalysisData } from "@/lib/property-analysis/types/analysis-types"
+import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
+import { convertPropertyDataToSubjectProperty } from "@/lib/property-analysis/utils/property-utils"
 
 // Import our hooks and components
-import { useAiAnalysis } from "../hooks/use-ai-analysis"
-import { useOverrideState } from "../hooks/use-override-state"
-import { AnalysisResults } from "./analysis-results"
+import { useAiAnalysis } from "../../hooks/use-ai-analysis"
+import { useOverrideState } from "../../hooks/use-override-state"
+import { AnalysisResults } from "../shared/analysis-results"
 
 interface AiAnalyzerStepProps {
-  subjectProperty: SubjectProperty
+  subjectProperty: EnrichedPropertyData
   onBack: () => void
   onNext: (finalOverrides: OverrideState, analysisData: AnalysisData | null) => void
 }
 
-export function AiAnalyzerStep({ subjectProperty, onBack, onNext }: AiAnalyzerStepProps) {
+export function AiAnalyzerStep({ subjectProperty: propertyData, onBack, onNext }: AiAnalyzerStepProps) {
   const [showDetails, setShowDetails] = useState(false)
   const [editingField, setEditingField] = useState<string | null>(null)
+  
+  // Convert PropertyData to SubjectProperty using unified service
+  const subjectProperty = convertPropertyDataToSubjectProperty(propertyData)
   
   // Use our custom hooks
   const aiAnalysis = useAiAnalysis()

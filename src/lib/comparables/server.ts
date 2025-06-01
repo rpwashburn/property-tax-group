@@ -2,10 +2,11 @@
 
 import { db } from '@/drizzle/db';
 import { propertyData, structuralElements } from '@/drizzle/schema';
-import type { ComparableProperty, AdjustedComparable, SubjectProperty } from '@/lib/property-analysis/types';
+import type { ComparableProperty, AdjustedComparable } from '@/lib/property-analysis/types';
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
 import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
 import { calculateAdjustments } from './calculations';
+import { getComparablePropertyData } from '@/lib/property-analysis/services/property-service';
 
 // Select specific columns for efficiency
 const selectedColumns = {
@@ -25,60 +26,6 @@ const selectedColumns = {
     totApprVal: propertyData.totApprVal,
     xFeaturesVal: propertyData.xFeaturesVal,
 };
-
-// Function to fetch a single property by account number, including grade and condition via separate queries
-export async function getPropertyByAcct(acct: string): Promise<SubjectProperty | null> {
-    if (!acct) return null;
-
-    try {
-        // Query 1: Fetch base property data
-        const propertyResult = await db
-            .select(selectedColumns) // Use the columns needed for ComparableProperty
-            .from(propertyData)
-            .where(eq(propertyData.acct, acct))
-            .limit(1);
-
-        if (propertyResult.length === 0) return null;
-        const baseProperty = propertyResult[0];
-
-        // Query 2: Fetch relevant structural elements separately for Building 1
-        const elementsResult = await db
-            .select({
-                typeDscr: structuralElements.typeDscr,
-                categoryDscr: structuralElements.categoryDscr
-            })
-            .from(structuralElements)
-            .where(and(
-                eq(structuralElements.acct, acct),
-                eq(structuralElements.bldNum, '1'),
-                // Only fetch the types we care about
-                sql`${structuralElements.typeDscr} IN ('Grade Adjustment', 'Cond / Desir / Util')` 
-            ));
-
-        // Extract Grade and Condition from the separate elements query result
-        let grade: string | null = null;
-        let condition: string | null = null;
-
-        if (elementsResult && elementsResult.length > 0) {
-             grade = elementsResult.find(el => el.typeDscr === 'Grade Adjustment')?.categoryDscr ?? null;
-             condition = elementsResult.find(el => el.typeDscr === 'Cond / Desir / Util')?.categoryDscr ?? null; 
-        }
-
-        // Construct the final SubjectProperty object
-        const subject: SubjectProperty = {
-            ...baseProperty, // Spread the base property data
-            grade: grade,
-            condition: condition
-        };
-
-        console.log("[getPropertyByAcct] Final subject object (separate queries):", subject);
-        return subject;
-
-    } catch (error) {
-        console.error(`Error fetching property with account ${acct}:`, error);
-        return null; 
-    }
-}
 
 // Main search function
 export async function searchProperties(
@@ -135,7 +82,7 @@ export async function searchProperties(
     }
 
     // Exclude properties with 0, empty, or NULL land/building values
-    conditions.push(isNotNull(propertyData.landVal)); 
+    conditions.push(isNotNull(propertyData.landVal));
     conditions.push(ne(propertyData.landVal, '0')); 
     conditions.push(ne(propertyData.landVal, '')); 
     conditions.push(isNotNull(propertyData.bldVal)); 
@@ -207,8 +154,8 @@ export async function fetchAndAdjustComparables(
 ): Promise<AdjustedComparable[]> {
     console.log(`[comparables/server.ts] Fetching & adjusting comparables for: ${subjectAcct}`);
     try {
-        // 1. Fetch the subject property
-        const subjectProperty = await getPropertyByAcct(subjectAcct);
+        // 1. Fetch the subject property using unified service
+        const subjectProperty = await getComparablePropertyData(subjectAcct);
         if (!subjectProperty) {
             console.error(`[comparables/server.ts] Subject property not found: ${subjectAcct}`);
             return [];

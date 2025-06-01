@@ -5,7 +5,8 @@ import {
     type GroupMembershipIds
 } from "@/lib/comparables/calculations";
 // Import the server functions
-import { fetchAndAdjustComparables, getPropertyByAcct } from "@/lib/comparables/server"; 
+import { fetchAndAdjustComparables } from "@/lib/comparables/server"; 
+import { getSubjectProperty } from "@/lib/property-analysis/services/property-service";
 // Import types directly from types.ts
 import type { PropertySearchCriteria } from "@/lib/comparables/types";
 import { ComparablesView } from "./ComparablesView"; 
@@ -22,7 +23,7 @@ export async function ComparablesDataFetcher({ searchParams }: ComparablesDataFe
 
   const subjectAcctNumber = resolvedSearchParams?.subjectAcct as string | undefined;
   // Fetch subject property separately IF needed for median calculation or other view logic
-  const subjectProperty: SubjectProperty | null = subjectAcctNumber ? await getPropertyByAcct(subjectAcctNumber) : null;
+  const subjectProperty: SubjectProperty | null = subjectAcctNumber ? await getSubjectProperty(subjectAcctNumber) : null;
   console.log("[Fetcher] Fetched Subject Property:", subjectProperty?.acct);
 
   // Determine filters (same logic as before)
