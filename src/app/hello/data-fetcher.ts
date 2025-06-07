@@ -17,7 +17,7 @@ export async function fetchHelloMessage() {
         headers['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
       }
       
-      const response = await fetch(`${baseUrl}/api/hello`, {
+      const response = await fetch(`${baseUrl}/api/v1/hello`, {
         // Important: disable caching for dynamic content
         cache: 'no-store',
         headers
@@ -53,7 +53,7 @@ export async function fetchPropertyData() {
       headers['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     }
     
-    const response = await fetch(`${baseUrl}/api/properties/sample`, {
+    const response = await fetch(`${baseUrl}/api/v1/properties/sample`, {
       // Important: disable caching for dynamic content
       cache: 'no-store',
       headers
@@ -64,7 +64,20 @@ export async function fetchPropertyData() {
     }
     
     const data = await response.json();
-    return data;
+    
+    // Transform FastAPI response format to match component expectations
+    return {
+      status: data.status,
+      total_properties: data.sample_data?.length || 0,
+      sample_properties: data.sample_data?.map((item: any) => ({
+        account: item.account,
+        address: item.address,
+        neighborhood: item.neighborhood || "N/A", // Use the neighborhood from database
+        appraised_value: item.appraised_value?.toString() || "0",
+        market_value: item.market_value?.toString() || "0"
+      })) || [],
+      message: data.message
+    };
   } catch (error) {
     console.error('Failed to fetch property data:', error);
     return {

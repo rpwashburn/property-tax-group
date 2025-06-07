@@ -5,7 +5,8 @@ Centralized configuration management using Pydantic settings with environment va
 
 import os
 from typing import List, Optional, Any, Dict
-from pydantic import BaseSettings, Field, validator, PostgresDsn
+from pydantic_settings import BaseSettings
+from pydantic import Field, validator, PostgresDsn
 from functools import lru_cache
 
 
@@ -181,15 +182,22 @@ class Settings(BaseSettings):
     
     def get_database_url(self) -> str:
         """
-        Get the database URL, either from DATABASE_URL or constructed from components.
+        Get the database URL, either from DATABASE_URL/POSTGRES_URL or constructed from components.
         """
+        # Check for DATABASE_URL first, then POSTGRES_URL (shared with NextJS)
         if self.DATABASE_URL:
             url = self.DATABASE_URL
         else:
-            url = (
-                f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-                f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-            )
+            # Check for POSTGRES_URL environment variable (shared with NextJS)
+            postgres_url = os.getenv("POSTGRES_URL")
+            if postgres_url:
+                url = postgres_url
+            else:
+                # Construct from individual components
+                url = (
+                    f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+                    f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+                )
         
         # Convert to async URL for asyncpg
         if url.startswith("postgres://"):

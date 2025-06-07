@@ -27,13 +27,21 @@ const nextConfig = {
         source: "/api/analyze/:path*", 
         destination: "/api/analyze/:path*", // Keep as Next.js route
       },
-      // Catch-all: Everything else under /api goes to FastAPI
+      // FastAPI specific routes - forward to FastAPI backend
       {
-        source: "/api/:path*",
+        source: "/api/v1/:path*",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/:path*"
+            ? "http://127.0.0.1:8000/api/v1/:path*"
             : "/api/",
+      },
+      // Health check endpoint - forward to FastAPI
+      {
+        source: "/health",
+        destination:
+          process.env.NODE_ENV === "development"
+            ? "http://127.0.0.1:8000/health"
+            : "/api/health",
       },
     ];
   },

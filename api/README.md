@@ -17,8 +17,7 @@ api/
 │   ├── api/v1/         # API routes
 │   └── utils/          # Utility functions
 ├── alembic/            # Database migrations
-├── scripts/            # Migration and utility scripts
-└── requirements.txt    # Dependencies
+└── scripts/            # Migration and utility scripts
 ```
 
 ## 📊 Canonical Schema
@@ -53,7 +52,6 @@ The canonical schema replaces the HCAD-specific tables with normalized, jurisdic
 
 1. **Install dependencies:**
    ```bash
-   cd api
    pip install -r requirements.txt
    ```
 

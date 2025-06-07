@@ -96,9 +96,9 @@ export default async function HelloPage() {
               New API Endpoints
             </h2>
             <div className="text-sm text-yellow-700 space-y-1">
-              <p>• <strong>/api/properties/sample</strong> - Get sample properties</p>
-              <p>• <strong>/api/hello</strong> - Hello World message</p>
-              <p>• <strong>/api/health</strong> - Health check endpoint</p>
+              <p>• <strong>/api/v1/properties/sample</strong> - Get sample properties</p>
+              <p>• <strong>/api/v1/hello</strong> - Hello World message</p>
+              <p>• <strong>/health</strong> - Health check endpoint</p>
               <p>• <strong>/docs</strong> - FastAPI documentation</p>
             </div>
           </div>
