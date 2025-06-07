@@ -51,6 +51,14 @@ dev-debug.log
 node_modules/
 # Environment variables
 .env
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 # Editor directories and files
 .idea
 .vscode
@@ -64,3 +72,4 @@ node_modules/
 tasks.json
 tasks/ 
 .cursor/mcp.json
+example-code/

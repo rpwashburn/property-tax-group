@@ -31,6 +31,11 @@ export default function HomePage() {
               <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
                 How It Works
               </Button>
+              <Link href="/hello">
+                <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
+                  API Demo <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
             <div className="stats-container flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
