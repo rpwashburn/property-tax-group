@@ -59,27 +59,46 @@ if IS_VERCEL and "supabase.com" in DATABASE_URL and ":5432" in DATABASE_URL:
 
 # Handle SSL parameters - convert psycopg2 sslmode to asyncpg-compatible parameters
 def fix_asyncpg_ssl_params(url: str) -> str:
-    """Convert psycopg2 sslmode parameters to asyncpg-compatible parameters"""
+    """Convert psycopg2 sslmode parameters to asyncpg-compatible parameters and remove invalid ones"""
     parsed = urlparse(url)
     query_params = parse_qs(parsed.query)
     
-    # Handle sslmode parameter conversion
-    if 'sslmode' in query_params:
-        sslmode = query_params['sslmode'][0]
-        # Remove the problematic sslmode parameter
-        del query_params['sslmode']
-        
-        # For production/Supabase connections that require SSL
-        if sslmode == 'require' and IS_VERCEL:
-            # For asyncpg, we'll handle SSL in connect_args instead
-            pass
-        elif sslmode == 'disable':
-            query_params['ssl'] = ['disable']
+    # List of known valid PostgreSQL/asyncpg parameters
+    valid_params = {
+        'ssl', 'sslcert', 'sslkey', 'sslrootcert', 'sslcrl', 'sslcompression',
+        'target_session_attrs', 'application_name', 'connect_timeout',
+        'command_timeout', 'server_settings'
+    }
+    
+    # Remove invalid/unknown parameters and handle sslmode conversion
+    cleaned_params = {}
+    ssl_required = False
+    
+    for param, values in query_params.items():
+        if param == 'sslmode':
+            # Handle sslmode parameter conversion
+            sslmode = values[0] if values else 'prefer'
+            if sslmode == 'require':
+                ssl_required = True
+            elif sslmode == 'disable':
+                cleaned_params['ssl'] = ['disable']
+        elif param in valid_params:
+            # Keep valid parameters
+            cleaned_params[param] = values
+        else:
+            # Log and remove invalid parameters
+            logger.warning(f"Removing invalid URL parameter: {param}={values}")
     
     # Rebuild the URL with cleaned parameters
-    new_query = urlencode(query_params, doseq=True)
+    new_query = urlencode(cleaned_params, doseq=True)
     new_parsed = parsed._replace(query=new_query)
-    return urlunparse(new_parsed)
+    cleaned_url = urlunparse(new_parsed)
+    
+    # Store SSL requirement for later use in connect_args
+    if ssl_required:
+        cleaned_url += "&_ssl_required=true" if new_query else "?_ssl_required=true"
+    
+    return cleaned_url
 
 DATABASE_URL = fix_asyncpg_ssl_params(DATABASE_URL)
 
@@ -110,7 +129,10 @@ if IS_VERCEL:
     engine_kwargs["poolclass"] = NullPool
     
     # For Supabase connections in production, configure SSL properly for asyncpg
-    if "supabase.com" in DATABASE_URL:
+    if "supabase.com" in DATABASE_URL or "_ssl_required=true" in DATABASE_URL:
+        # Remove our internal SSL flag from the URL before creating engine
+        DATABASE_URL = DATABASE_URL.replace("&_ssl_required=true", "").replace("?_ssl_required=true", "")
+        
         engine_kwargs["connect_args"] = {
             "server_settings": {"jit": "off"},
             "command_timeout": 60,
