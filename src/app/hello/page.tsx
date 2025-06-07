@@ -1,5 +1,41 @@
 import { fetchHelloMessage } from "./data-fetcher";
 
+async function fetchHelloMessage() {
+  try {
+    // In production, use your full domain URL
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000';
+    
+    // Headers for bypassing Vercel deployment protection
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add protection bypass header if available (for internal API calls in production)
+    if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+      headers['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+    }
+    
+    const response = await fetch(`${baseUrl}/api/hello`, {
+      // Important: disable caching for dynamic content
+      cache: 'no-store',
+      headers
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const currentTime = new Date().toISOString();
+    return `${data.message} at ${currentTime}`;
+  } catch (error) {
+    console.error('Failed to fetch hello message:', error);
+    return 'Failed to connect to backend';
+  }
+}
+
 export default async function HelloPage() {
   // Server-side data fetching
   const message = await fetchHelloMessage();
@@ -24,6 +60,7 @@ export default async function HelloPage() {
           <p>✅ Next.js frontend is running</p>
           <p>✅ FastAPI backend is connected</p>
           <p>✅ Data fetched server-side (better SEO & performance)</p>
+          <p>✅ Deployment protection bypass configured</p>
           <p>✅ Ready for Vercel deployment</p>
         </div>
 
@@ -51,6 +88,18 @@ export default async function HelloPage() {
           </div>
         </div>
 
+        <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+          <h2 className="text-lg font-semibold text-yellow-800 mb-2">
+            Security Features
+          </h2>
+          <div className="text-sm text-yellow-700 text-left space-y-1">
+            <p>• Vercel Deployment Protection enabled</p>
+            <p>• Internal API calls use protection bypass</p>
+            <p>• Server-side rendering protects API secrets</p>
+            <p>• External requests are protected by default</p>
+          </div>
+        </div>
+
         <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
           <h2 className="text-lg font-semibold text-indigo-800 mb-2">
             Deployment Instructions
@@ -58,7 +107,8 @@ export default async function HelloPage() {
           <div className="text-sm text-indigo-700 text-left">
             <p>1. Push your code to GitHub</p>
             <p>2. Connect your repo to Vercel</p>
-            <p>3. Deploy! Vercel will automatically handle both frontend and backend</p>
+            <p>3. Enable Protection Bypass for Automation in Vercel settings</p>
+            <p>4. Deploy! Vercel will automatically handle both frontend and backend</p>
           </div>
         </div>
       </div>
