@@ -7,9 +7,20 @@ export async function fetchHelloMessage() {
         ? `https://${process.env.VERCEL_URL}` 
         : 'http://localhost:3000';
       
+      // Headers for bypassing Vercel deployment protection
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add protection bypass header if available (for internal API calls in production)
+      if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+        headers['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+      }
+      
       const response = await fetch(`${baseUrl}/api/hello`, {
         // Important: disable caching for dynamic content
-        cache: 'no-store'
+        cache: 'no-store',
+        headers
       });
       
       if (!response.ok) {
