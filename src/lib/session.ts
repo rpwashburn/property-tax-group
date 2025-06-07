@@ -1,28 +1,20 @@
+import { cookies, headers } from "next/headers";
 import { auth } from "./auth";
-import { headers } from "next/headers";
-import { cookies } from "next/headers";
-import type { Session, User } from "./auth";
 
 /**
  * Get the current session from server-side context
  * Use this in API routes and server components
  */
-export async function getSession(): Promise<{ session: Session | null; user: User | null }> {
+export async function getSession() {
   try {
     const sessionData = await auth.api.getSession({
       headers: await headers(),
     });
 
-    return {
-      session: sessionData?.session || null,
-      user: sessionData?.user || null,
-    };
+    return sessionData;
   } catch (error) {
     console.error("Failed to get session:", error);
-    return {
-      session: null,
-      user: null,
-    };
+    return null;
   }
 }
 
@@ -30,33 +22,33 @@ export async function getSession(): Promise<{ session: Session | null; user: Use
  * Validate that a user is authenticated
  * Throws an error if not authenticated
  */
-export async function requireAuth(): Promise<{ session: Session; user: User }> {
-  const { session, user } = await getSession();
+export async function requireAuth() {
+  const sessionData = await getSession();
   
-  if (!session || !user) {
+  if (!sessionData?.session || !sessionData?.user) {
     throw new Error("Authentication required");
   }
   
-  return { session, user };
+  return sessionData;
 }
 
 /**
  * Check if user has a specific role
  */
-export async function requireRole(requiredRole: string): Promise<{ session: Session; user: User }> {
-  const { session, user } = await requireAuth();
+export async function requireRole(requiredRole: string) {
+  const sessionData = await requireAuth();
   
-  if (user.role !== requiredRole) {
+  if (sessionData.user.role !== requiredRole) {
     throw new Error(`Role ${requiredRole} required`);
   }
   
-  return { session, user };
+  return sessionData;
 }
 
 /**
  * Check if user is admin
  */
-export async function requireAdmin(): Promise<{ session: Session; user: User }> {
+export async function requireAdmin() {
   return requireRole("admin");
 }
 
@@ -73,8 +65,8 @@ export async function getSessionCookie(): Promise<string | undefined> {
  */
 export async function isAuthenticated(): Promise<boolean> {
   try {
-    const { session } = await getSession();
-    return !!session;
+    const sessionData = await getSession();
+    return !!sessionData?.session;
   } catch {
     return false;
   }
@@ -85,8 +77,8 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function getUserRole(): Promise<string> {
   try {
-    const { user } = await getSession();
-    return user?.role || "user";
+    const sessionData = await getSession();
+    return sessionData?.user?.role || "user";
   } catch {
     return "user";
   }
@@ -98,9 +90,9 @@ export async function getUserRole(): Promise<string> {
  */
 export async function validateSessionForAPI() {
   try {
-    const { session, user } = await getSession();
+    const sessionData = await getSession();
     
-    if (!session || !user) {
+    if (!sessionData?.session || !sessionData?.user) {
       return {
         isValid: false,
         response: Response.json(
@@ -112,8 +104,8 @@ export async function validateSessionForAPI() {
     
     return {
       isValid: true,
-      session,
-      user,
+      session: sessionData.session,
+      user: sessionData.user,
     };
   } catch (error) {
     return {
@@ -132,13 +124,11 @@ export async function validateSessionForAPI() {
 export async function validateRoleForAPI(requiredRole: string) {
   const validation = await validateSessionForAPI();
   
-  if (!validation.isValid) {
+  if (!validation.isValid || !validation.user) {
     return validation;
   }
   
-  const { user } = validation;
-  
-  if (user.role !== requiredRole) {
+  if (validation.user.role !== requiredRole) {
     return {
       isValid: false,
       response: Response.json(

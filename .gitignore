@@ -72,4 +72,5 @@ __pycache__/
 tasks.json
 tasks/ 
 .cursor/mcp.json
+# Example code (causes build conflicts)
 example-code/

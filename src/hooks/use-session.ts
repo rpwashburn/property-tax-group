@@ -3,7 +3,6 @@
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
-import type { Session, User } from "@/lib/auth-client";
 
 /**
  * Enhanced session hook with additional utilities
@@ -16,7 +15,9 @@ export function useSession() {
  * Hook to require authentication - redirects if not authenticated
  */
 export function useRequireAuth(redirectTo: string = "/login") {
-  const { isAuthenticated, isLoading } = useSession();
+  const { data, isPending } = useSession();
+  const isAuthenticated = !!data;
+  const isLoading = isPending;
   const router = useRouter();
 
   useEffect(() => {
@@ -35,7 +36,10 @@ export function useRequireRole(
   requiredRole: string,
   redirectTo: string = "/unauthorized"
 ) {
-  const { user, isLoading, isAuthenticated } = useSession();
+  const { data, isPending } = useSession();
+  const user = data?.user;
+  const isLoading = isPending;
+  const isAuthenticated = !!data;
   const router = useRouter();
 
   const hasRole = user?.role === requiredRole;
@@ -129,7 +133,9 @@ export function useAuth() {
  * Hook to check permissions
  */
 export function usePermissions() {
-  const { user, isAuthenticated } = useSession();
+  const { data } = useSession();
+  const user = data?.user;
+  const isAuthenticated = !!data;
 
   const hasRole = useCallback((role: string) => {
     return isAuthenticated && user?.role === role;
@@ -155,7 +161,9 @@ export function usePermissions() {
  * Hook for session-aware navigation
  */
 export function useSessionNavigation() {
-  const { isAuthenticated, isLoading } = useSession();
+  const { data, isPending } = useSession();
+  const isAuthenticated = !!data;
+  const isLoading = isPending;
   const router = useRouter();
 
   const navigateIfAuthenticated = useCallback((path: string) => {
