@@ -3,25 +3,18 @@ const nextConfig = {
   rewrites: async () => {
     return [
       {
-        source: "/api/v1/:path*",
+        source: "/nexus/:path*",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/api/v1/:path*"
-            : "/api/v1/:path*", // Vercel will handle this via vercel.json rewrites
+            ? "http://127.0.0.1:8000/:path*"
+            : "/api/index.py", // Vercel serverless function
       },
       {
-        source: "/docs",
+        source: "/nexus",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/docs"
-            : "/api/v1/docs",
-      },
-      {
-        source: "/openapi.json",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/openapi.json"
-            : "/api/v1/openapi.json",
+            ? "http://127.0.0.1:8000/"
+            : "/api/index.py",
       },
     ];
   },
