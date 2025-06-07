@@ -1,12 +1,12 @@
 "use client";
 
-import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import { useSession } from '@/hooks/use-session';
 import { authClient } from '@/lib/auth-client';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Header() {
   const { data: session, isPending } = useSession();
@@ -24,7 +24,7 @@ export default function Header() {
           },
         },
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to sign out");
     } finally {
       setIsSigningOut(false);

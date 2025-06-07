@@ -107,7 +107,7 @@ export async function validateSessionForAPI() {
       session: sessionData.session,
       user: sessionData.user,
     };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       response: Response.json(

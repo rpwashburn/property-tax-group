@@ -1,7 +1,7 @@
+import { accounts, sessions, users, verifications } from "@/drizzle/auth-schema";
+import { db } from "@/drizzle/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/drizzle/db";
-import { users, sessions, accounts, verifications } from "@/drizzle/auth-schema";
 
 // Mock email service for development - replace with real service in production
 async function sendEmail({ to, subject, text, html }: {
@@ -35,7 +35,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false, // Set to true in production
-    sendResetPassword: async ({ user, url, token }, request) => {
+    sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
         subject: "Reset your password - Property Tax Group",
@@ -62,7 +62,7 @@ export const auth = betterAuth({
     resetPasswordTokenExpiresIn: 3600, // 1 hour
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, request) => {
+    sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
         subject: "Verify your email - Property Tax Group",

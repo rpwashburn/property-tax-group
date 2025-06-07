@@ -72,7 +72,7 @@ export default function DashboardPage() {
     setIsChangingPassword(true);
 
     try {
-      const { data, error } = await authClient.changePassword({
+      const { error } = await authClient.changePassword({
         newPassword: newPassword,
         currentPassword: currentPassword,
         revokeOtherSessions: false, // Keep user logged in on other devices

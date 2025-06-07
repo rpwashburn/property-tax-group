@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     
     try {
-      const { data, error } = await authClient.forgetPassword({
+      const { error } = await authClient.forgetPassword({
         email: email.trim(),
         redirectTo: "/reset-password", // Where users will be redirected after clicking the email link
       });

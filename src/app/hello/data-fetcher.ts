@@ -1,5 +1,13 @@
 "use server";
 
+interface PropertyDataItem {
+  account: string;
+  address: string;
+  neighborhood: string;
+  appraised_value: number;
+  market_value: number;
+}
+
 export async function fetchHelloMessage() {
     try {
       // In production, use your full domain URL
@@ -69,7 +77,7 @@ export async function fetchPropertyData() {
     return {
       status: data.status,
       total_properties: data.sample_data?.length || 0,
-      sample_properties: data.sample_data?.map((item: any) => ({
+      sample_properties: data.sample_data?.map((item: PropertyDataItem) => ({
         account: item.account,
         address: item.address,
         neighborhood: item.neighborhood || "N/A", // Use the neighborhood from database

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -39,7 +39,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      await authClient.signUp.email({
         email,
         password,
         name,
@@ -57,9 +57,6 @@ export default function RegisterPage() {
         },
       });
 
-      if (error) {
-        toast.error(error.message || "Failed to create account");
-      }
     } catch (error) {
       toast.error("An unexpected error occurred");
     } finally {

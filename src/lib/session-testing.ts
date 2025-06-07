@@ -3,8 +3,6 @@
  * Use these functions to verify that session management is working securely
  */
 
-import { auth } from "./auth";
-
 export interface SessionTestResult {
   test: string;
   passed: boolean;
