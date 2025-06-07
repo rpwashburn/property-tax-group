@@ -7,14 +7,14 @@ const nextConfig = {
         destination:
           process.env.NODE_ENV === "development"
             ? "http://127.0.0.1:8000/:path*"
-            : "/nexus/index.py", // Vercel serverless function
+            : "/api/nexus.py", // Vercel serverless function
       },
       {
         source: "/nexus",
         destination:
           process.env.NODE_ENV === "development"
             ? "http://127.0.0.1:8000/"
-            : "/nexus/index.py",
+            : "/api/nexus.py",
       },
     ];
   },

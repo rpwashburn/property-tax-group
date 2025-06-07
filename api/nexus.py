@@ -29,7 +29,7 @@ async def root():
         "message": "Property Tax Nexus API is running successfully!",
         "service": "Property Tax Group Nexus",
         "version": "1.0.0",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(datetime.UTC).isoformat(),
         "environment": os.getenv("VERCEL_ENV", "development"),
         "endpoints": {
             "hello": "/nexus/hello",
@@ -45,7 +45,7 @@ async def hello_world():
     return {
         "message": "Hello World from Property Tax Nexus API!",
         "service": "nexus",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(datetime.UTC).isoformat(),
         "status": "healthy"
     }
 
@@ -55,7 +55,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "Property Tax Nexus API",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(datetime.UTC).isoformat(),
         "uptime": "operational",
         "version": "1.0.0"
     }
@@ -71,7 +71,7 @@ async def get_status():
             "analysis_engine": "ready",
             "reporting": "ready"
         },
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(datetime.UTC).isoformat()
     }
 
 # Error handler for 404s
@@ -81,8 +81,10 @@ async def not_found_handler(request, exc):
         status_code=404,
         content={
             "error": "Endpoint not found",
-            "message": f"The requested endpoint was not found in the Nexus API",
-            "available_endpoints": ["/", "/hello", "/health", "/status", "/docs"],
-            "timestamp": datetime.utcnow().isoformat()
+            "message": "The requested endpoint was not found in Nexus API",
+            "available_endpoints": [
+                "/", "/hello", "/health", "/status", "/docs"
+            ],
+            "timestamp": datetime.now(datetime.UTC).isoformat()
         }
     )
