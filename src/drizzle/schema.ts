@@ -12,6 +12,9 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+// Auth tables
+export { users, sessions, accounts, verifications } from './auth-schema';
+
 export const propertyData = pgTable('property_data', {
   id: uuid('id').defaultRandom().primaryKey(),
   acct: varchar('acct', { length: 13 }).notNull(),

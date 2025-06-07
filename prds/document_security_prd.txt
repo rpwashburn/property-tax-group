@@ -22,6 +22,10 @@ The application is valuable because it centralizes property information, automat
     *   **What it does:** Allows users to manage service subscriptions.
     *   **Why it's important:** Potentially gates access to premium features, detailed reports, or higher usage limits.
     *   **How it works:** Users would interact with a dedicated section to choose subscription plans, process payments (integration with a payment gateway would be needed), and manage their subscription status.
+5.  **Secure Document Management:**
+    *   **What it does:** Allows consumers to upload supporting documents (e.g., proof of property condition, repair invoices, appraisal documents) required for certain report types or appeals.
+    *   **Why it's important:** Provides necessary evidence for property tax appeals or detailed analysis, enhancing the accuracy and credibility of reports. Ensures sensitive documents are handled securely.
+    *   **How it works:** Users upload files through a secure interface during the report request process. Files are stored in a dedicated, secure cloud storage solution (e.g., AWS S3, Google Cloud Storage) with appropriate access controls and encryption. The system will store references (e.g., secure URLs or identifiers) to these documents in the database, associated with the user and the specific property/report. The Property Analysis Engine can then securely retrieve these documents when generating relevant reports.
 
 # User Experience  
 *   **User Personas:**
@@ -33,8 +37,10 @@ The application is valuable because it centralizes property information, automat
         2. User searches for their property (e.g., by address or parcel number).
         3. User selects their property from search results.
         4. User requests a specific type of report (e.g., tax appeal, market analysis).
-        5. System generates and displays the report.
-        6. User can download or review the report.
+        5. If the report type requires supporting documentation, the user is prompted to upload necessary files through a secure interface. The system provides clear guidance on acceptable file types and size limits.
+        6. System securely stores the uploaded documents and associates them with the user's request.
+        7. System generates and displays the report, incorporating information from uploaded documents where applicable.
+        8. User can download or review the report.
     *   **Administrator - Data Update:**
         1. Admin logs in.
         2. Admin navigates to the relevant data management section (e.g., "Properties," "Comparables").
@@ -55,6 +61,21 @@ The application is valuable because it centralizes property information, automat
 - Data models
 - APIs and integrations
 - Infrastructure requirements]
+
+## Secure Document Storage
+-   **Storage Solution:** Utilize a secure, private cloud storage service (e.g., AWS S3 bucket, Google Cloud Storage bucket) for storing all user-uploaded documents.
+-   **Access Control:**
+    -   Implement strict access control policies (e.g., IAM roles/permissions) to ensure that only authorized application services can write to and read from the storage.
+    -   Direct user access to the storage bucket will be prohibited.
+    -   Generate pre-signed URLs with limited-time validity for uploads and for the analysis engine to access documents, minimizing exposure.
+-   **Encryption:**
+    -   **In Transit:** All document uploads and retrievals will use HTTPS/TLS encryption.
+    -   **At Rest:** Enable server-side encryption (SSE) on the storage buckets (e.g., SSE-S3 on AWS, Google-managed encryption keys on GCS) to protect documents stored.
+-   **Database Integration:**
+    -   The application database (PostgreSQL via Drizzle ORM) will store metadata about the uploaded documents, such as file name, type, size, upload timestamp, user ID, property ID, and a secure reference/identifier to the actual file in cloud storage (not the direct URL).
+    -   Do NOT store the documents themselves in the database.
+-   **Virus Scanning:** Implement a mechanism to scan uploaded files for viruses and malware before they are processed or made accessible to the analysis engine. This could be an integrated service from the cloud provider or a third-party solution.
+-   **Deletion Policy:** Define a clear data retention and deletion policy for uploaded documents, especially for inactive accounts or after reports are finalized, to comply with privacy regulations and minimize storage costs. Users should be informed about these policies.
 
 # Development Roadmap  
 [Break down the development process into phases:
@@ -78,4 +99,4 @@ The application is valuable because it centralizes property information, automat
 [Include any additional information:
 - Research findings
 - Technical specifications]
-</PRD>
+</PRD> 

@@ -36,6 +36,13 @@
       "when": 1748145203090,
       "tag": "0004_update_extra_features_detail_column_types",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1748912768090,
+      "tag": "0005_add-auth-tables",
+      "breakpoints": true
     }
   ]
 }

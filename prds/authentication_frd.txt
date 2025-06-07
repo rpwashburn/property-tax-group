@@ -1,0 +1,192 @@
+# Feature Requirements Document: User Authentication with Better Auth & Admin Roles
+
+## 1. Feature Overview
+   - **1.1. Problem Statement:** The application currently lacks user authentication, preventing personalized experiences, secure data access, and distinct functionalities for different user types (consumers vs. administrators). This is a prerequisite for features like secure document upload and administrative data management.
+   - **1.2. Proposed Solution:** Implement a robust user authentication system using the "Better Auth" library for Next.js. This will include user registration, login (email/password), session management, and a mechanism to assign and check for administrator roles to control access to specific application sections.
+   - **1.3. Goals & Success Metrics:**
+       - **Goal:** Securely authenticate and manage user sessions.
+       - **Goal:** Provide a clear and intuitive login and registration experience for all users.
+       - **Goal:** Enable distinct access controls for administrative sections of the application.
+       - **Success Metric:** Users can successfully register, log in, and log out.
+       - **Success Metric:** Admin users can access designated admin sections, while non-admin users cannot.
+       - **Success Metric:** Session management is secure and reliable (e.g., sessions expire appropriately, logout is effective).
+       - **Success Metric:** Low error rate during login/registration.
+
+## 2. User Stories
+   - As a new Consumer, I want to register for an account using my email and a password so that I can access application features.
+   - As a returning Consumer, I want to log in with my email and password so that I can access my account and saved information.
+   - As an authenticated User, I want to log out of the application so that my session is terminated securely.
+   - As a System Administrator, I want to be designated as an "admin" user so that I can access the administrative data management sections.
+   - As an authenticated Admin User, I want to access the admin dashboard/sections, while regular users are denied access.
+   - As a User, I want to have a way to reset my password if I forget it (Note: Password reset is a common related feature, consider for MVP or fast follow-up).
+
+## 3. Scope
+   - **3.1. In Scope (MVP):**
+       - User registration with email and password using Better Auth.
+       - User login with email and password using Better Auth.
+       - Secure session management (handled automatically by Better Auth with HttpOnly, SameSite, Secure cookies).
+       - Logout functionality.
+       - A dedicated login page/screen.
+       - A simple registration page/screen or integrated into the login screen.
+       - A data field/attribute in the user model (e.g., `isAdmin: boolean` or a `role: string` field) to designate administrators.
+       - Mechanism to set a user as an administrator (e.g., initially manual database update, or a simple seed script).
+       - Middleware or server-side checks to protect admin routes/sections based on the admin role.
+       - Basic UI for login and registration forms.
+       - Database schema generation and migration using Better Auth CLI.
+   - **3.2. Out of Scope (for initial release):**
+       - Social logins (OAuth providers like Google, GitHub etc.).
+       - Two-Factor Authentication (2FA).
+       - Password reset functionality (though highly recommended as a fast follow-up).
+       - Email verification for new registrations.
+       - "Remember me" functionality beyond standard session cookies.
+       - Advanced user profile management screens (e.g., change password, update email from UI).
+       - Automated admin role assignment through a UI.
+       - Complex role-based access control (RBAC) beyond a simple admin/non-admin distinction.
+
+## 4. Detailed Requirements
+   - **4.1. Functional Requirements:** 
+       - **Registration:**
+           - Users must provide a unique email address.
+           - Users must provide a password meeting minimum complexity requirements (configurable via Better Auth, defaults to 8 characters minimum).
+           - Upon successful registration, a user account is created, and the user is typically logged in.
+       - **Login:**
+           - Users must provide their registered email and correct password.
+           - Upon successful login, a session is established via Better Auth.
+           - Failed login attempts (wrong email/password) must display a generic error message (to avoid revealing whether an email exists).
+       - **Session Management:**
+           - Better Auth automatically handles secure session management with JWT tokens stored in secure, HttpOnly cookies.
+           - Sessions include proper security headers (HttpOnly, SameSite, Secure in production).
+           - Configurable session expiration (Better Auth default behavior).
+       - **Logout:**
+           - Terminates the current user session and clears authentication cookies.
+           - Redirects the user to a public page (e.g., login screen or homepage).
+       - **Admin Access:**
+           - Users designated as admins (e.g., `isAdmin === true` or `role === 'admin'`) can access routes prefixed with `/admin`.
+           - Non-admin users attempting to access `/admin` routes are redirected or shown an unauthorized error.
+   - **4.2. Non-Functional Requirements:**
+       - **Security:** 
+           - Passwords must be securely hashed and salted before storage (handled automatically by Better Auth).
+           - Session cookies must be secure (HttpOnly, SameSite, Secure in production) - handled by Better Auth.
+           - Protect against common web vulnerabilities (CSRF, XSS - Better Auth provides protection, supplement with Next.js best practices).
+           - Use AUTH_SECRET environment variable for JWT signing.
+       - **Performance:** 
+           - Login and registration process should be quick (e.g., < 2 seconds).
+           - Database queries optimized via Drizzle ORM.
+       - **Usability:** 
+           - Login and registration forms should be clear, simple, and provide appropriate feedback for errors or success.
+   - **4.3. UI/UX Considerations:**
+       - A clean, user-friendly login page (`/login`) with fields for email and password, and a submit button. Link to registration if separate.
+       - A registration page (`/register`) or section with fields for email, password, and password confirmation. Link to login.
+       - Clear error messages for invalid input or failed authentication attempts.
+       - After login, users should be redirected to their intended page or a default dashboard page.
+       - Admin sections should have a distinct layout or clear indication they are admin-only areas (if accessed).
+
+## 5. Technical Considerations
+   - **5.1. Key System Components Involved:** 
+       - Next.js Framework (App Router).
+       - Better Auth library (`better-auth` package).
+       - Drizzle ORM for database operations.
+       - PostgreSQL database for storing user accounts, sessions, and authentication data.
+       - Frontend components for login/registration forms.
+       - Next.js Middleware for route protection.
+       - Better Auth CLI for schema generation and migration.
+   - **5.2. Data Model Changes:** 
+       - Better Auth requires core tables (auto-generated via CLI):
+         - `user` table: Core user information
+         - `session` table: Session management
+         - `account` table: Authentication providers and credentials
+         - `verification` table: Email verification tokens (if enabled later)
+       - Custom field addition to user table for admin designation:
+         ```sql
+         -- Option 1: Boolean flag approach
+         ALTER TABLE user ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+         
+         -- Option 2: Role-based approach (more flexible)
+         ALTER TABLE user ADD COLUMN role VARCHAR(50) DEFAULT 'consumer';
+         ```
+       - Better Auth Core Schema (managed automatically):
+         ```sql
+         -- user table (Better Auth core + custom field)
+         CREATE TABLE user (
+           id TEXT PRIMARY KEY,
+           name TEXT,
+           email TEXT NOT NULL,
+           email_verified BOOLEAN NOT NULL,
+           image TEXT,
+           created_at TIMESTAMP NOT NULL,
+           updated_at TIMESTAMP NOT NULL,
+           is_admin BOOLEAN DEFAULT FALSE -- Custom field
+         );
+         
+         -- session table (Better Auth managed)
+         CREATE TABLE session (
+           id TEXT PRIMARY KEY,
+           expires_at TIMESTAMP NOT NULL,
+           token TEXT NOT NULL UNIQUE,
+           created_at TIMESTAMP NOT NULL,
+           updated_at TIMESTAMP NOT NULL,
+           ip_address TEXT,
+           user_agent TEXT,
+           user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE
+         );
+         
+         -- account table (Better Auth managed)
+         CREATE TABLE account (
+           id TEXT PRIMARY KEY,
+           account_id TEXT NOT NULL,
+           provider_id TEXT NOT NULL,
+           user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+           access_token TEXT,
+           refresh_token TEXT,
+           id_token TEXT,
+           access_token_expires_at TIMESTAMP,
+           refresh_token_expires_at TIMESTAMP,
+           scope TEXT,
+           password TEXT,
+           created_at TIMESTAMP NOT NULL,
+           updated_at TIMESTAMP NOT NULL
+         );
+         ```
+   - **5.3. API Design:** 
+       - Better Auth provides built-in API routes at `/api/auth/[...all]/route.ts` for:
+         - Registration: `POST /api/auth/sign-up/email`
+         - Login: `POST /api/auth/sign-in/email`
+         - Logout: `POST /api/auth/sign-out`
+         - Session management: `GET /api/auth/session`
+       - No custom API endpoints required for basic authentication functionality.
+       - Custom endpoints may be needed for admin-specific operations.
+   - **5.4. Configuration Files Required:**
+       - `lib/auth.ts`: Better Auth configuration file
+       - `app/api/auth/[...all]/route.ts`: API route handler
+       - `middleware.ts`: Route protection middleware
+       - `.env`: Environment variables (AUTH_SECRET, DATABASE_URL)
+       - `drizzle.config.ts`: Database configuration (existing)
+   - **5.5. Potential Technical Challenges/Risks:** 
+       - Correctly configuring Better Auth with Drizzle ORM and existing PostgreSQL database.
+       - Ensuring the existing Drizzle schema is compatible with Better Auth requirements.
+       - Implementing admin role check robustly in middleware and server-side logic.
+       - Initial setup of admin users (manual DB update or seed script needed).
+       - Managing schema migrations when adding Better Auth tables to existing database.
+
+## 6. Open Questions & Future Considerations
+   - How will the first admin user(s) be created/designated? (Manual DB edit, seed script, or Better Auth admin plugin?)
+   - Should we use Better Auth's built-in admin plugin for more sophisticated role management?
+   - What are the specific password complexity rules to enforce beyond Better Auth defaults?
+   - Should we implement database sessions instead of JWT sessions for better control?
+   - Detailed UI/UX for error handling on forms (inline validation vs. summary errors).
+   - Plan for implementing password reset functionality (critical for user experience).
+   - Plan for email verification in production environment.
+   - Consider adding social logins in a future iteration for improved user convenience.
+   - Integration with existing Drizzle schema and potential migration strategy.
+
+## 7. Implementation Steps
+   1. **Install Better Auth**: `npm install better-auth`
+   2. **Configure Better Auth**: Create `lib/auth.ts` with Drizzle adapter
+   3. **Generate Schema**: Run `npx @better-auth/cli@latest generate` 
+   4. **Database Migration**: Apply Better Auth tables to existing database
+   5. **Add Custom Admin Field**: Migrate admin designation field to user table
+   6. **Create API Routes**: Set up `/api/auth/[...all]/route.ts`
+   7. **Implement Middleware**: Create route protection for admin sections
+   8. **Build UI Components**: Login and registration forms
+   9. **Testing**: Verify authentication flow and admin access control
+   10. **Seed Admin User**: Create initial admin user for testing 

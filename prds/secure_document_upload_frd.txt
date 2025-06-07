@@ -1,0 +1,89 @@
+# Feature Requirements Document: Secure Document Management
+
+## 1. Feature Overview
+   - **1.1. Problem Statement:** Property owners need to submit supporting documents (e.g., repair invoices, appraisals, photos of property condition) to substantiate their property tax reports or appeals. Currently, there is no mechanism within the application to securely upload and manage these documents.
+   - **1.2. Proposed Solution:** Implement a feature that allows consumers to securely upload documents during the report generation flow. These documents will be stored securely and made available to the property analysis engine when generating relevant reports.
+   - **1.3. Goals & Success Metrics:**
+       - **Goal:** Enable users to easily and securely submit necessary documentation for their property tax assessments.
+       - **Goal:** Ensure all uploaded documents are stored with high security and integrity.
+       - **Success Metric:** High adoption rate of the document upload feature for relevant report types.
+       - **Success Metric:** Zero security incidents related to uploaded documents.
+       - **Success Metric:** User satisfaction with the ease of use and perceived security of the upload process.
+
+## 2. User Stories
+   - As a Property Owner, I want to upload PDF, JPG, or PNG files as supporting evidence for my tax appeal so that my appeal is more comprehensive and likely to succeed.
+   - As a Property Owner, I want to be assured that my uploaded documents are stored securely and only used for the purpose of my report generation.
+   - As a Property Owner, I want clear instructions on what types of documents are needed and the allowed file formats/sizes.
+   - As a System, I want to scan uploaded files for malware to protect the integrity of the system and other users.
+   - As a System, I want to store document metadata (filename, type, uploader, timestamp, associated property/report) separately from the file itself for efficient querying and management.
+
+## 3. Scope
+   - **3.1. In Scope (MVP):
+**       - Secure file upload interface integrated into the consumer report generation flow.
+       - Support for PDF, JPG, PNG file types.
+       - File size limit (e.g., 10MB per file).
+       - Secure storage of uploaded files in a private cloud storage bucket (e.g., AWS S3).
+       - Encryption of files at rest and in transit.
+       - Storing metadata about uploaded files in the application database.
+       - Basic virus scanning for uploaded files.
+       - Mechanism for the Property Analysis Engine to securely access relevant documents.
+       - Clear user guidance on the upload process, accepted formats, and size limits.
+   - **3.2. Out of Scope (for initial release):
+**       - Advanced document management features for users (e.g., deleting/replacing uploaded files after initial submission within the same report request, document versioning).
+       - Administrator interface for managing uploaded documents (beyond what's necessary for system maintenance/troubleshooting).
+       - Optical Character Recognition (OCR) or content analysis of uploaded documents.
+       - Direct sharing of uploaded documents between users.
+       - Complex document retention policies beyond a basic system-wide setting.
+
+## 4. Detailed Requirements
+   - **4.1. Functional Requirements:** 
+       - Users must be authenticated to upload documents.
+       - The system shall allow uploads of files with extensions .pdf, .jpg, .jpeg, .png.
+       - The system shall enforce a maximum file size of 10MB per file.
+       - The system shall allow a user to upload multiple files for a single report request (e.g., up to 5 documents).
+       - Uploaded files shall be associated with the specific user and property/report request.
+       - The system shall provide feedback to the user on the status of their uploads (e.g., progress, success, failure).
+       - Failed uploads due to format, size, or other errors must provide clear error messages.
+   - **4.2. Non-Functional Requirements:**
+       - **Security:** 
+           - All file transfers must use HTTPS/TLS.
+           - Files at rest must be encrypted using server-side encryption (e.g., SSE-S3 or equivalent).
+           - Access to the raw files in cloud storage must be strictly limited to authorized application services/roles.
+           - Pre-signed URLs for uploads and downloads should be used and have short expiry times.
+           - Uploaded files must be scanned for viruses/malware.
+       - **Performance:** 
+           - Uploads of files up to the size limit should complete within a reasonable timeframe (e.g., < 30 seconds on a typical broadband connection).
+           - The document upload process should not significantly degrade the performance of other application services.
+       - **Usability:** 
+           - The upload interface should be intuitive and clearly indicate where to drag/drop or select files.
+           - Users should receive clear instructions and feedback throughout the upload process.
+   - **4.3. UI/UX Considerations:**
+       - An upload component (e.g., a dropzone or file input button) will be presented at the relevant step in the consumer report generation flow.
+       - Display of file name, size, and upload progress for each file.
+       - Clear visual indicators for successful uploads or errors.
+       - Option to remove a file before finalizing the upload step (if multiple files are being staged).
+
+## 5. Technical Considerations
+   - **5.1. Key System Components Involved:** 
+       - Frontend: Consumer report generation UI (Next.js/React components).
+       - Backend: API endpoint(s) for handling file uploads, metadata storage, and generating pre-signed URLs. Property Analysis Engine (`src/lib/property-analysis/services`).
+       - Database: PostgreSQL (via Drizzle ORM) for storing document metadata.
+       - Cloud Storage: AWS S3 or Google Cloud Storage.
+   - **5.2. Data Model Changes (if any):** 
+       - New table, e.g., `property_documents`, with columns for: `id`, `user_id`, `property_id` (or `report_request_id`), `file_name`, `file_type`, `file_size`, `storage_path` (secure reference/key in cloud storage), `upload_timestamp`, `status` (e.g., pending_scan, clean, infected).
+   - **5.3. API Design (if applicable):** 
+       - Endpoint to request pre-signed URL for upload: `POST /api/documents/upload-url` (request: { file_name, file_type }, response: { upload_url, file_key }).
+       - Endpoint/mechanism to notify backend of successful upload and trigger metadata update/virus scan: Could be an S3 event trigger to a Lambda function or a callback.
+       - Internal API for Property Analysis Engine to get secure access URLs for documents associated with a report.
+   - **5.4. Potential Technical Challenges/Risks:** 
+       - Ensuring robust security for the entire lifecycle of the document.
+       - Integrating virus scanning effectively without significantly delaying the upload process.
+       - Handling upload errors and retries gracefully.
+       - Managing cloud storage costs and lifecycle policies.
+
+## 6. Open Questions & Future Considerations
+   - What is the exact user flow if a virus is detected? (Notify user? Quarantine file?)
+   - What are the specific data retention requirements for these documents?
+   - Should there be a limit on the total number of documents or total storage per user?
+   - Future: Allow users to view/manage their previously uploaded documents.
+   - Future: Integrate document previews within the application. 
