@@ -1,114 +1,329 @@
-# FastAPI Backend
+# FastAPI Canonical Property Assessment Schema
 
-This is the FastAPI backend for the Property Tax Group application, being migrated from Next.js API routes.
+This FastAPI application implements the canonical property assessment schema as specified in the PRD. It provides a production-ready API for multi-jurisdiction property data with normalized tables and proper data relationships.
 
-## Setup
+## 🏗️ Architecture Overview
 
-### 1. Install Python Dependencies
+The application follows a modern, production-ready architecture:
+
+```
+api/
+├── app/
+│   ├── core/           # Configuration and logging
+│   ├── database/       # Database connection and migration
+│   ├── models/         # SQLAlchemy models (canonical schema)
+│   ├── schemas/        # Pydantic schemas for API
+│   ├── services/       # Business logic services
+│   ├── api/v1/         # API routes
+│   └── utils/          # Utility functions
+├── alembic/            # Database migrations
+├── scripts/            # Migration and utility scripts
+└── requirements.txt    # Dependencies
+```
+
+## 📊 Canonical Schema
+
+The canonical schema replaces the HCAD-specific tables with normalized, jurisdiction-aware tables:
+
+### Core Tables
+
+- **`jurisdictions`** - Multi-jurisdiction support (Harris County, Travis County, etc.)
+- **`addresses`** - Normalized address storage with parsed components
+- **`properties`** - Core property table with jurisdiction + account number uniqueness
+- **`valuations`** - Time-series property values (annual tax year data)
+- **`structures`** - Individual buildings on properties
+- **`code_maps`** - Translation between jurisdiction codes and canonical codes
+
+### Detail Tables
+
+- **`structure_elements`** - Building components (walls, roof, etc.) 
+- **`extra_features`** - Property amenities (pools, garages, etc.)
+- **`fixtures`** - Built-in features (cabinets, flooring, etc.)
+- **`element_types`**, **`feature_types`**, **`fixture_types`** - Lookup tables
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.9+
+- PostgreSQL 13+
+- Existing HCAD data in NextJS schema tables
+
+### Installation
+
+1. **Install dependencies:**
+   ```bash
+   cd api
+   pip install -r requirements.txt
+   ```
+
+2. **Configure environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+3. **Set up database connection:**
+   ```bash
+   export DATABASE_URL="postgresql+asyncpg://user:password@localhost/dbname"
+   ```
+
+### Database Migration
+
+#### Step 1: Create Canonical Schema
+
+Generate and run the initial migration to create the canonical tables:
 
 ```bash
-pip install -r requirements.txt
+cd api
+python scripts/create_migration.py
 ```
 
-### 2. Set Environment Variables
+This script will:
+- Generate Alembic migration files for the canonical schema
+- Test database connectivity
+- Optionally run the migration to create tables
 
-Create a `.env` file in the project root with:
+#### Step 2: Migrate Legacy Data
 
-```env
-POSTGRES_URL=your_postgresql_connection_string_here
-```
-
-#### Local Development
-For local development with Docker:
-```
-POSTGRES_URL=postgres://propertytaxgroup:localpass@localhost:54320/verceldb
-```
-
-#### Production (Vercel + Supabase)
-For production deployment on Vercel with Supabase, use the **pooler connection** (port 6543):
-```
-POSTGRES_URL=postgres://[db-user].[project-ref]:[db-password]@aws-0-[aws-region].pooler.supabase.com:6543/postgres
-```
-
-**Important**: For Vercel/serverless deployments, always use the pooler connection (port 6543) instead of the direct connection (port 5432). The application will automatically:
-- Detect the Vercel environment
-- Use NullPool for connection pooling (recommended for serverless)
-- Switch to pooler mode if a direct connection is detected
-- Convert `sslmode=require` parameters to asyncpg-compatible SSL settings
-
-**SSL Parameter Handling**: If your Supabase connection string includes `?sslmode=require`, the application will automatically convert this to asyncpg-compatible SSL parameters to avoid connection errors.
-
-### 3. Test Database Connection
-
-Run the test script to verify your database connection:
+After creating the canonical tables, migrate your existing HCAD data:
 
 ```bash
-python api/test_db_connection.py
+python -m app.database.migration
 ```
 
-### 4. Run the FastAPI Server
+This will:
+- Create HCAD jurisdiction record
+- Generate lookup tables from existing data
+- Migrate properties, valuations, structures, and related data
+- Maintain referential integrity throughout the process
 
-For development:
+## 📈 Migration Process Details
+
+### Data Flow
+
+```
+Legacy HCAD Tables          →    Canonical Tables
+─────────────────────────────     ─────────────────
+property_data               →    properties + valuations + addresses
+structural_elements         →    structures + structure_elements + element_types  
+extra_features_detail       →    extra_features + feature_types
+fixtures                    →    fixtures + fixture_types
+neighborhood_codes          →    code_maps
+```
+
+### Key Transformations
+
+1. **Jurisdiction Awareness**: All properties linked to jurisdiction (HCAD initially)
+2. **Address Normalization**: Street addresses parsed into components
+3. **Time Series Values**: Single property record → annual valuation records
+4. **Code Translation**: HCAD-specific codes mapped to canonical codes
+5. **Referential Integrity**: Proper foreign key relationships established
+
+### Migration Features
+
+- **Batch Processing**: Handles large datasets (millions of records)
+- **Error Handling**: Continues on individual record failures
+- **Progress Tracking**: Detailed logging and progress reports
+- **Data Validation**: Type conversion and format checking
+- **Rollback Support**: Database transactions for consistency
+
+## 🔧 Configuration
+
+### Environment Variables
+
 ```bash
-uvicorn api.index:app --reload --port 8000
+# Database
+DATABASE_URL=postgresql+asyncpg://user:password@localhost/dbname
+DATABASE_POOL_SIZE=20
+DATABASE_MAX_OVERFLOW=30
+
+# Application
+APP_NAME="Property Assessment API"
+VERSION="1.0.0"
+DEBUG=false
+LOG_LEVEL=INFO
+
+# Security (for production)
+SECRET_KEY=your-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-## API Endpoints
+### Database Configuration
 
-- `GET /` - Root endpoint
-- `GET /api/hello` - Hello World endpoint
-- `GET /api/health` - Health check endpoint
-- `GET /api/properties/sample` - Get sample properties from database
-- `GET /api/test-routing` - Test endpoint to verify routing configuration
-- `GET /docs` - Interactive API documentation
-- `GET /openapi.json` - OpenAPI schema
+The application uses async PostgreSQL with connection pooling:
 
-## Database Models
+```python
+# Automatic configuration from environment
+settings = Settings()  # Loads from .env
+db_manager = DatabaseManager()  # Production-ready connection management
+```
 
-The API uses SQLAlchemy with async support for database operations. Currently implemented models:
+## 🌐 API Endpoints
 
-- `PropertyData` - Main property information table
+### Property Endpoints
 
-## Architecture
+```
+GET    /api/v1/properties/              # List properties with pagination
+GET    /api/v1/properties/{id}          # Get property details
+GET    /api/v1/properties/search        # Search properties
+POST   /api/v1/properties/              # Create property
+PUT    /api/v1/properties/{id}          # Update property
+DELETE /api/v1/properties/{id}          # Delete property
+```
 
-- **FastAPI** - Modern Python web framework
-- **SQLAlchemy** - Async ORM for database operations
-- **PostgreSQL** - Database (via asyncpg driver)
-- **Dependency Injection** - Database sessions are injected into endpoints
-- **Connection Pooling**:
-  - Local development: Standard connection pooling
-  - Production (Vercel): NullPool for serverless compatibility
-- **SSL Handling**: Automatic conversion of psycopg2 SSL parameters to asyncpg format
+### Valuation Endpoints
 
-## Routing Configuration
+```
+GET    /api/v1/properties/{id}/valuations/     # Property valuations by year
+GET    /api/v1/valuations/{id}                 # Specific valuation details
+POST   /api/v1/valuations/                     # Create valuation
+PUT    /api/v1/valuations/{id}                 # Update valuation
+```
 
-The Next.js application is configured to route API requests as follows:
-- `/api/auth/*` - Handled by Next.js
-- `/api/analyze/*` - Handled by Next.js  
-- `/api/*` (everything else) - Routed to FastAPI
+### Analytics Endpoints
 
-This allows gradual migration from Next.js API routes to FastAPI.
+```
+GET    /api/v1/analytics/market-trends         # Market value trends
+GET    /api/v1/analytics/jurisdiction-stats    # Cross-jurisdiction comparisons
+GET    /api/v1/analytics/property-history      # Property value history
+```
 
-## Troubleshooting
+## 🔍 Querying Across Jurisdictions
 
-### SSL Connection Issues
-If you encounter `sslmode` errors in production:
-1. Ensure you're using the Supabase pooler connection (port 6543)
-2. The application automatically handles SSL parameter conversion
-3. Check that your connection string doesn't have conflicting SSL parameters
+The canonical schema enables consistent queries across all jurisdictions:
 
-### Connection Pool Issues
-For serverless deployments (Vercel):
-- Always use NullPool (automatically configured)
-- Use transaction mode pooler connections
-- Monitor connection usage in Supabase dashboard
+```sql
+-- Compare land vs improvement ratios across Texas counties
+SELECT 
+    j.county_name,
+    AVG(v.improvement_value / NULLIF(v.market_value, 0)) as avg_improvement_ratio
+FROM valuations v
+JOIN properties p ON v.property_id = p.id  
+JOIN jurisdictions j ON p.jurisdiction_id = j.id
+WHERE j.state = 'TX' AND v.tax_year = 2024
+GROUP BY j.county_name;
+```
 
-## Next Steps
+```sql
+-- Find properties with pools across all jurisdictions
+SELECT 
+    p.account_number,
+    j.short_name as jurisdiction,
+    ft.description as feature_type
+FROM properties p
+JOIN jurisdictions j ON p.jurisdiction_id = j.id
+JOIN extra_features ef ON ef.property_id = p.id
+JOIN feature_types ft ON ef.feature_type_id = ft.id
+WHERE ft.category = 'Pool';
+```
 
-1. Migrate authentication endpoints from Next.js
-2. Move property analysis logic to FastAPI
-3. Convert admin endpoints to FastAPI routes
-4. Add comprehensive error handling
-5. Implement request validation with Pydantic models
-6. Add API versioning
-7. Set up proper logging and monitoring 
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+pytest tests/
+```
+
+Test specific components:
+
+```bash
+pytest tests/test_models.py          # Model tests
+pytest tests/test_migration.py       # Migration tests  
+pytest tests/test_api.py             # API endpoint tests
+```
+
+## 📊 Performance Considerations
+
+### Database Indexes
+
+The schema includes optimized indexes for common query patterns:
+
+- **Property lookups**: `(jurisdiction_id, account_number)`
+- **Valuation queries**: `(property_id, tax_year)`
+- **Address searches**: `(city, state)`, `(street_number, street_name)`
+- **Code translations**: `(jurisdiction_id, code_type, source_code)`
+
+### Migration Performance
+
+- **Batch processing**: 1,000 records per batch (configurable)
+- **Connection pooling**: Reuses database connections
+- **Minimal logging**: Reduces I/O during migration
+- **Parallel processing**: Multiple workers for large datasets
+
+## 🔐 Security
+
+### Production Security Features
+
+- **HTTPS enforcement**: TrustedHostMiddleware configured
+- **CORS protection**: Configurable allowed origins
+- **Rate limiting**: Request throttling middleware
+- **Input validation**: Pydantic schema validation
+- **SQL injection protection**: SQLAlchemy parameterized queries
+
+### Database Security
+
+- **Connection encryption**: SSL/TLS for database connections
+- **Role-based access**: Database user permissions
+- **Audit logging**: Change tracking and monitoring
+
+## 🚀 Deployment
+
+### Production Deployment
+
+1. **Build the container:**
+   ```bash
+   docker build -t property-assessment-api .
+   ```
+
+2. **Run with environment variables:**
+   ```bash
+   docker run -d \
+     -e DATABASE_URL="postgresql+asyncpg://user:pass@host/db" \
+     -e LOG_LEVEL="INFO" \
+     -p 8000:8000 \
+     property-assessment-api
+   ```
+
+### Health Monitoring
+
+The application includes comprehensive health checks:
+
+```
+GET /health       # Basic health check
+GET /health/db    # Database connectivity check
+GET /metrics      # Prometheus metrics
+```
+
+## 📋 Migration Checklist
+
+Before running the migration:
+
+- [ ] Database backup created
+- [ ] Environment variables configured
+- [ ] Test database connection successful
+- [ ] Sufficient disk space available
+- [ ] Migration script tested on subset of data
+
+After migration:
+
+- [ ] Verify record counts match expectations
+- [ ] Test sample queries across jurisdictions
+- [ ] Validate foreign key relationships
+- [ ] Check data type conversions
+- [ ] Run application test suite
+
+## 🤝 Contributing
+
+1. Follow the existing code style (Black formatting)
+2. Add tests for new functionality
+3. Update documentation for API changes
+4. Verify migration compatibility
+
+## 📚 Additional Resources
+
+- [Canonical Schema PRD](../prds/canonical_property_assessment_schema_prd.txt)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [SQLAlchemy Async Documentation](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)
+- [Alembic Migration Guide](https://alembic.sqlalchemy.org/en/latest/tutorial.html) 

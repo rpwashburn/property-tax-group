@@ -1,7 +1,56 @@
 {
   "functions": {
     "api/**": {
-      "excludeFiles": "{.next,.git,node_modules}/**"
+      "excludeFiles": [
+        "**/.git/**",
+        "**/.next/**",
+        "**/node_modules/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**",
+        "**/.coverage",
+        "**/coverage.xml",
+        "**/htmlcov/**",
+        "**/.mypy_cache/**",
+        "**/.venv/**",
+        "**/venv/**",
+        "**/.env.local",
+        "**/.env.development",
+        "**/.env.test",
+        "**/alembic/**",
+        "**/scripts/**",
+        "**/README.md",
+        "**/docs/**",
+        "**/*.log",
+        "**/*.tmp",
+        "**/*.pyc",
+        "**/*.pyo",
+        "**/*.pyd",
+        "**/.Python",
+        "**/pip-log.txt",
+        "**/pip-delete-this-directory.txt",
+        "**/.tox",
+        "**/.coverage",
+        "**/.coverage.*",
+        "**/coverage.xml",
+        "**/*.cover",
+        "**/*.py,cover",
+        "**/.hypothesis/",
+        "**/.pytest_cache/",
+        "**/.DS_Store",
+        "**/Thumbs.db",
+        "**/test_*.py",
+        "**/*_test.py",
+        "**/tests/**",
+        "**/migrations/**",
+        "**/alembic.ini",
+        "**/Dockerfile*",
+        "**/docker-compose*",
+        "**/pyproject.toml",
+        "**/*.md",
+        "**/*.txt",
+        "**/.gitignore",
+        "**/.gitattributes"
+      ]
     }
   }
 }
