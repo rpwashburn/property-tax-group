@@ -1,8 +1,7 @@
 {
   "functions": {
-    "api/nexus.py": {
-      "memory": 1024,
-      "maxDuration": 30
+    "api/**": {
+      "excludeFiles": "{.next,.git,node_modules}/**"
     }
   }
-} 
+}

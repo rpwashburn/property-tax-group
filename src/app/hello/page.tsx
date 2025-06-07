@@ -5,7 +5,7 @@ async function fetchHelloMessage() {
       ? `https://${process.env.VERCEL_URL}` 
       : 'http://localhost:3000';
     
-    const response = await fetch(`${baseUrl}/nexus/hello`, {
+    const response = await fetch(`${baseUrl}/api/hello`, {
       // Important: disable caching for dynamic content
       cache: 'no-store'
     });
@@ -64,9 +64,21 @@ export default async function HelloPage() {
 
         <div className="mt-6 p-4 bg-green-50 rounded-lg">
           <h2 className="text-lg font-semibold text-green-800 mb-2">
+            API Endpoints Available
+          </h2>
+          <div className="text-sm text-green-700 text-left space-y-1">
+            <p>• <strong>/api/hello</strong> - Hello World message</p>
+            <p>• <strong>/api/health</strong> - Health check endpoint</p>
+            <p>• <strong>/docs</strong> - FastAPI documentation</p>
+            <p>• <strong>/openapi.json</strong> - OpenAPI schema</p>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
+          <h2 className="text-lg font-semibold text-indigo-800 mb-2">
             Deployment Instructions
           </h2>
-          <div className="text-sm text-green-700 text-left">
+          <div className="text-sm text-indigo-700 text-left">
             <p>1. Push your code to GitHub</p>
             <p>2. Connect your repo to Vercel</p>
             <p>3. Deploy! Vercel will automatically handle both frontend and backend</p>

@@ -2,19 +2,35 @@
 const nextConfig = {
   rewrites: async () => {
     return [
+      // Specific FastAPI endpoints
       {
-        source: "/nexus/:path*",
+        source: "/api/hello",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/:path*"
-            : "/api/nexus.py?path=:path*", // Send path as query parameter
+            ? "http://127.0.0.1:8000/api/hello"
+            : "/api/",
       },
       {
-        source: "/nexus",
+        source: "/api/health",
         destination:
           process.env.NODE_ENV === "development"
-            ? "http://127.0.0.1:8000/"
-            : "/api/nexus.py",
+            ? "http://127.0.0.1:8000/api/health"
+            : "/api/",
+      },
+      // FastAPI docs
+      {
+        source: "/docs",
+        destination:
+          process.env.NODE_ENV === "development"
+            ? "http://127.0.0.1:8000/docs"
+            : "/api/docs",
+      },
+      {
+        source: "/openapi.json",
+        destination:
+          process.env.NODE_ENV === "development"
+            ? "http://127.0.0.1:8000/openapi.json"
+            : "/api/openapi.json",
       },
     ];
   },
