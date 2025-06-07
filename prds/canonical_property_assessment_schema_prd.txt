@@ -1,0 +1,95 @@
+# Feature Requirements Document: Canonical Property-Assessment Schema (Multi-Jurisdiction)
+
+## 1. Feature Overview
+### 1.1. Problem Statement
+Our current Postgres tables (`property_data`, `structural_elements`, `fixtures`, `extra_features_detail`, etc.) mirror the Harris County Appraisal District (HCAD) export format.  As soon as we ingest data from another county or state we face:
+- Column name clashes and missing dimensions.
+- Duplicate `acct` values (because account numbers only guarantee uniqueness inside each jurisdiction).
+- No explicit time-series handling for yearly values.
+- Analytics code that hard-codes HCAD-specific codes (e.g., `econ_bld_class`).
+
+### 1.2. Proposed Solution
+Introduce a **canonical, normalized schema** that is jurisdiction-aware and year-aware. All loaders will translate raw assessor feeds into this schema so that queries, APIs and analytics remain identical regardless of the source county.
+
+### 1.3. Goals & Success Metrics
+- Ingest at least **2 additional counties** without schema changes.
+- Run existing valuation/appeal analytics across all counties with **≤ 5 query changes**.
+- Loader throughput stays **≥ 5 k rows/sec** on a 4-core laptop.
+- No duplicate `(jurisdiction_id, account_number)` pairs (**0 data-quality violations**).
+
+## 2. User Stories
+1. **As a data engineer** I can point a new county's raw dump to a loader script and it lands in the canonical tables with correct FKs.
+2. **As a property owner** I can view my parcel's values year-over-year even after moving from Harris to Travis county.
+3. **As an analyst** I can write one SQL query to compare land vs. improvement percentages across all Texas counties.
+4. **As an admin** I can look up the original "raw code" from any jurisdiction to audit translation errors.
+
+## 3. Scope
+### 3.1. In Scope
+- DDL for new tables and foreign keys.
+- Migration plan & backfill from existing HCAD data.
+- Refactor loader scripts (`load-fixtures.ts`, `load-extra-features-detail.ts`, etc.) to write into canonical tables.
+- Code-translation/lookup tables (`code_maps`).
+
+### 3.2. Out of Scope
+- UI/UX changes in the consumer portal.
+- Real-time streaming ingest (batch only for now).
+- Historical addresses prior to 2000.
+
+## 4. Detailed Requirements
+### 4.1. Functional Requirements
+FR-1  The database **must** store every parcel uniquely by `(jurisdiction_id, account_number)`.
+FR-2  The database **must** support multiple valuations per parcel (one per `tax_year`).
+FR-3  Structure-level elements and extra features **must** link to a specific `structure_id` *or* fall back to the parcel level.
+FR-4  Loaders **must** translate jurisdiction-specific codes into a canonical `std_code`, storing the original in `source_code`.
+FR-5  All FK relationships **must** enforce referential integrity (ON DELETE RESTRICT).
+FR-6  Existing loaders **must** batch-insert with upsert-on-conflict to keep current throughput.
+
+### 4.2. Non-Functional Requirements
+- **Security:** Database roles remain unchanged; new tables inherit the same RLS policies.
+- **Performance:** Typical analytics query (< 5 joins) returns within 200 ms for 10 million parcels.
+- **Usability:** ERD and a column-mapping spreadsheet are delivered with the migration.
+
+### 4.3. UI/UX Considerations
+None for this release; backend-only change.
+
+## 5. Technical Considerations
+### 5.1. Key System Components Involved
+- Postgres 15 with Drizzle ORM.
+- ETL scripts in `scripts/*.ts`.
+- Drizzle migrations for DDL.
+- Supabase (auth/session tables untouched).
+
+### 5.2. Data Model Changes
+Below is the first-pass table list and a **field-level mapping** from current HCAD-shaped tables.
+
+| Canonical Table | New Columns | Source Table(s) | Notes / Mapping |
+|-----------------|-------------|-----------------|-----------------|
+| **jurisdictions** | `id`, `state`, `county_name`, `fips_code` | *n/a* | Seed table. HCAD → one row (Harris County, TX). |
+| **properties** | `id`, `jurisdiction_id`, `account_number`, `parcel_number`, `situs_address_id`, `geometry` | `property_data` | `acct` → `account_number`; geometry from shapefiles (future). |
+| **addresses** | `id`, `line1`, `city`, `state`, `zip` | `property_data` | Compose from `str_num`, `str`, `str_sfx`, etc. |
+| **valuations** | `id`, `property_id`, `tax_year`, `land_value`, `improvement_value`, `extra_features_value`, `ag_value`, `assessed_value`, `market_value`, `certified_date`, `notice_sent`, `protested` | `property_data` | Monetary fields migrate 1-to-1; current HCAD dump's "2024" values → `tax_year = 2024`. |
+| **structures** | `id`, `property_id`, `structure_seq`, `year_built`, `living_area_sqft`, `class_code` | `structural_elements` | `bld_num` → `structure_seq`. Aggregate common attrs (yr_built from `act_yr`). |
+| **structure_elements** | `id`, `structure_id`, `element_type_id`, `quantity`, `unit`, `grade`, `condition_code` | `structural_elements` | Each row from loader becomes one `structure_element`; `code` maps to `element_type_id` via `code_maps`. |
+| **extra_features** | `id`, `property_id`, `structure_id?`, `feature_type_id`, `quantity`, `unit`, `unit_price`, `adj_unit_price`, `pct_complete`, `depreciated_value` | `extra_features_detail` | `bld_num` → nullable `structure_id` lookup; `cd` → `feature_type_id`. |
+| **fixtures** (optional) | `id`, `structure_id`, `fixture_type_id`, `units` | `fixtures` | Loader already parses `type`, `type_dscr`, `units`. |
+| **property_ownership** | `property_id`, `owner_id`, `from_date`, `to_date` | *future* | Ownership not in current dataset but added for extensibility. |
+| **owners** | `id`, `name`, `mailing_address_id` | *future* | Placeholders for later owner CSVs. |
+| **code_maps** | `id`, `jurisdiction_id`, `code_type`, `source_code`, `std_code`, `description` | `neighborhood_codes`, lookups in loaders | Example: `econ_bld_class 'B'` → `std_code 'B'`, `description 'Class B'`. |
+
+### 5.3. API Design (if applicable)
+No public API change; GraphQL resolvers & Next.js server components will hit new Drizzle models behind the same service interfaces.
+
+### 5.4. Potential Technical Challenges/Risks
+- Backfilling millions of rows may lock tables—plan phased migration.
+- Legacy analytics code may reference old columns (`bld_val`).
+- Code-translation accuracy (HCAD → canonical) must be validated with sample queries.
+- Composite PKs & FKs increase join depth—index tuning required.
+
+## 6. Open Questions & Future Considerations
+1. Do we need per-month valuation snapshots or is annual (`tax_year`) sufficient?
+2. Should we store raw source files in an S3 "data-lake" bucket for audit?
+3. Will we require history on `code_maps` (when counties re-classify codes)?
+4. How soon will ownership data be added (affects `owners`, `property_ownership` design)?
+
+---
+*Document prepared {{DATE}}.  Please add comments or change-requests directly in this file or via GitHub PR.* 

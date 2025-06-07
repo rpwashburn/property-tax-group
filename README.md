@@ -1,22 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# property-tax-group
+
+A property tax analysis application.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+
+- pnpm
+- PostgreSQL database
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Set up environment variables:
+   ```bash
+   cp env.sample .env
+   # Edit .env with your database credentials
+   ```
+
+4. Run database migrations:
+   ```bash
+   npx drizzle-kit migrate
+   ```
+
+5. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+## FastAPI Backend Migration
+
+We are migrating the backend from Next.js API routes to FastAPI. The new backend is located in the `/api` folder.
+
+### Running FastAPI Backend
+
+1. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Start the FastAPI server:
+   ```bash
+   uvicorn api.index:app --reload --port 8000
+   ```
+
+3. View API documentation at `http://localhost:8000/docs`
+
+### Test the Integration
+
+Visit `http://localhost:3000/hello` to see the integration between Next.js and FastAPI with PostgreSQL database.
+
+## Tech Stack
+
+- **Frontend**: Next.js 15 (App Router)
+- **Backend**: FastAPI (migrating from Next.js API routes)
+- **Database**: PostgreSQL
+- **ORM**: Drizzle ORM (Next.js) / SQLAlchemy (FastAPI)
+- **UI**: Tailwind CSS + shadcn/ui
+
+## Development
+
+- Next.js runs on port 3000
+- FastAPI runs on port 8000
+- PostgreSQL runs on port 54320 (via Docker)
+
+See `/api/README.md` for more details about the FastAPI backend.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

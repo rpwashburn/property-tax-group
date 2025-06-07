@@ -1,7 +1,9 @@
-import { defineConfig } from 'drizzle-kit';
 import * as dotenv from 'dotenv';
+import { defineConfig } from 'drizzle-kit';
 
-dotenv.config({ path: '.env.local' }); // Load .env.local if it exists
+// Load .env first, then .env.local (which will override if it exists)
+dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env.local' });
 
 const postgresUrl = process.env.POSTGRES_URL;
 

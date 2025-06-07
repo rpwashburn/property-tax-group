@@ -35,3 +35,43 @@ export async function fetchHelloMessage() {
       return 'Failed to connect to backend';
     }
   }
+
+export async function fetchPropertyData() {
+  try {
+    // In production, use your full domain URL
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'http://localhost:3000';
+    
+    // Headers for bypassing Vercel deployment protection
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add protection bypass header if available (for internal API calls in production)
+    if (process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+      headers['x-vercel-protection-bypass'] = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+    }
+    
+    const response = await fetch(`${baseUrl}/api/properties/sample`, {
+      // Important: disable caching for dynamic content
+      cache: 'no-store',
+      headers
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch property data:', error);
+    return {
+      status: 'error',
+      total_properties: 0,
+      sample_properties: [],
+      error: 'Failed to connect to database'
+    };
+  }
+}

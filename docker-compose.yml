@@ -23,6 +23,8 @@ services:
     volumes:
       - ./api:/app/api
       - ./requirements.txt:/app/requirements.txt
+    environment:
+      - POSTGRES_URL=postgresql://propertytaxgroup:localpass@propertytaxgroup-db:5432/verceldb
     ports:
       # HOST:CONTAINER
       - "8000:8000"
