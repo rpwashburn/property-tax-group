@@ -6,6 +6,27 @@ import asyncio
 import os
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
+def fix_asyncpg_ssl_params(url: str) -> str:
+    """Convert psycopg2 sslmode parameters to asyncpg-compatible parameters"""
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+    
+    # Handle sslmode parameter conversion
+    if 'sslmode' in query_params:
+        sslmode = query_params['sslmode'][0]
+        # Remove the problematic sslmode parameter
+        del query_params['sslmode']
+        
+        # For connections that require SSL, we'll handle it in connect_args
+        if sslmode == 'disable':
+            query_params['ssl'] = ['disable']
+    
+    # Rebuild the URL with cleaned parameters
+    new_query = urlencode(query_params, doseq=True)
+    new_parsed = parsed._replace(query=new_query)
+    return urlunparse(new_parsed)
 
 async def test_connection():
     # Get database URL from environment variable
@@ -24,11 +45,22 @@ async def test_connection():
     if DATABASE_URL.startswith("postgresql://"):
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
     
+    # Fix SSL parameters for asyncpg
+    DATABASE_URL = fix_asyncpg_ssl_params(DATABASE_URL)
+    
     print(f"🔄 Testing connection to database...")
     
     try:
-        # Create engine and test connection
-        engine = create_async_engine(DATABASE_URL, echo=False)
+        # Create engine with appropriate SSL configuration
+        connect_args = {}
+        if "supabase.com" in DATABASE_URL:
+            connect_args["ssl"] = "require"
+        
+        engine = create_async_engine(
+            DATABASE_URL, 
+            echo=False,
+            connect_args=connect_args
+        )
         
         async with engine.begin() as conn:
             # Test basic query
@@ -44,6 +76,7 @@ async def test_connection():
         print("1. POSTGRES_URL is correctly set")
         print("2. The database is accessible")
         print("3. The property_data table exists")
+        print("4. For Supabase: Use pooler connection (port 6543) in production")
     finally:
         if 'engine' in locals():
             await engine.dispose()

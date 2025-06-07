@@ -8,6 +8,7 @@ from sqlalchemy.pool import NullPool
 from datetime import datetime
 import uuid
 import logging
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -56,6 +57,32 @@ if IS_VERCEL and "supabase.com" in DATABASE_URL and ":5432" in DATABASE_URL:
     DATABASE_URL = DATABASE_URL.replace(":5432", ":6543")
     DATABASE_URL = DATABASE_URL.replace("db.", "pooler.")
 
+# Handle SSL parameters - convert psycopg2 sslmode to asyncpg-compatible parameters
+def fix_asyncpg_ssl_params(url: str) -> str:
+    """Convert psycopg2 sslmode parameters to asyncpg-compatible parameters"""
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+    
+    # Handle sslmode parameter conversion
+    if 'sslmode' in query_params:
+        sslmode = query_params['sslmode'][0]
+        # Remove the problematic sslmode parameter
+        del query_params['sslmode']
+        
+        # For production/Supabase connections that require SSL
+        if sslmode == 'require' and IS_VERCEL:
+            # For asyncpg, we'll handle SSL in connect_args instead
+            pass
+        elif sslmode == 'disable':
+            query_params['ssl'] = ['disable']
+    
+    # Rebuild the URL with cleaned parameters
+    new_query = urlencode(query_params, doseq=True)
+    new_parsed = parsed._replace(query=new_query)
+    return urlunparse(new_parsed)
+
+DATABASE_URL = fix_asyncpg_ssl_params(DATABASE_URL)
+
 # For local Docker connections, disable SSL
 if (
     "propertytaxgroup-db" in DATABASE_URL
@@ -81,10 +108,19 @@ engine_kwargs = {
 if IS_VERCEL:
     # For Vercel/serverless, use NullPool as recommended by Supabase
     engine_kwargs["poolclass"] = NullPool
-    engine_kwargs["connect_args"] = {
-        "server_settings": {"jit": "off"},
-        "command_timeout": 60,
-    }
+    
+    # For Supabase connections in production, configure SSL properly for asyncpg
+    if "supabase.com" in DATABASE_URL:
+        engine_kwargs["connect_args"] = {
+            "server_settings": {"jit": "off"},
+            "command_timeout": 60,
+            "ssl": "require",  # Use string value for asyncpg
+        }
+    else:
+        engine_kwargs["connect_args"] = {
+            "server_settings": {"jit": "off"},
+            "command_timeout": 60,
+        }
 else:
     # For local development with Docker
     engine_kwargs["connect_args"] = {
@@ -111,7 +147,6 @@ async_session_maker = async_sessionmaker(
 # Create declarative base
 Base = declarative_base()
 
-
 # Define PropertyData model matching the drizzle schema
 class PropertyData(Base):
     __tablename__ = "property_data"
@@ -137,7 +172,6 @@ class PropertyData(Base):
     tot_mkt_val = Column(String(20))
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-
 
 # Dependency to get database session
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

@@ -34,6 +34,9 @@ POSTGRES_URL=postgres://[db-user].[project-ref]:[db-password]@aws-0-[aws-region]
 - Detect the Vercel environment
 - Use NullPool for connection pooling (recommended for serverless)
 - Switch to pooler mode if a direct connection is detected
+- Convert `sslmode=require` parameters to asyncpg-compatible SSL settings
+
+**SSL Parameter Handling**: If your Supabase connection string includes `?sslmode=require`, the application will automatically convert this to asyncpg-compatible SSL parameters to avoid connection errors.
 
 ### 3. Test Database Connection
 
@@ -75,6 +78,7 @@ The API uses SQLAlchemy with async support for database operations. Currently im
 - **Connection Pooling**:
   - Local development: Standard connection pooling
   - Production (Vercel): NullPool for serverless compatibility
+- **SSL Handling**: Automatic conversion of psycopg2 SSL parameters to asyncpg format
 
 ## Routing Configuration
 
@@ -84,6 +88,20 @@ The Next.js application is configured to route API requests as follows:
 - `/api/*` (everything else) - Routed to FastAPI
 
 This allows gradual migration from Next.js API routes to FastAPI.
+
+## Troubleshooting
+
+### SSL Connection Issues
+If you encounter `sslmode` errors in production:
+1. Ensure you're using the Supabase pooler connection (port 6543)
+2. The application automatically handles SSL parameter conversion
+3. Check that your connection string doesn't have conflicting SSL parameters
+
+### Connection Pool Issues
+For serverless deployments (Vercel):
+- Always use NullPool (automatically configured)
+- Use transaction mode pooler connections
+- Monitor connection usage in Supabase dashboard
 
 ## Next Steps
 
