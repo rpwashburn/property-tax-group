@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
 from datetime import datetime
+from typing import Optional
 
 app = FastAPI(
     title="Property Tax Group Nexus API",
@@ -23,21 +24,62 @@ app.add_middleware(
 )
 
 @app.get("/")
-async def root():
+async def root(path: Optional[str] = Query(None)):
     """Root endpoint - API health check"""
-    return {
-        "message": "Property Tax Nexus API is running successfully!",
-        "service": "Property Tax Group Nexus",
-        "version": "1.0.0",
-        "timestamp": datetime.now(datetime.UTC).isoformat(),
-        "environment": os.getenv("VERCEL_ENV", "development"),
-        "endpoints": {
-            "hello": "/nexus/hello",
-            "health": "/nexus/health", 
-            "docs": "/nexus/docs",
-            "redoc": "/nexus/redoc"
+    
+    # Handle different paths via query parameter (Vercel routing)
+    if path == "hello":
+        return {
+            "message": "Hello World from Property Tax Nexus API!",
+            "service": "nexus",
+            "timestamp": datetime.now(datetime.UTC).isoformat(),
+            "status": "healthy"
         }
-    }
+    elif path == "health":
+        return {
+            "status": "healthy",
+            "service": "Property Tax Nexus API",
+            "timestamp": datetime.now(datetime.UTC).isoformat(),
+            "uptime": "operational",
+            "version": "1.0.0"
+        }
+    elif path == "status":
+        return {
+            "api_status": "operational",
+            "database_status": "not_connected",
+            "external_services": {
+                "property_data": "ready",
+                "analysis_engine": "ready",
+                "reporting": "ready"
+            },
+            "timestamp": datetime.now(datetime.UTC).isoformat()
+        }
+    elif path == "debug":
+        return {
+            "message": "Debug endpoint reached successfully",
+            "path_received": path,
+            "environment": {
+                "VERCEL_ENV": os.getenv("VERCEL_ENV"),
+                "VERCEL_URL": os.getenv("VERCEL_URL"),
+                "NODE_ENV": os.getenv("NODE_ENV")
+            },
+            "timestamp": datetime.now(datetime.UTC).isoformat()
+        }
+    else:
+        # Default root response
+        return {
+            "message": "Property Tax Nexus API is running successfully!",
+            "service": "Property Tax Group Nexus",
+            "version": "1.0.0",
+            "timestamp": datetime.now(datetime.UTC).isoformat(),
+            "environment": os.getenv("VERCEL_ENV", "development"),
+            "endpoints": {
+                "hello": "/nexus/hello",
+                "health": "/nexus/health",
+                "docs": "/nexus/docs",
+                "redoc": "/nexus/redoc"
+            }
+        }
 
 @app.get("/hello")
 async def hello_world():
@@ -47,6 +89,26 @@ async def hello_world():
         "service": "nexus",
         "timestamp": datetime.now(datetime.UTC).isoformat(),
         "status": "healthy"
+    }
+
+@app.get("/debug")
+async def debug_info(request: Request):
+    """Debug endpoint to troubleshoot 401 issues"""
+    return {
+        "message": "Debug endpoint reached successfully",
+        "request_info": {
+            "method": request.method,
+            "url": str(request.url),
+            "headers": dict(request.headers),
+            "path": request.url.path,
+            "query": str(request.url.query)
+        },
+        "environment": {
+            "VERCEL_ENV": os.getenv("VERCEL_ENV"),
+            "VERCEL_URL": os.getenv("VERCEL_URL"),
+            "NODE_ENV": os.getenv("NODE_ENV")
+        },
+        "timestamp": datetime.now(datetime.UTC).isoformat()
     }
 
 @app.get("/health")
@@ -83,7 +145,7 @@ async def not_found_handler(request, exc):
             "error": "Endpoint not found",
             "message": "The requested endpoint was not found in Nexus API",
             "available_endpoints": [
-                "/", "/hello", "/health", "/status", "/docs"
+                "/", "/hello", "/health", "/status", "/docs", "/debug"
             ],
             "timestamp": datetime.now(datetime.UTC).isoformat()
         }
