@@ -28,7 +28,7 @@ async def root():
 async def hello():
     """Hello endpoint"""
     return {
-        "message": "Hello from Property Tax Nexus API!",
+        "message": "Hello from Property Tax Nexus API!!!",
         "status": "working"
     }
 
