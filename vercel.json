@@ -1,7 +1,6 @@
 {
   "functions": {
     "api/**": {
-      "runtime": "@vercel/python",
       "excludeFiles": "{**/.git/**,**/node_modules/**,**/__pycache__/**,**/.venv/**,**/venv/**,**/alembic/**,**/scripts/**,**/tests/**,**/*.pyc,**/*.log,**/.env.*,**/README.md}"
     }
   },
