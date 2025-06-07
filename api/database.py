@@ -37,7 +37,7 @@ if DATABASE_URL:
         host_match = re.search(r"@([^:\/]+)", DATABASE_URL)
         if host_match:
             logger.info(f"Database host: {host_match.group(1)}")
-    except:
+    except Exception:
         pass
 
 # Convert postgres:// to postgresql:// for SQLAlchemy

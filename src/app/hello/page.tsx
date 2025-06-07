@@ -1,9 +1,26 @@
 import { fetchHelloMessage, fetchPropertyData } from "./data-fetcher";
 
+// Define types for the property data
+interface Property {
+  account: string;
+  address: string;
+  neighborhood: string;
+  appraised_value: string;
+  market_value: string;
+}
+
+interface PropertyDataResponse {
+  status: string;
+  total_properties: number;
+  sample_properties: Property[];
+  error?: string;
+  timestamp?: string;
+}
+
 export default async function HelloPage() {
   // Server-side data fetching
   const message = await fetchHelloMessage();
-  const propertyData = await fetchPropertyData();
+  const propertyData = await fetchPropertyData() as PropertyDataResponse;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -33,7 +50,7 @@ export default async function HelloPage() {
               </p>
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-green-800">Sample Properties:</p>
-                {propertyData.sample_properties.map((property: any, index: number) => (
+                {propertyData.sample_properties.map((property: Property, index: number) => (
                   <div key={index} className="bg-white p-3 rounded border border-green-200">
                     <div className="text-sm text-gray-700">
                       <p><span className="font-semibold">Account:</span> {property.account}</p>
