@@ -23,21 +23,29 @@ function buildPropertyApiUrl(baseUrl: string, endpoint: string, options: {
   include?: string[];
   [key: string]: string | string[] | number | boolean | undefined;
 }): string {
-  const url = new URL(`${baseUrl}${endpoint}`);
-  
-  if (options.include && options.include.length > 0) {
-    // Use comma-separated includes instead of multiple include parameters
-    url.searchParams.set('include', options.include.join(','));
-  }
-  
-  // Add any other query parameters
-  Object.entries(options).forEach(([key, value]) => {
-    if (key !== 'include' && key !== 'accountNumber' && value !== undefined) {
-      url.searchParams.set(key, String(value));
+  try {
+    const url = new URL(`${baseUrl}${endpoint}`);
+    
+    if (options.include && options.include.length > 0) {
+      // Use comma-separated includes instead of multiple include parameters
+      url.searchParams.set('include', options.include.join(','));
     }
-  });
-  
-  return url.toString();
+    
+    // Add any other query parameters
+    Object.entries(options).forEach(([key, value]) => {
+      if (key !== 'include' && key !== 'accountNumber' && value !== undefined) {
+        url.searchParams.set(key, String(value));
+      }
+    });
+    
+    return url.toString();
+  } catch (error) {
+    console.error('[PropertyAPI] Error building URL:', error);
+    console.error('[PropertyAPI] Base URL:', baseUrl);
+    console.error('[PropertyAPI] Endpoint:', endpoint);
+    console.error('[PropertyAPI] Options:', options);
+    throw new Error(`Invalid URL construction: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -48,7 +56,12 @@ function createFetchOptions(options: PropertyApiOptions = {}): RequestInit {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      // Don't set Content-Type for GET requests - can cause issues with some APIs
+      // 'Content-Type': 'application/json',
+      // Add ngrok bypass header to avoid browser warning page
+      'ngrok-skip-browser-warning': 'true',
+      // Add user agent to look more like a legitimate request
+      'User-Agent': 'Property-Tax-Group-API/1.0',
     },
   };
 
@@ -107,9 +120,35 @@ export async function getPropertyByAccount(
       include: includes
     });
     
-    console.log(`[PropertyAPI] Fetching property data from: ${url}`);
+    // Enhanced debugging for production
+    console.log(`[PropertyAPI] Environment: ${process.env.NODE_ENV}`);
+    console.log(`[PropertyAPI] PROPERTY_API_BASE_URL: ${process.env.PROPERTY_API_BASE_URL}`);
+    console.log(`[PropertyAPI] Base URL: ${baseUrl}`);
+    console.log(`[PropertyAPI] Account Number: ${accountNumber}`);
+    console.log(`[PropertyAPI] Includes: ${JSON.stringify(includes)}`);
+    console.log(`[PropertyAPI] Final URL: ${url}`);
     
-    const response = await fetch(url, createFetchOptions(options));
+    const fetchOptions = createFetchOptions(options);
+    console.log(`[PropertyAPI] Fetch options: ${JSON.stringify(fetchOptions, null, 2)}`);
+    console.log(`[PropertyAPI] Request headers being sent: ${JSON.stringify(fetchOptions.headers)}`);
+    
+    const response = await fetch(url, fetchOptions);
+    
+    // Log response details for debugging
+    console.log(`[PropertyAPI] Response status: ${response.status}`);
+    console.log(`[PropertyAPI] Response statusText: ${response.statusText}`);
+    console.log(`[PropertyAPI] Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+    
+    // If we get a bad request, try to log the response body for debugging
+    if (response.status === 400) {
+      try {
+        const errorBody = await response.clone().text();
+        console.log(`[PropertyAPI] 400 Response body: ${errorBody}`);
+      } catch (e) {
+        console.log(`[PropertyAPI] Could not read 400 response body: ${e}`);
+      }
+    }
+    
     const data = await handleApiResponse<ApiPropertyResponse>(response, accountNumber);
     
     if (data) {
@@ -300,4 +339,62 @@ export async function testPropertyApiConnection(
     console.error('[PropertyAPI] Connection test failed:', error);
     return false;
   }
+}
+
+/**
+ * Comprehensive diagnostic function for troubleshooting API issues
+ * @returns Promise<object> - Diagnostic information
+ */
+export async function diagnosePropertyApiIssues(): Promise<{
+  environment: string;
+  baseUrl: string;
+  envVarSet: boolean;
+  healthCheck: any;
+  connectivityTest: boolean;
+  sampleUrl: string;
+  timestamp: string;
+}> {
+  const baseUrl = getApiBaseUrl();
+  const sampleAccountNumber = '0520860000040';
+  
+  console.log('[PropertyAPI] Running comprehensive diagnostics...');
+  
+  // Test health endpoint
+  let healthCheck;
+  try {
+    healthCheck = await checkPropertyApiHealth();
+  } catch (error) {
+    healthCheck = { 
+      status: 'error', 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+  
+  // Test basic connectivity
+  let connectivityTest = false;
+  try {
+    const response = await fetch(`${baseUrl}/health`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
+    });
+    connectivityTest = response.ok;
+  } catch (error) {
+    console.log('[PropertyAPI] Connectivity test failed:', error);
+  }
+  
+  const diagnostics = {
+    environment: process.env.NODE_ENV || 'unknown',
+    baseUrl: baseUrl,
+    envVarSet: !!process.env.PROPERTY_API_BASE_URL,
+    healthCheck,
+    connectivityTest,
+    sampleUrl: buildPropertyApiUrl(baseUrl, `/api/v1/properties/account/${sampleAccountNumber}`, {
+      include: ['buildings', 'owners']
+    }),
+    timestamp: new Date().toISOString()
+  };
+  
+  console.log('[PropertyAPI] Diagnostics results:', JSON.stringify(diagnostics, null, 2));
+  return diagnostics;
 } 

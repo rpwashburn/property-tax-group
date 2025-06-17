@@ -18,5 +18,6 @@ export {
   getPropertiesByNeighborhood,
   getComparableProperties,
   checkPropertyApiHealth,
-  testPropertyApiConnection
+  testPropertyApiConnection,
+  diagnosePropertyApiIssues
 } from './server'; 

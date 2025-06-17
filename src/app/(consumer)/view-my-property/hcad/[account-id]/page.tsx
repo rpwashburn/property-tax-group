@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Building2, MapPin, Home, DollarSign, Calendar, Users, FileText, TrendingUp, AlertCircle, CheckCircle, Clock, Scale, BarChart3, FileCheck } from "lucide-react"
-import { getPropertyDataByAccountNumber } from "@/lib/properties"
+import { getPropertyDataByAccountNumber, diagnosePropertyApiIssues } from "@/lib/properties"
 import { formatCurrency } from "@/lib/utils"
 import { CTACard } from "@/components/shared/CTACard"
 
@@ -19,12 +19,20 @@ export default async function ViewPropertyPage({ params }: ViewPropertyPageProps
   // Fetch property data from API
   let propertyData = null;
   let error = null;
+  let diagnostics = null;
 
   try {
     propertyData = await getPropertyDataByAccountNumber(accountId);
   } catch (err) {
     error = err instanceof Error ? err.message : 'Failed to fetch property data';
     console.error('Error fetching property data:', err);
+    
+    // Run diagnostics when there's an error
+    try {
+      diagnostics = await diagnosePropertyApiIssues();
+    } catch (diagErr) {
+      console.error('Failed to run diagnostics:', diagErr);
+    }
   }
 
   if (error) {
@@ -40,11 +48,29 @@ export default async function ViewPropertyPage({ params }: ViewPropertyPageProps
             <CardHeader>
               <CardTitle className="text-red-600">Error Loading Property</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <p className="text-muted-foreground">{error}</p>
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-sm text-muted-foreground">
                 Please check the account number and try again.
               </p>
+              
+              {/* Diagnostic Information */}
+              {diagnostics && (
+                <details className="mt-4 p-4 border rounded-lg">
+                  <summary className="cursor-pointer text-sm font-medium text-muted-foreground">
+                    🔍 Diagnostic Information (Click to expand)
+                  </summary>
+                  <div className="mt-2 space-y-2 text-xs font-mono">
+                    <div><strong>Environment:</strong> {diagnostics.environment}</div>
+                    <div><strong>Base URL:</strong> {diagnostics.baseUrl}</div>
+                    <div><strong>Env Var Set:</strong> {diagnostics.envVarSet ? '✅' : '❌'}</div>
+                    <div><strong>Health Check:</strong> {JSON.stringify(diagnostics.healthCheck)}</div>
+                    <div><strong>Connectivity:</strong> {diagnostics.connectivityTest ? '✅' : '❌'}</div>
+                    <div><strong>Sample URL:</strong> {diagnostics.sampleUrl}</div>
+                    <div><strong>Timestamp:</strong> {diagnostics.timestamp}</div>
+                  </div>
+                </details>
+              )}
             </CardContent>
           </Card>
         </div>
