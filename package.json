@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed:admin": "tsx scripts/seed-admin.ts",
-    "push": "drizzle-kit push"
+    "push": "drizzle-kit push",
+    "test:api": "node scripts/test-api-integration.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

@@ -23,7 +23,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-              <Link href="/search">
+              <Link href="/view-my-property">
                 <Button size="lg" className="gap-1 rounded-full px-8">
                   Start Your Protest <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -31,26 +31,13 @@ export default function HomePage() {
               <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
                 How It Works
               </Button>
-              <Link href="/hello">
+              <Link href="/purchase">
                 <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
-                  API Demo <ArrowRight className="h-4 w-4" />
+                  Purchase Reports <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <div className="stats-container flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                <span>93% Success Rate</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                <span>$3,200 Average Savings</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                <span>No Win, No Fee</span>
-              </div>
-            </div>
+
           </div>
         </div>
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
@@ -146,9 +133,11 @@ export default function HomePage() {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
-                  <Button className="w-full gap-2 rounded-full">
-                    <Calculator className="h-4 w-4" /> Calculate Savings
-                  </Button>
+                  <Link href="/view-my-property">
+                    <Button className="w-full gap-2 rounded-full">
+                      <Calculator className="h-4 w-4" /> Calculate Savings
+                    </Button>
+                  </Link>
                 </div>
                 <div className="flex-1 rounded-xl bg-primary/5 p-6">
                   <div className="space-y-4">
@@ -254,14 +243,14 @@ export default function HomePage() {
                 Join thousands of homeowners who have successfully reduced their property tax burden.
               </p>
             </div>
-            <div className="mt-6">
-              <Button size="lg" variant="secondary" className="gap-1 rounded-full px-8">
-                Start Your Protest Now <ArrowRight className="h-4 w-4" />
-              </Button>
+            <div className="mt-6 mb-8">
+              <Link href="/view-my-property">
+                <Button size="lg" variant="secondary" className="gap-1 rounded-full px-8">
+                  Start Your Protest Now <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
-            <p className="mt-4 text-sm text-primary-foreground/70">
-              No win, no fee. You only pay if we save you money.
-            </p>
+
           </div>
         </div>
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>

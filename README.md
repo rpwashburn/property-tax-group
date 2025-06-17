@@ -21,7 +21,7 @@ A property tax analysis application.
 3. Set up environment variables:
    ```bash
    cp env.sample .env
-   # Edit .env with your database credentials
+   # Edit .env with your database credentials and API configuration
    ```
 
 4. Run database migrations:
@@ -55,6 +55,26 @@ We are migrating the backend from Next.js API routes to FastAPI. The new backend
 ### Test the Integration
 
 Visit `http://localhost:3000/hello` to see the integration between Next.js and FastAPI with PostgreSQL database.
+
+## Configuration
+
+The application loads property data from an external API service.
+
+### API Configuration
+
+The `PROPERTY_API_BASE_URL` environment variable is **required**:
+
+```bash
+# In your .env file
+PROPERTY_API_BASE_URL=http://localhost:9000
+```
+
+The application will load property data from:
+```
+{PROPERTY_API_BASE_URL}/api/v1/properties/account/{accountNumber}?include=buildings&include=owners
+```
+
+**Note**: The API endpoint is required. If not configured, the application will throw an error.
 
 ## Tech Stack
 

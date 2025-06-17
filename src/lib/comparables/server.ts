@@ -8,6 +8,9 @@ import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'dr
 import { calculateAdjustments } from './calculations';
 import { getComparablePropertyData } from '@/lib/property-analysis/services/property-service';
 
+import { ComparablesAPIResponse, ComparablesSearchCriteria } from './types'
+import { extractSearchCriteriaFromProperty } from './utils'
+
 // Select specific columns for efficiency
 const selectedColumns = {
     id: propertyData.id,
@@ -179,4 +182,98 @@ export async function fetchAndAdjustComparables(
         console.error('[comparables/server.ts] Error in fetchAndAdjustComparables:', error);
         return []; // Return empty array on error
     }
+} 
+
+interface ComparablesApiError extends Error {
+  status?: number;
+  statusText?: string;
+}
+
+/**
+ * Get the API base URL from environment or default
+ */
+function getApiBaseUrl(): string {
+  return process.env.PROPERTY_API_BASE_URL || 'http://localhost:9000';
+}
+
+/**
+ * Fetch comparable properties from the backend API
+ * @param searchCriteria - The criteria to search for comparable properties
+ * @returns Promise<ComparablesAPIResponse | null>
+ */
+export async function getComparablesData(
+  searchCriteria: ComparablesSearchCriteria
+): Promise<ComparablesAPIResponse | null> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    const url = new URL(`${baseUrl}/api/v1/comparables`);
+    
+    // Add search parameters
+    url.searchParams.set("subject_account_id", searchCriteria.subject_account_id);
+    url.searchParams.set("state_class", searchCriteria.state_class);
+    url.searchParams.set("neighborhood_code", searchCriteria.neighborhood_code);
+    url.searchParams.set("quality_condition", searchCriteria.quality_condition);
+    
+    console.log(`[ComparablesApiClient] Fetching comparables data from: ${url.toString()}`);
+    
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      // Add cache control for server-side rendering
+      next: { revalidate: 300 } // Revalidate every 5 minutes
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log(`[ComparablesApiClient] No comparables found for criteria: ${JSON.stringify(searchCriteria)}`);
+        return null;
+      }
+      
+      const error: ComparablesApiError = new Error(`API request failed: ${response.status} ${response.statusText}`);
+      error.status = response.status;
+      error.statusText = response.statusText;
+      throw error;
+    }
+    
+    const data: ComparablesAPIResponse = await response.json();
+    
+    // Validate the response structure
+    if (!data.comparables || !Array.isArray(data.comparables)) {
+      console.error('[ComparablesApiClient] Invalid comparables API response structure:', data);
+      return null;
+    }
+    
+    console.log(`[ComparablesApiClient] Successfully fetched ${data.comparables.length} comparables for account: ${searchCriteria.subject_account_id}`);
+    return data;
+    
+  } catch (error) {
+    console.error(`[ComparablesApiClient] Error fetching comparables data for account ${searchCriteria.subject_account_id}:`, error);
+    
+    if (error instanceof Error && 'status' in error) {
+      // Re-throw API errors as-is
+      throw error;
+    }
+    
+    // Wrap other errors
+    throw new Error(`Failed to fetch comparables data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+
+
+/**
+ * Get comparable properties for a specific property
+ * @param accountId - The account ID of the subject property
+ * @param propertyData - The property data for the subject property
+ * @returns Promise<ComparablesAPIResponse | null>
+ */
+export async function getComparablesForProperty(
+  accountId: string,
+  propertyData: any
+): Promise<ComparablesAPIResponse | null> {
+  const searchCriteria = extractSearchCriteriaFromProperty(propertyData, accountId)
+  return await getComparablesData(searchCriteria)
 } 

@@ -18,6 +18,9 @@ export interface ExtraFeature {
   depreciatedValue: string | null;
   note: string | null;
   assessedValue: string | null;
+  count?: number;
+  category?: string;
+  shortDescription?: string;
 }
 
 export interface ExtraFeatureDispute {

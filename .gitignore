@@ -41,6 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 src/lib/property-analysis/data/
+api/data/
 
 # Added by Claude Task Master
 # Logs

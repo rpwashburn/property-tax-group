@@ -39,14 +39,14 @@ export default function Header() {
         </Link>
         
         <nav className="hidden md:flex space-x-4 items-center">
-          <Link href="/#how-it-works" className="hover:opacity-80 transition-opacity">
-            How It Works
+          <Link href="/view-my-property" className="hover:opacity-80 transition-opacity font-bold">
+            View My Property
           </Link>
-          <Link href="/#success-stories" className="hover:opacity-80 transition-opacity">
-            Success Stories
+          <Link href="/comparables" className="hover:opacity-80 transition-opacity font-bold">
+            Find Comparables
           </Link>
-          <Link href="/contact" className="hover:opacity-80 transition-opacity">
-            Contact
+          <Link href="/purchase" className="hover:opacity-80 transition-opacity font-bold">
+            Purchase Reports
           </Link>
         </nav>
 
@@ -100,14 +100,14 @@ export default function Header() {
       {/* Mobile Navigation */}
       <div className="md:hidden border-t border-primary-foreground/20">
         <nav className="container mx-auto flex flex-wrap justify-center space-x-4 p-3 text-sm">
-          <Link href="/#how-it-works" className="hover:opacity-80 transition-opacity">
-            How It Works
+          <Link href="/view-my-property" className="hover:opacity-80 transition-opacity font-bold">
+            View My Property
           </Link>
-          <Link href="/#success-stories" className="hover:opacity-80 transition-opacity">
-            Success Stories
+          <Link href="/comparables" className="hover:opacity-80 transition-opacity font-bold">
+            Find Comparables
           </Link>
-          <Link href="/contact" className="hover:opacity-80 transition-opacity">
-            Contact
+          <Link href="/purchase" className="hover:opacity-80 transition-opacity font-bold">
+            Purchase Reports
           </Link>
         </nav>
       </div>

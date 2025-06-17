@@ -3,91 +3,172 @@
 import { db } from '@/drizzle/db';
 import { propertyData, neighborhoodCodes, structuralElements, fixtures, extraFeaturesDetail } from '@/drizzle/schema';
 import { eq, and, type InferSelectModel, sql } from 'drizzle-orm';
-import type { EnrichedPropertyData, SubjectProperty } from '@/lib/property-analysis/types/index';
+import type { EnrichedPropertyData, SubjectProperty, ApiPropertyResponse } from '@/lib/property-analysis/types/index';
 import { extractGradeAndCondition, convertPropertyDataToSubjectProperty } from '@/lib/property-analysis/utils/property-utils';
 
 /**
- * Unified function to load complete property data with all related information
- * This replaces both getPropertyDataByAccountNumber and getPropertyByAcct
+ * Transform API response to EnrichedPropertyData format
  */
-export async function getUnifiedPropertyData(accountNumber: string): Promise<EnrichedPropertyData | null> {
-  try {
-    const [propertyResult, structuralElementsResult, fixturesResult, extraFeaturesResult] = await Promise.all([
-      db
-        .select()
-        .from(propertyData)
-        .leftJoin(neighborhoodCodes, eq(propertyData.neighborhoodCode, neighborhoodCodes.code))
-        .where(eq(propertyData.acct, accountNumber))
-        .limit(1),
-      db
-        .select()
-        .from(structuralElements)
-        .where(eq(structuralElements.acct, accountNumber)),
-      db
-        .select()
-        .from(fixtures)
-        .where(and(eq(fixtures.acct, accountNumber), eq(fixtures.bldNum, '1'))),
-      db
-        .select()
-        .from(extraFeaturesDetail)
-        .where(eq(extraFeaturesDetail.acct, accountNumber))
-    ]);
-
-    if (!propertyResult.length) return null;
-
-    const property = propertyResult[0];
-    if (!property.property_data.neighborhoodCode) {
-      throw new Error('Property data missing required neighborhoodCode');
-    }
-
-    const mappedFixtures = fixturesResult.map((fixture: InferSelectModel<typeof fixtures>) => ({
-      bldNum: fixture.bldNum,
-      type: fixture.type,
-      typeDscr: fixture.typeDscr,
-      units: Number(fixture.units),
-    }));
-
-    const mappedExtraFeatures = extraFeaturesResult.map((feature: InferSelectModel<typeof extraFeaturesDetail>) => ({
-      type: feature.cd,
-      description: feature.dscr,
+function transformApiResponseToEnrichedData(apiData: ApiPropertyResponse): EnrichedPropertyData {
+  return {
+    // Core identifiers
+    id: apiData.id,
+    acct: apiData.accountId,
+    
+    // Address fields (flattened from address object)
+    strNum: apiData.address.streetNumber,
+    str: apiData.address.streetName,
+    strSfx: apiData.address.streetSuffix,
+    strSfxDir: apiData.address.streetSuffixDirection,
+    siteAddr1: apiData.address.siteAddress1,
+    siteAddr2: apiData.address.siteAddress2,
+    siteAddr3: apiData.address.siteAddress3,
+    
+    // Classification fields (flattened from classification object)
+    stateClass: apiData.classification.stateClass,
+    schoolDist: apiData.classification.schoolDistrict,
+    neighborhoodCode: apiData.classification.neighborhoodCode,
+    neighborhoodGrp: apiData.classification.neighborhoodGroup,
+    neighborhoodDescription: apiData.classification.neighborhoodDescription,
+    jurs: apiData.classification.jurisdiction,
+    
+    // Market info fields (flattened from marketInfo object)
+    marketArea1: apiData.marketInfo.marketArea1,
+    marketArea1Dscr: apiData.marketInfo.marketArea1Description,
+    marketArea2: apiData.marketInfo.marketArea2,
+    marketArea2Dscr: apiData.marketInfo.marketArea2Description,
+    econArea: apiData.marketInfo.economicArea,
+    econBldClass: apiData.marketInfo.economicBuildingClass,
+    
+    // Characteristics fields (flattened from characteristics object)
+    yrImpr: apiData.characteristics.yearImproved?.toString() || null,
+    yrAnnexed: apiData.characteristics.yearAnnexed?.toString() || null,
+    bldAr: apiData.characteristics.buildingArea,
+    landAr: apiData.characteristics.landArea,
+    acreage: apiData.characteristics.acreage,
+    
+    // Current values (flattened from currentValues object)
+    landVal: apiData.currentValues.landValue,
+    bldVal: apiData.currentValues.buildingValue,
+    xFeaturesVal: apiData.currentValues.extraFeaturesValue,
+    agVal: apiData.currentValues.agriculturalValue,
+    assessedVal: apiData.currentValues.assessedValue,
+    totApprVal: apiData.currentValues.totalAppraisedValue,
+    totMktVal: apiData.currentValues.totalMarketValue,
+    newConstructionVal: apiData.currentValues.newConstructionValue,
+    totRcnVal: apiData.currentValues.totalReplacementCostValue,
+    
+    // Prior values (flattened from priorValues object)
+    priorLandVal: apiData.priorValues.landValue,
+    priorBldVal: apiData.priorValues.buildingValue,
+    priorXFeaturesVal: apiData.priorValues.extraFeaturesValue,
+    priorAgVal: apiData.priorValues.agriculturalValue,
+    priorTotApprVal: apiData.priorValues.totalAppraisedValue, // Critical for year-over-year calculation
+    priorTotMktVal: apiData.priorValues.totalMarketValue,
+    
+    // Status fields (flattened from status object)
+    valueStatus: apiData.status.valueStatus,
+    noticed: apiData.status.noticed,
+    noticeDt: apiData.status.noticeDate,
+    protested: apiData.status.protested,
+    certifiedDate: apiData.status.certifiedDate,
+    revDt: apiData.status.revisionDate,
+    revBy: apiData.status.revisedBy,
+    newOwnDt: apiData.status.newOwnerDate,
+    
+    // Legal fields (combination of legal fields)
+    lgl1: apiData.legal.description || [
+      apiData.legal.legalLine1,
+      apiData.legal.legalLine2,
+      apiData.legal.legalLine3,
+      apiData.legal.legalLine4
+    ].filter(Boolean).join(' ') || null,
+    
+    // Metadata (convert string dates to Date objects)
+    createdAt: new Date(apiData.metadata.createdAt),
+    updatedAt: new Date(apiData.metadata.updatedAt),
+    
+    // Related data
+    structuralElements: apiData.buildings || [],
+    fixtures: apiData.fixtures || [],
+    extraFeatures: apiData.extraFeatures?.map(feature => ({
+      type: feature.type,
+      description: feature.description,
       grade: feature.grade,
-      condition: feature.condCd,
-      buildingNumber: feature.bldNum,
+      condition: feature.condition,
+      buildingNumber: feature.buildingNumber,
       length: feature.length,
       width: feature.width,
       units: feature.units,
       unitPrice: feature.unitPrice,
-      adjustedUnitPrice: feature.adjUnitPrice,
-      percentComplete: feature.pctComp,
-      actualYear: feature.actYr,
-      effectiveYear: feature.effYr,
-      rollYear: feature.rollYr,
-      date: feature.dt,
-      percentCondition: feature.pctCond,
-      depreciatedValue: feature.dprVal,
+      adjustedUnitPrice: feature.adjustedUnitPrice,
+      percentComplete: feature.percentComplete,
+      actualYear: feature.actualYear,
+      effectiveYear: feature.effectiveYear,
+      rollYear: feature.rollYear,
+      date: feature.date,
+      percentCondition: feature.percentCondition,
+      depreciatedValue: feature.depreciatedValue,
       note: feature.note,
-      assessedValue: feature.asdVal,
-    }));
+      assessedValue: feature.assessedValue,
+      // New fields from API
+      count: feature.count,
+      category: feature.category,
+      shortDescription: feature.shortDescription,
+    })) || [],
+  };
+}
 
-    return {
-      ...property.property_data,
-      neighborhoodDescription: property.neighborhood_codes?.description,
-      structuralElements: structuralElementsResult.map((element: InferSelectModel<typeof structuralElements>) => ({
-        bldNum: element.bldNum,
-        code: element.code,
-        adj: element.adj,
-        type: element.type,
-        typeDscr: element.typeDscr,
-        categoryDscr: element.categoryDscr,
-        dorCd: element.dorCd,
-      })),
-      fixtures: mappedFixtures,
-      extraFeatures: mappedExtraFeatures,
-    } as EnrichedPropertyData;
+/**
+ * Fetch property data from external API
+ */
+async function fetchPropertyDataFromAPI(accountNumber: string): Promise<EnrichedPropertyData | null> {
+  const apiBaseUrl = process.env.PROPERTY_API_BASE_URL!; // Non-null assertion since we check in caller
+
+  try {
+    const url = `${apiBaseUrl}/api/v1/properties/account/${accountNumber}?include=buildings&include=owners&include=extraFeatures`;
+    console.log('Fetching property data from API:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log(`Property not found in API for account: ${accountNumber}`);
+        return null;
+      }
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const apiData: ApiPropertyResponse = await response.json();
+    
+    // Transform API response to match our EnrichedPropertyData interface
+    const transformedData = transformApiResponseToEnrichedData(apiData);
+
+    console.log('Successfully transformed API data for account:', accountNumber);
+    return transformedData;
   } catch (error) {
-    console.error('Error fetching unified property data:', error);
+    console.error('Error fetching property data from API:', error);
     throw error;
   }
+}
+
+/**
+ * Unified function to load complete property data with all related information
+ * This loads data from the external API only
+ */
+export async function getUnifiedPropertyData(accountNumber: string): Promise<EnrichedPropertyData | null> {
+  const apiBaseUrl = process.env.PROPERTY_API_BASE_URL;
+  
+  if (!apiBaseUrl) {
+    throw new Error('PROPERTY_API_BASE_URL environment variable is required');
+  }
+
+  return await fetchPropertyDataFromAPI(accountNumber);
 }
 
 /**

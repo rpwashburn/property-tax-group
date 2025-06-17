@@ -1,0 +1,48 @@
+# Exclude large data files
+api/data/
+data/
+
+# Exclude Node.js dependencies and build artifacts
+node_modules/
+.next/
+dist/
+build/
+
+# Exclude Git and IDE files
+.git/
+.gitignore
+.vscode/
+.cursor/
+*.swp
+*.swo
+
+# Exclude environment files (they should be passed via docker-compose)
+.env
+.env.local
+.env.production
+
+# Exclude logs
+*.log
+logs/
+
+# Exclude Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Exclude temporary files
+tmp/
+temp/
+*.tmp
+
+# Exclude documentation
+docs/
+*.md
+README*
+
+# Exclude test files
+tests/
+test/
+*.test.* 
