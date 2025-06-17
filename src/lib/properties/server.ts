@@ -349,7 +349,7 @@ export async function diagnosePropertyApiIssues(): Promise<{
   environment: string;
   baseUrl: string;
   envVarSet: boolean;
-  healthCheck: any;
+  healthCheck: PropertyApiHealthResponse | { status: 'error'; error: string };
   connectivityTest: boolean;
   sampleUrl: string;
   timestamp: string;
@@ -360,7 +360,7 @@ export async function diagnosePropertyApiIssues(): Promise<{
   console.log('[PropertyAPI] Running comprehensive diagnostics...');
   
   // Test health endpoint
-  let healthCheck;
+  let healthCheck: PropertyApiHealthResponse | { status: 'error'; error: string };
   try {
     healthCheck = await checkPropertyApiHealth();
   } catch (error) {
