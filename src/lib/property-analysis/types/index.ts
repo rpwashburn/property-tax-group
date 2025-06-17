@@ -1,4 +1,5 @@
-import type { ExtraFeature } from './extra-features-types';
+// Import currently unused - will re-export when needed
+// import type { ExtraFeature } from './extra-features-types';
 import type { propertyData } from '@/drizzle/schema';
 import type { InferSelectModel } from 'drizzle-orm';
 
@@ -250,31 +251,4 @@ export interface EnrichedPropertyData {
     category?: string;
     shortDescription?: string;
   }>;
-}
-
-export type ComparableProperty = Pick<
-  EnrichedPropertyData,
-  | 'id'
-  | 'acct'
-  | 'siteAddr1'
-  | 'siteAddr3'
-  | 'stateClass'
-  | 'neighborhoodCode'
-  | 'yrImpr'
-  | 'bldAr'
-  | 'landAr'
-  | 'acreage'
-  | 'landVal'
-  | 'totMktVal'
-  | 'totApprVal'
-  | 'bldVal'
-  | 'xFeaturesVal'
-> & {
-  grade?: string | null;
-  condition?: string | null;
-};
-
-export type SubjectProperty = ComparableProperty & {
-  grade?: string | null;
-  condition?: string | null;
-}; 
+} 

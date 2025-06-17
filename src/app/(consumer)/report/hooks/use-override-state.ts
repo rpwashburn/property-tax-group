@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { OverrideState } from "@/lib/property-analysis/types/override-types"
-import type { SubjectProperty } from "@/lib/property-analysis/types"
+import type { SubjectProperty } from "@/lib/comparables/types"
 
 export interface UseOverrideStateReturn {
   overrideState: OverrideState

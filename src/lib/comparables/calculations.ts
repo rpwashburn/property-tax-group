@@ -1,4 +1,4 @@
-import type { ComparableProperty, SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
+import type { ComparableProperty, SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
 
 // --- Interfaces ---
 
@@ -78,7 +78,7 @@ function calculateComparableScore(
         ? (subjectMarketValue - adjustedValue) / subjectMarketValue
         : 0;
   
-    // Optional cap so one crazy low sale doesn’t swamp the list.
+    // Optional cap so one crazy low sale doesn't swamp the list.
     const MAX_DISCOUNT = 0.60;          // 60 % below subject ⇒ max credit
     const cappedDiscountPct = Math.min(rawDiscountPct, MAX_DISCOUNT);
   

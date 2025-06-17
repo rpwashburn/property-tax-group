@@ -8,10 +8,9 @@ import {
 import { fetchAndAdjustComparables } from "@/lib/comparables/server"; 
 import { getSubjectProperty } from "@/lib/property-analysis/services/property-service";
 // Import types directly from types.ts
-import type { PropertySearchCriteria } from "@/lib/comparables/types";
+import type { PropertySearchCriteria, SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
 import { ComparablesView } from "./ComparablesView"; 
 // Update import for SubjectProperty from comparables/server, and other types from property-analysis/types
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
 
 interface ComparablesDataFetcherProps {
   searchParams?: { [key: string]: string | string[] | undefined };

@@ -1,9 +1,10 @@
 "use server"
 
 import { db } from '@/drizzle/db';
-import { propertyData, neighborhoodCodes, structuralElements, fixtures, extraFeaturesDetail } from '@/drizzle/schema';
-import { eq, and, type InferSelectModel, sql } from 'drizzle-orm';
-import type { EnrichedPropertyData, SubjectProperty, ApiPropertyResponse } from '@/lib/property-analysis/types/index';
+import { propertyData, structuralElements, extraFeaturesDetail } from '@/drizzle/schema';
+import { eq, and, sql } from 'drizzle-orm';
+import type { SubjectProperty } from "@/lib/comparables/types";
+import type { EnrichedPropertyData, ApiPropertyResponse } from '@/lib/property-analysis/types/index';
 import { extractGradeAndCondition, convertPropertyDataToSubjectProperty } from '@/lib/property-analysis/utils/property-utils';
 
 /**

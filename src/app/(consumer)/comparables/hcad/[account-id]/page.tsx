@@ -2,13 +2,11 @@ import type React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Building2, MapPin, Home, DollarSign, BarChart3, TrendingUp, AlertCircle, CheckCircle, FileText, Star, Download, Eye } from "lucide-react"
+import { Building2, MapPin, Home, BarChart3, CheckCircle, FileText, Download } from "lucide-react"
 import Link from "next/link"
 import { getPropertyDataByAccountNumber } from "@/lib/property-api-client"
 import { formatCurrency } from "@/lib/utils"
 import { getComparablesForProperty } from "@/lib/comparables/server"
-import type { ComparablesAPIResponse } from "@/lib/comparables/types"
 
 interface ComparablesPageProps {
   params: Promise<{
@@ -129,12 +127,9 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
 
   // Calculate year-over-year changes
   const currentTotal = parseFloat(propertyData.currentValues.totalAppraisedValue?.replace(/[^0-9.-]+/g, "") || "0");
-  const priorTotal = parseFloat(propertyData.priorValues.totalAppraisedValue?.replace(/[^0-9.-]+/g, "") || "0");
-  const totalChange = currentTotal - priorTotal;
 
   // Use real API data for comparables - Freemium model: show 3 full, tease the rest
   const freeComparables = comparablesData.comparables.slice(0, 3); // Show first 3 fully
-  const medianComparableValue = comparablesData.median_comparable_value;
 
   return (
     <div className="py-6 px-4 sm:py-12">
@@ -202,8 +197,6 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
           </CardContent>
         </Card>
 
-
-
         {/* Comparable Properties */}
         <Card>
           <CardHeader>
@@ -218,38 +211,38 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
           <CardContent>
             <div className="space-y-4">
               {/* Free Comparables - Full Access */}
-              {freeComparables.map((comp, index) => {
-                const varianceVsYours = ((comp.financial_data.adjusted_value - currentTotal) / currentTotal) * 100;
+              {freeComparables.map((comp) => {
+                const varianceVsYours = ((parseFloat(comp.totApprVal?.replace(/[^0-9.-]+/g, "") || "0") - currentTotal) / currentTotal) * 100;
                 return (
-                  <div key={comp.account_id} className="p-4 border rounded-lg bg-white shadow-sm">
+                  <div key={comp.acct} className="p-4 border rounded-lg bg-white shadow-sm">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <div>
-                        <div className="font-semibold text-lg">{comp.address}</div>
-                        <div className="text-sm text-muted-foreground">Account #{comp.account_id}</div>
+                        <div className="font-semibold text-lg">{comp.siteAddr1}</div>
+                        <div className="text-sm text-muted-foreground">Account #{comp.acct}</div>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Year Built:</span>
-                          <span className="font-medium">{comp.basic_info.year_built}</span>
+                          <span className="font-medium">{comp.yrImpr}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Square Feet:</span>
-                          <span className="font-medium">{comp.basic_info.square_footage.toLocaleString()}</span>
+                          <span className="font-medium">{comp.bldAr}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Condition:</span>
-                          <span className="font-medium">{comp.basic_info.building_condition}</span>
+                          <span className="font-medium">{comp.condition}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Quality:</span>
-                          <span className="font-medium">{comp.basic_info.building_quality}</span>
+                          <span className="font-medium">{comp.grade}</span>
                         </div>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Adjusted Value:</span>
                           <span className="font-bold text-primary text-lg">
-                            {formatCurrency(comp.financial_data.adjusted_value)}
+                            {formatCurrency(comp.totApprVal)}
                           </span>
                         </div>
                         <div className="flex justify-between">
@@ -276,16 +269,13 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
                       <div className="text-sm">
                         <div className="font-semibold text-blue-900 mb-2">📊 Professional Adjustment Analysis:</div>
                         <div className="text-blue-800">
-                          {comp.analysis.adjustment_notes.slice(0, 2).join(' • ')}
-                          {comp.analysis.adjustment_notes.length > 2 && ' • View all adjustments in full report...'}
+                          This feature is coming soon.
                         </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
-
-
 
               {/* Call to Action for More Comparables */}
               <div className="p-6 border-2 border-dashed border-primary/30 rounded-lg bg-gradient-to-r from-green-50 to-blue-50 text-center">
@@ -323,8 +313,6 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
             </div>
           </CardContent>
         </Card>
-
-
 
         {/* Additional Actions */}
         <div className="grid gap-4 sm:grid-cols-2">

@@ -2,7 +2,7 @@
 
 import OpenAI from 'openai';
 import { parseAndValidateAnalysis, validateAnalysisResults } from './analysis-service';
-import type { SubjectProperty } from '@/lib/property-analysis/types';
+import type { SubjectProperty } from '@/lib/comparables/types';
 import type { AnalysisData } from '@/lib/property-analysis/types/analysis-types';
 
 const openai = new OpenAI(); // Ensure OPENAI_API_KEY is set

@@ -2,7 +2,7 @@
 
 import { db } from '@/drizzle/db';
 import { propertyData, structuralElements } from '@/drizzle/schema';
-import type { ComparableProperty, AdjustedComparable } from '@/lib/property-analysis/types';
+import type { ComparableProperty, AdjustedComparable } from '@/lib/comparables/types';
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
 import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
 import { calculateAdjustments } from './calculations';
@@ -10,6 +10,7 @@ import { getComparablePropertyData } from '@/lib/property-analysis/services/prop
 
 import { ComparablesAPIResponse, ComparablesSearchCriteria } from './types'
 import { extractSearchCriteriaFromProperty } from './utils'
+import type { ApiPropertyResponse } from "../property-analysis/types";
 
 // Select specific columns for efficiency
 const selectedColumns = {
@@ -262,8 +263,6 @@ export async function getComparablesData(
   }
 }
 
-
-
 /**
  * Get comparable properties for a specific property
  * @param accountId - The account ID of the subject property
@@ -272,7 +271,7 @@ export async function getComparablesData(
  */
 export async function getComparablesForProperty(
   accountId: string,
-  propertyData: any
+  propertyData: ApiPropertyResponse
 ): Promise<ComparablesAPIResponse | null> {
   const searchCriteria = extractSearchCriteriaFromProperty(propertyData, accountId)
   return await getComparablesData(searchCriteria)

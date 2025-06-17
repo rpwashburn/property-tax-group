@@ -27,7 +27,7 @@ import {
   TrendingUp,
   TrendingDown
 } from "lucide-react"
-import type { SubjectProperty } from "@/lib/property-analysis/types"
+import type { SubjectProperty } from "@/lib/comparables/types"
 import type { UseAiAnalysisReturn } from "../../../(consumer)/report/hooks/use-ai-analysis"
 import type { UseOverrideStateReturn } from "../../../(consumer)/report/hooks/use-override-state"
 import { calculateMedianAssessment } from "@/lib/property-analysis/services/analysis-service"

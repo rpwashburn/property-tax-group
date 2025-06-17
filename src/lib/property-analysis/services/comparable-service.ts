@@ -1,6 +1,6 @@
 import { safeParseInt } from '@/lib/comparables/calculations';
 import { fetchAndAdjustComparables } from '@/lib/comparables/server';
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
 
 export interface ComparableData {

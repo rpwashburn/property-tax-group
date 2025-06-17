@@ -5,7 +5,7 @@ import type {
   MedianAssessmentResult,
   ExcludedProperty
 } from "@/lib/property-analysis/types/analysis-types"
-import type { SubjectProperty } from "@/lib/property-analysis/types"
+import type { SubjectProperty } from "@/lib/comparables/types"
 import type { Comparable } from "@/lib/comparables/types"
 
 /**

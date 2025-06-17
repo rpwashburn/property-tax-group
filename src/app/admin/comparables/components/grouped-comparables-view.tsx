@@ -13,7 +13,7 @@ import {
   TableRow 
 } from "@/components/ui/table"
 import { Download, Clock, Ruler, TrendingDown, Users, LucideIcon } from "lucide-react"
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types"
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types"
 
 interface GroupedComparablesViewProps {
   groupedComparables: {

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight, BarChart3, Building, Calculator, CheckCircle, Shield } from "lucide-react"
+import { ArrowRight, BarChart3, Building, Calculator, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function HomePage() {

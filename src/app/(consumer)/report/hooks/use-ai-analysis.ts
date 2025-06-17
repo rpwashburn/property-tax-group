@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { SubjectProperty } from "@/lib/property-analysis/types"
+import type { SubjectProperty } from "@/lib/comparables/types"
 import type { AnalysisData } from "@/lib/property-analysis/types/analysis-types"
 
 // Import individual services instead of the orchestrating action

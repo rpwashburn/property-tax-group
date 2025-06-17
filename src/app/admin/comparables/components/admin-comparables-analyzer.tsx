@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Brain, Database, Edit, Check, X, AlertCircle, Filter, Target, Layers } from "lucide-react"
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types"
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types"
 import type { PropertySearchCriteria } from "@/lib/comparables/types"
 
 // Import services

@@ -14,7 +14,7 @@ import {
   TableRow 
 } from "@/components/ui/table"
 import { Download, Target, Info, Clock, Ruler, TrendingDown, SortAsc, SortDesc } from "lucide-react"
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types"
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types"
 
 interface FinalComparablesViewProps {
   finalComparables: AdjustedComparable[]

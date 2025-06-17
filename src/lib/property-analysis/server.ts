@@ -1,6 +1,6 @@
 "use server"
 
-import type { AdjustedComparable, SubjectProperty } from './types';
+import type { AdjustedComparable, SubjectProperty } from '@/lib/comparables/types';
 import { searchProperties } from '@/lib/comparables/server';
 import { calculateAdjustments } from '@/lib/comparables/calculations';
 import type { PropertySearchCriteria } from '@/lib/comparables/types';

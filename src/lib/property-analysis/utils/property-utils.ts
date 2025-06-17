@@ -1,4 +1,5 @@
-import type { EnrichedPropertyData, SubjectProperty } from '@/lib/property-analysis/types/index';
+import type { SubjectProperty } from "@/lib/comparables/types";
+import type { EnrichedPropertyData } from '@/lib/property-analysis/types/index';
 
 /**
  * Unified function to extract grade and condition from structural elements

@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/lib/utils";
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types";
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
 import type { GroupMembershipIds } from '@/lib/comparables/calculations';
 
 /**

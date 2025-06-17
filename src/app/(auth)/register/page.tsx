@@ -57,7 +57,7 @@ export default function RegisterPage() {
         },
       });
 
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);

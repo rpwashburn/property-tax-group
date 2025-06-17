@@ -17,7 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 // Type Imports
 import type { PropertySearchCriteria } from "@/lib/comparables/types";
-import type { SubjectProperty, ComparableProperty, AdjustedComparable } from "@/lib/property-analysis/types";
+import type { SubjectProperty, ComparableProperty, AdjustedComparable } from "@/lib/comparables/types";
 // Import calculation functions and types
 import { 
     safeParseInt, // <<< Import safeParseInt

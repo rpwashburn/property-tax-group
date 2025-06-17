@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Download, Filter, SortAsc, SortDesc } from "lucide-react"
-import type { SubjectProperty, AdjustedComparable } from "@/lib/property-analysis/types"
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types"
 
 interface AllComparablesTableProps {
   comparables: AdjustedComparable[]

@@ -39,7 +39,7 @@ export default function DashboardPage() {
           },
         },
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to sign out");
     } finally {
       setIsSigningOut(false);
