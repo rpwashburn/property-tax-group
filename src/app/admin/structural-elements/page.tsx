@@ -67,7 +67,7 @@ export default async function AdminStructuralElementsPage({ searchParams }: {
           <TableBody>
             {elements && elements.length > 0 ? (
               elements.map((el: StructuralElement) => (
-                <TableRow key={el.id}>
+                <TableRow key={`element-${el.id}`}>
                   <TableCell className="font-medium font-mono">{el.acct}</TableCell>
                   <TableCell>{el.bldNum}</TableCell>
                   <TableCell>{el.code}</TableCell>

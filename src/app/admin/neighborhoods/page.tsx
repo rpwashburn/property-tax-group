@@ -62,7 +62,7 @@ export default async function AdminNeighborhoodsPage({ searchParams }: {
           <TableBody>
             {neighborhoods && neighborhoods.length > 0 ? (
               neighborhoods.map((nbh: NeighborhoodCode) => (
-                <TableRow key={nbh.id}>
+                <TableRow key={`neighborhood-${nbh.id}`}>
                   <TableCell className="font-medium">{nbh.code}</TableCell>
                   <TableCell>{nbh.groupCode}</TableCell>
                   <TableCell>{nbh.description}</TableCell>

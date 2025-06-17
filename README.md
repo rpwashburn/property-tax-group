@@ -71,7 +71,7 @@ PROPERTY_API_BASE_URL=http://localhost:9000
 
 The application will load property data from:
 ```
-{PROPERTY_API_BASE_URL}/api/v1/properties/account/{accountNumber}?include=buildings&include=owners
+{PROPERTY_API_BASE_URL}/api/v1/properties/account/{accountNumber}?include=buildings,owners
 ```
 
 **Note**: The API endpoint is required. If not configured, the application will throw an error.

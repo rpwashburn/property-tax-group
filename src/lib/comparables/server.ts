@@ -10,7 +10,7 @@ import { getComparablePropertyData } from '@/lib/property-analysis/services/prop
 
 import { ComparablesAPIResponse, ComparablesSearchCriteria } from './types'
 import { extractSearchCriteriaFromProperty } from './utils'
-import type { ApiPropertyResponse } from "../property-analysis/types";
+import type { ApiPropertyResponse } from "@/lib/properties";
 
 // Select specific columns for efficiency
 const selectedColumns = {

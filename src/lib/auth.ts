@@ -22,6 +22,37 @@ async function sendEmail({ to, subject, text, html }: {
   // await resend.emails.send({ from: 'noreply@yourdomain.com', to, subject, html });
 }
 
+// Better URL detection for production environments
+function getAuthURL() {
+  // If BETTER_AUTH_URL is explicitly set, use it
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
+  }
+  
+  // In Vercel production, use the VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Fallback to localhost for development
+  return "http://localhost:3000";
+}
+
+function getPublicAuthURL() {
+  // If NEXT_PUBLIC_BETTER_AUTH_URL is explicitly set, use it
+  if (process.env.NEXT_PUBLIC_BETTER_AUTH_URL) {
+    return process.env.NEXT_PUBLIC_BETTER_AUTH_URL;
+  }
+  
+  // In Vercel production, use the VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Fallback to localhost for development
+  return "http://localhost:3000";
+}
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -129,8 +160,8 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+    getAuthURL(),
+    getPublicAuthURL(),
   ],
   rateLimit: {
     enabled: true,

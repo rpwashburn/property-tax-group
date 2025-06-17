@@ -9,7 +9,7 @@ const DEFAULT_ACCOUNT = '1157370000003';
 
 async function testAPIIntegration(accountNumber = DEFAULT_ACCOUNT) {
   const apiBaseUrl = process.env.PROPERTY_API_BASE_URL || 'http://localhost:9000';
-  const url = `${apiBaseUrl}/api/v1/properties/account/${accountNumber}?include=buildings&include=owners`;
+  const url = `${apiBaseUrl}/api/v1/properties/account/${accountNumber}?include=buildings,owners`;
   
   console.log('🧪 Testing Property API Integration');
   console.log('📍 API URL:', url);

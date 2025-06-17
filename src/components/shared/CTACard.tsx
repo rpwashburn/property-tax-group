@@ -121,7 +121,7 @@ export function CTACard({
         
         <ul className="space-y-3 text-sm mb-6 flex-grow">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-2">
+            <li key={`feature-${index}-${feature.split(' ')[0]}`} className="flex items-center gap-3">
               <CheckCircle className={`h-4 w-4 ${button.variant === "blue" ? "text-blue-600" : "text-green-600"} mt-0.5 flex-shrink-0`} />
               <span dangerouslySetInnerHTML={{ __html: feature }} />
             </li>

@@ -358,7 +358,7 @@ function PropertyInformation({ propertyData }: { propertyData: EnrichedPropertyD
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {infoItems.map((item, index) => (
-          <div key={index} className="space-y-4">
+          <div key={`info-${item.label}-${index}`} className="space-y-4">
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
               <div className="flex items-center gap-2">
@@ -442,7 +442,7 @@ function PropertyCharacteristics({ propertyData }: { propertyData: EnrichedPrope
                     <h4 className="font-medium">Structural Elements</h4>
                     <div className="grid grid-cols-1 gap-4">
                       {propertyData.structuralElements.map((element, index) => (
-                        <Card key={index} className="overflow-hidden border-slate-200">
+                        <Card key={`element-${element.bldNum}-${element.code}-${index}`} className="overflow-hidden border-slate-200">
                           <CardHeader className="bg-slate-50 py-3">
                             <CardTitle className="text-sm flex items-center gap-2">
                               <Badge variant="outline" className="font-mono">

@@ -51,7 +51,7 @@ export default async function HelloPage() {
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-green-800">Sample Properties:</p>
                 {propertyData.sample_properties.map((property: Property, index: number) => (
-                  <div key={index} className="bg-white p-3 rounded border border-green-200">
+                  <div key={`property-${property.account}-${index}`} className="grid grid-cols-3 gap-4 p-4 border rounded">
                     <div className="text-sm text-gray-700">
                       <p><span className="font-semibold">Account:</span> {property.account}</p>
                       <p><span className="font-semibold">Address:</span> {property.address}</p>

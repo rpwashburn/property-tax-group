@@ -207,7 +207,7 @@ export function ExtraFeaturesStep({ propertyData, onNext, onBack }: ExtraFeature
           </CardHeader>
           <CardContent className="space-y-4">
             {disputes.map((dispute, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-3">
+              <div key={`dispute-${dispute.type}-${dispute.description}-${index}`} className="border rounded-lg p-4 space-y-3">
                 <div className="flex items-start gap-3">
                   <Checkbox
                     checked={dispute.disputed}
@@ -293,7 +293,7 @@ export function ExtraFeaturesStep({ propertyData, onNext, onBack }: ExtraFeature
                       {dispute.evidenceFiles.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {dispute.evidenceFiles.map((file, fileIndex) => (
-                            <div key={fileIndex} className="flex items-center justify-between text-sm bg-slate-50 rounded px-2 py-1">
+                            <div key={`evidence-${index}-${fileIndex}-${file.name}`} className="flex items-center justify-between text-sm bg-slate-50 rounded px-2 py-1">
                               <span className="truncate">{file.name}</span>
                               <Button
                                 type="button"

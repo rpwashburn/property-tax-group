@@ -241,7 +241,7 @@ export function AdditionalDeductionsStep({
                     </SelectTrigger>
                     <SelectContent>
                       {deductionTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem key={`deduction-type-${type.value}`} value={type.value}>
                           {type.label}
                         </SelectItem>
                       ))}
@@ -365,7 +365,7 @@ export function AdditionalDeductionsStep({
                     <Label className="text-sm font-medium">Attached Evidence ({newDeduction.evidence.length})</Label>
                     <div className="mt-2 max-h-40 space-y-2 overflow-y-auto rounded-md border p-2">
                       {newDeduction.evidence.map((file) => (
-                        <div key={file.id} className="flex items-center justify-between rounded-md bg-muted p-2 text-sm">
+                        <div key={`evidence-${file.id}`} className="flex items-center justify-between rounded-md bg-muted p-2 text-sm">
                           <div className="flex items-center gap-2 truncate">
                             {file.type === "photo" ? (
                               <Camera className="h-4 w-4 flex-shrink-0 text-primary" />
@@ -474,7 +474,7 @@ export function AdditionalDeductionsStep({
                     <Label className="text-sm font-medium">Attached Quotes ({newDeduction.quotes.length})</Label>
                     <div className="mt-2 max-h-48 space-y-2 overflow-y-auto rounded-md border p-2">
                       {newDeduction.quotes.map((quote) => (
-                        <div key={quote.id} className="rounded-md bg-muted p-3">
+                        <div key={`quote-${quote.id}`} className="rounded-md bg-muted p-3">
                           <div className="flex items-center justify-between">
                             <div className="font-semibold text-primary">{quote.company}</div>
                             <Button
@@ -525,7 +525,7 @@ export function AdditionalDeductionsStep({
             <div className="mt-4 grid gap-x-4 gap-y-2 md:grid-cols-2">
               <Accordion type="multiple" className="w-full">
                 {deductionTypes.slice(0, Math.ceil(deductionTypes.length / 2)).map(dt => (
-                  <AccordionItem value={dt.value} key={dt.value}>
+                  <AccordionItem value={dt.value} key={`dt-first-${dt.value}`}>
                     <AccordionTrigger className="text-sm">{dt.label}</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground">
                       {/* Placeholder for specific examples - can be expanded later */}
@@ -536,7 +536,7 @@ export function AdditionalDeductionsStep({
               </Accordion>
               <Accordion type="multiple" className="w-full">
                 {deductionTypes.slice(Math.ceil(deductionTypes.length / 2)).map(dt => (
-                  <AccordionItem value={dt.value} key={dt.value}>
+                  <AccordionItem value={dt.value} key={`dt-second-${dt.value}`}>
                     <AccordionTrigger className="text-sm">{dt.label}</AccordionTrigger>
                     <AccordionContent className="text-xs text-muted-foreground">
                       E.g., Leaks, Pests, Outdated features impacting value.
@@ -580,9 +580,10 @@ export function AdditionalDeductionsStep({
 
                   <div className="space-y-4">
                     {deductions.map((deduction) => {
+                      const DeductionKey = `deduction-${deduction.type}-${deduction.amount}`
                       const deductionTypeInfo = deductionTypes.find((t) => t.value === deduction.type);
                       return (
-                        <Card key={deduction.id} className="overflow-hidden">
+                        <Card key={DeductionKey} className="border-l-4 border-l-orange-500">
                           <CardHeader className="flex flex-row items-start justify-between bg-muted/50 px-4 py-3">
                             <div>
                                <CardTitle className="text-lg">{deductionTypeInfo?.label || deduction.type}</CardTitle>
@@ -616,7 +617,7 @@ export function AdditionalDeductionsStep({
                                 ) : (
                                   <ul className="mt-1 space-y-1">
                                     {deduction.evidence.map((file) => (
-                                      <li key={file.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                      <li key={`deduction-evidence-${file.id}`} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                         {file.type === "photo" ? (
                                           <Camera className="h-3.5 w-3.5 flex-shrink-0 text-sky-600" />
                                         ) : (
@@ -638,7 +639,7 @@ export function AdditionalDeductionsStep({
                                 ) : (
                                   <ul className="mt-1 space-y-1">
                                     {deduction.quotes.map((quote) => (
-                                      <li key={quote.id} className="text-xs text-muted-foreground">
+                                      <li key={`deduction-quote-${quote.id}`} className="text-xs text-muted-foreground">
                                         <div className="flex items-center justify-between">
                                           <span className="truncate" title={`${quote.company} - ${quote.name}`}>{quote.company}</span>
                                           <span className="font-medium text-foreground">${quote.amount.toLocaleString()}</span>

@@ -67,7 +67,7 @@ export default async function AdminPropertiesPage({ searchParams }: {
           <TableBody>
             {properties && properties.length > 0 ? (
               properties.map((prop: PropertyData) => (
-                <TableRow key={prop.id}>
+                <TableRow key={`property-${prop.acct}`}>
                   <TableCell className="font-medium font-mono">{prop.acct}</TableCell>
                   <TableCell>{prop.siteAddr1}</TableCell>
                   <TableCell>${Number(prop.totMktVal)?.toLocaleString()}</TableCell>

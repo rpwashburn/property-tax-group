@@ -1,10 +1,9 @@
-import type React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, MapPin, Home, BarChart3, CheckCircle, FileText, Download } from "lucide-react"
 import Link from "next/link"
-import { getPropertyDataByAccountNumber } from "@/lib/property-api-client"
+import { getPropertyDataByAccountNumber } from "@/lib/properties"
 import { formatCurrency } from "@/lib/utils"
 import { getComparablesForProperty } from "@/lib/comparables/server"
 
@@ -212,46 +211,46 @@ export default async function ComparablesPage({ params }: ComparablesPageProps) 
             <div className="space-y-4">
               {/* Free Comparables - Full Access */}
               {freeComparables.map((comp) => {
-                const varianceVsYours = ((parseFloat(comp.totApprVal?.replace(/[^0-9.-]+/g, "") || "0") - currentTotal) / currentTotal) * 100;
+                const varianceVsYours = ((comp.financial_data.adjusted_value - currentTotal) / currentTotal) * 100;
                 return (
-                  <div key={comp.acct} className="p-4 border rounded-lg bg-white shadow-sm">
+                  <div key={comp.account_id} className="p-4 border rounded-lg bg-white shadow-sm">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                       <div>
-                        <div className="font-semibold text-lg">{comp.siteAddr1}</div>
-                        <div className="text-sm text-muted-foreground">Account #{comp.acct}</div>
+                        <div className="font-semibold text-lg">{comp.address}</div>
+                        <div className="text-sm text-muted-foreground">Account #{comp.account_id}</div>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Year Built:</span>
-                          <span className="font-medium">{comp.yrImpr}</span>
+                          <span className="font-medium">{comp.basic_info.year_built}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Square Feet:</span>
-                          <span className="font-medium">{comp.bldAr}</span>
+                          <span className="font-medium">{comp.basic_info.square_footage?.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Condition:</span>
-                          <span className="font-medium">{comp.condition}</span>
+                          <span className="font-medium">{comp.basic_info.building_condition}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Quality:</span>
-                          <span className="font-medium">{comp.grade}</span>
+                          <span className="font-medium">{comp.basic_info.building_quality}</span>
                         </div>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Adjusted Value:</span>
                           <span className="font-bold text-primary text-lg">
-                            {formatCurrency(comp.totApprVal)}
+                            {formatCurrency(comp.financial_data.adjusted_value)}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Variance:</span>
+                          <span className="text-muted-foreground">vs Your Property:</span>
                           <Badge 
                             variant={varianceVsYours < -10 ? 'destructive' : varianceVsYours < -5 ? 'secondary' : 'outline'} 
                             className="text-xs font-medium"
                           >
-                            {varianceVsYours > 0 ? '+' : ''}{varianceVsYours.toFixed(1)}% vs yours
+                            {varianceVsYours > 0 ? '+' : ''}{varianceVsYours.toFixed(1)}%
                           </Badge>
                         </div>
                         {varianceVsYours < -10 && (

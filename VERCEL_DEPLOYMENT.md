@@ -68,6 +68,40 @@ PROJECT_NAME=Property Tax Nexus API
 VERSION=1.0.0
 ```
 
+### Critical Variables (Required to fix CORS issues)
+
+Add these environment variables in your Vercel dashboard under Settings > Environment Variables:
+
+```bash
+# Authentication Configuration (CRITICAL - fixes CORS errors)
+BETTER_AUTH_URL=https://your-app-name.vercel.app
+NEXT_PUBLIC_BETTER_AUTH_URL=https://your-app-name.vercel.app
+BETTER_AUTH_SECRET=your-super-secret-auth-key-minimum-32-characters-long
+
+# Database Configuration
+POSTGRES_URL=postgres://[user].[project]:[password]@[host]:[port]/postgres
+
+# Optional: Property API Configuration
+PROPERTY_API_BASE_URL=https://your-api-domain.com
+
+# Optional: Vercel Bypass for Internal API Calls
+VERCEL_AUTOMATION_BYPASS_SECRET=your_secret_here
+```
+
+### Important Notes:
+
+1. **Replace `your-app-name` with your actual Vercel app name**
+   - If your app is at `https://property-tax-group.vercel.app`, use that exact URL
+   - Do NOT include trailing slashes
+
+2. **Generate a secure BETTER_AUTH_SECRET**
+   - Must be at least 32 characters long
+   - Use a random string generator or: `openssl rand -hex 32`
+
+3. **Database URL should use pooler connection**
+   - For Supabase: use port 6543 (pooler) not 5432 (direct)
+   - Format: `postgres://[user].[project]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`
+
 ## Deployment Steps
 
 ### 1. Pre-deployment Checklist
@@ -203,3 +237,29 @@ After successful deployment:
 3. Implement CI/CD pipeline with GitHub Actions
 4. Set up database backup strategy
 5. Consider implementing caching for frequently accessed data 
+
+## Quick Fix for CORS Error
+
+If you're seeing this error:
+```
+Access to fetch at 'http://localhost:3000/api/auth/get-session' from origin 'https://property-tax-group.vercel.app' has been blocked by CORS policy
+```
+
+1. Go to your Vercel dashboard
+2. Select your project
+3. Go to Settings > Environment Variables
+4. Add these variables:
+   ```
+   BETTER_AUTH_URL = https://property-tax-group.vercel.app
+   NEXT_PUBLIC_BETTER_AUTH_URL = https://property-tax-group.vercel.app
+   BETTER_AUTH_SECRET = [generate-32-char-secret]
+   ```
+5. Redeploy your application
+
+## Security Checklist
+
+- [ ] `BETTER_AUTH_SECRET` is at least 32 characters
+- [ ] Database credentials are secure
+- [ ] No sensitive data in environment variable names
+- [ ] URLs use HTTPS in production
+- [ ] CORS origins are properly configured 

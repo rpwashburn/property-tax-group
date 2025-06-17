@@ -68,7 +68,7 @@ export default async function AdminFixturesPage({ searchParams }: {
           <TableBody>
             {fixtures && fixtures.length > 0 ? (
               fixtures.map((fix: Fixture) => (
-                <TableRow key={fix.id}>
+                <TableRow key={`fixture-${fix.acct}-${fix.bldNum}-${fix.type}`}>
                   <TableCell className="font-medium font-mono">{fix.acct}</TableCell>
                   <TableCell>{fix.bldNum}</TableCell>
                   <TableCell>{fix.typeDscr}</TableCell>

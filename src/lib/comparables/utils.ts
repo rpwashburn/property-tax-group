@@ -1,5 +1,5 @@
 import type { ComparablesSearchCriteria } from './types'
-import type { ApiPropertyResponse } from '@/lib/property-analysis/types'
+import type { ApiPropertyResponse } from '@/lib/properties'
 import { extractGradeAndCondition } from '@/lib/property-analysis/utils/property-utils'
 
 /**

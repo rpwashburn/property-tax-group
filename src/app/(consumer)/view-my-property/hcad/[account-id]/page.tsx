@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Building2, MapPin, Home, DollarSign, Calendar, Users, FileText, TrendingUp, AlertCircle, CheckCircle, Clock, Scale, BarChart3, FileCheck } from "lucide-react"
-import { getPropertyDataByAccountNumber } from "@/lib/property-api-client"
+import { getPropertyDataByAccountNumber } from "@/lib/properties"
 import { formatCurrency } from "@/lib/utils"
 import { CTACard } from "@/components/shared/CTACard"
 
@@ -467,8 +467,6 @@ export default async function ViewPropertyPage({ params }: ViewPropertyPageProps
           </CardContent>
         </Card>
 
-
-
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Building Details */}
           {propertyData.buildings && propertyData.buildings.length > 0 && (
@@ -480,8 +478,8 @@ export default async function ViewPropertyPage({ params }: ViewPropertyPageProps
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {propertyData.buildings.map((building, index) => (
-                  <div key={index} className="space-y-3">
+                {propertyData.buildings.map((building) => (
+                  <div key={`building-${building.bldNum}-${building.code}`} className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline">Building {building.bldNum}</Badge>
                       <Badge variant="secondary">{building.categoryDscr}</Badge>
@@ -551,7 +549,7 @@ export default async function ViewPropertyPage({ params }: ViewPropertyPageProps
               </CardHeader>
               <CardContent>
                 {propertyData.owners.map((owner, index) => (
-                  <div key={index} className="space-y-2">
+                  <div key={`owner-${index}-${owner.name}`} className="space-y-2">
                     <div className="font-semibold break-words">{owner.name}</div>
                     {owner.mailingAddress && (
                       <div className="text-muted-foreground text-sm whitespace-pre-line break-words">

@@ -1,5 +1,5 @@
 import { getUnifiedPropertyData } from "@/lib/property-analysis/services/property-service"
-import type { EnrichedPropertyData } from "@/lib/property-analysis/types/index"
+import type { EnrichedPropertyData } from "@/lib/properties"
 import { StartClient } from "./start-client"
 import { ReportErrorPage } from "./components/shared/report-error-page"
 
