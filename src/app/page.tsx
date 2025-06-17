@@ -1,258 +1,449 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowRight, BarChart3, Building, Calculator, Shield } from "lucide-react"
+import { motion } from "framer-motion"
+import { ArrowRight, BarChart3, Building, Shield, CheckCircle2, ChevronRight, DollarSign, Percent } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 export default function HomePage() {
+  const [currentPropertyValue, setCurrentPropertyValue] = useState("350000")
+  const [taxRate, setTaxRate] = useState("2.5")
+  const [savings, setSavings] = useState({
+    currentTax: 8750,
+    reduction: 15,
+    newTax: 7437,
+    annualSavings: 1313,
+  })
+
+  // Format number with commas
+  const formatNumber = (num: string) => {
+    return num.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
+
+  // Handle property value input
+  const handlePropertyValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/,/g, "")
+    if (!isNaN(Number(value)) || value === "") {
+      setCurrentPropertyValue(value)
+    }
+  }
+
+  // Handle tax rate input
+  const handleTaxRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    if (!isNaN(Number(value)) || value === "") {
+      setTaxRate(value)
+    }
+  }
+
+  // Calculate savings
+  const calculateSavings = () => {
+    const propertyValue = Number.parseFloat(currentPropertyValue.replace(/,/g, "")) || 0
+    const rate = Number.parseFloat(taxRate) || 0
+
+    const currentTax = Math.round((propertyValue * rate) / 100)
+    const reduction = 15 // 15% reduction
+    const newTax = Math.round(currentTax * (1 - reduction / 100))
+    const annualSavings = currentTax - newTax
+
+    setSavings({
+      currentTax,
+      reduction,
+      newTax,
+      annualSavings,
+    })
+  }
+
+  // Calculate savings when inputs change
+  useEffect(() => {
+    calculateSavings()
+  }, [currentPropertyValue, taxRate])
+
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 },
+    },
+  }
+
+  const staggerChildren = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted pt-16 md:pt-24 lg:pt-32">
+      <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/50 pt-16 pb-24 md:pt-24 md:pb-32 lg:pt-32 lg:pb-40">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <div className="flex flex-col items-center justify-center gap-4 text-center md:gap-10">
-            <div className="space-y-4 max-w-4xl mx-auto">
-              <div className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
-                Stop Overpaying on Property Taxes
-              </div>
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-                <span className="text-primary">Protest</span> Your Property Taxes
-                <span className="block text-muted-foreground">Without The Headache</span>
-              </h1>
-              <p className="mx-auto max-w-[700px] text-lg text-muted-foreground md:text-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div className="flex flex-col gap-6" initial="hidden" animate="visible" variants={staggerChildren}>
+              <motion.div variants={fadeIn}>
+                <Badge className="mb-4 text-sm font-medium" variant="outline">
+                  Stop Overpaying on Property Taxes
+                </Badge>
+              </motion.div>
+
+              <motion.h1
+                className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+                variants={fadeIn}
+              >
+                <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  Protest
+                </span>{" "}
+                Your Property Taxes
+                <span className="block text-muted-foreground mt-2">Without The Headache</span>
+              </motion.h1>
+
+              <motion.p className="text-lg text-muted-foreground md:text-xl max-w-[600px]" variants={fadeIn}>
                 Our AI-powered platform helps you fight unfair property tax assessments with data-driven comparables and
                 expert guidance.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-              <Link href="/view-my-property">
-                <Button size="lg" className="gap-1 rounded-full px-8">
-                  Start Your Protest <ArrowRight className="h-4 w-4" />
+              </motion.p>
+
+              <motion.div className="flex flex-wrap gap-3 mt-2" variants={fadeIn}>
+                <Link href="/view-my-property">
+                  <Button size="lg" className="gap-2 rounded-full px-8">
+                    Start Your Protest <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Button size="lg" variant="outline" className="gap-2 rounded-full px-8">
+                  How It Works <ChevronRight className="h-4 w-4" />
                 </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
-                How It Works
-              </Button>
-              <Link href="/purchase">
-                <Button size="lg" variant="outline" className="gap-1 rounded-full px-8">
-                  Purchase Reports <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
+                <Link href="/purchase">
+                  <Button size="lg" variant="secondary" className="gap-2 rounded-full px-8">
+                    Purchase Reports <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </motion.div>
 
-          </div>
-        </div>
-        <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
-      </section>
+              <motion.div className="flex items-center gap-4 mt-4" variants={fadeIn}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-muted-foreground">
+                    <span className="font-medium">AI-Powered</span> property tax analysis
+                  </span>
+                </div>
+              </motion.div>
+            </motion.div>
 
-      {/* How It Works Section */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="space-y-2 max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">How It Works</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground">
-                Our guided wizard makes protesting your property taxes simple and effective.
-              </p>
-            </div>
-            <div className="w-full max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-12 mt-8">
-                <div className="process-card group relative flex flex-col items-center rounded-xl border bg-card p-6 text-card-foreground shadow-sm transition-all hover:shadow-md mx-auto max-w-sm">
-                  <div className="process-step absolute -top-5 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                    1
-                  </div>
-                  <div className="mb-4 mt-4 rounded-full bg-primary/10 p-3">
-                    <Building className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold">Enter Property Details</h3>
-                  <p className="text-center text-muted-foreground">
-                    Provide basic information about your property and current assessment.
-                  </p>
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <div className="relative z-10 rounded-2xl border bg-card p-6 shadow-xl">
+                <div className="absolute -right-2 -top-2">
+                  <Badge className="bg-primary text-primary-foreground">Free Analysis</Badge>
                 </div>
-                <div className="process-card group relative flex flex-col items-center rounded-xl border bg-card p-6 text-card-foreground shadow-sm transition-all hover:shadow-md mx-auto max-w-sm">
-                  <div className="process-step absolute -top-5 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                    2
-                  </div>
-                  <div className="mb-4 mt-4 rounded-full bg-primary/10 p-3">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold">AI Analysis</h3>
-                  <p className="text-center text-muted-foreground">
-                    Our AI finds comparable properties and builds your case automatically.
-                  </p>
-                </div>
-                <div className="process-card group relative flex flex-col items-center rounded-xl border bg-card p-6 text-card-foreground shadow-sm transition-all hover:shadow-md mx-auto max-w-sm">
-                  <div className="process-step absolute -top-5 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                    3
-                  </div>
-                  <div className="mb-4 mt-4 rounded-full bg-primary/10 p-3">
-                    <Shield className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-bold">Submit & Win</h3>
-                  <p className="text-center text-muted-foreground">
-                    We prepare and submit your protest with all supporting evidence.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Savings Calculator */}
-      <section className="bg-muted py-16 md:py-24">
-        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="space-y-2 max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Calculate Your Savings</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground">
-                See how much you could save by protesting your property taxes.
-              </p>
-            </div>
-            <div className="calculator-card mt-8 w-full max-w-4xl mx-auto rounded-xl border bg-card p-6 shadow-lg">
-              <div className="flex flex-col gap-6 md:flex-row">
-                <div className="flex-1 space-y-4">
+                <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Current Property Value
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                      <input
-                        type="text"
-                        placeholder="350,000"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-8 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      />
+                    <h3 className="text-xl font-semibold">Estimate Your Potential Savings</h3>
+                    <p className="text-sm text-muted-foreground">
+                      See what you might save with a successful property tax protest
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="property-value">Current Property Value</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="property-value"
+                          value={formatNumber(currentPropertyValue)}
+                          onChange={handlePropertyValueChange}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="tax-rate">Tax Rate (%)</Label>
+                      <div className="relative">
+                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="tax-rate" value={taxRate} onChange={handleTaxRateChange} className="pl-10" />
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                      Tax Rate (%)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="2.5"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    />
+
+                  <div className="rounded-xl bg-muted p-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Current Tax Bill:</span>
+                        <span className="font-medium">${savings.currentTax.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Potential Reduction:</span>
+                        <span className="font-medium">{savings.reduction}%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Potential New Tax Bill:</span>
+                        <span className="font-medium">${savings.newTax.toLocaleString()}</span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t flex justify-between">
+                        <span className="font-semibold">Potential Annual Savings:</span>
+                        <span className="font-bold text-primary">${savings.annualSavings.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-3 text-center">
+                      *Estimates based on typical successful protests. Results not guaranteed.
+                    </p>
                   </div>
-                  <Link href="/view-my-property">
+
+                  <Link href="/view-my-property" className="block">
                     <Button className="w-full gap-2 rounded-full">
-                      <Calculator className="h-4 w-4" /> Calculate Savings
+                      Start Your Protest <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
-                <div className="flex-1 rounded-xl bg-primary/5 p-6">
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-bold">Potential Savings</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Current Tax Bill:</span>
-                        <span className="font-medium">$8,750</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Estimated Reduction:</span>
-                        <span className="font-medium">15%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">New Tax Bill:</span>
-                        <span className="font-medium">$7,437</span>
-                      </div>
-                      <div className="mt-4 flex justify-between border-t pt-4">
-                        <span className="text-lg font-bold">Annual Savings:</span>
-                        <span className="text-lg font-bold text-primary">$1,313</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
+
+              <div className="absolute -z-10 inset-0 blur-3xl opacity-20 bg-primary rounded-full" />
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Background grid pattern */}
+        <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+      </section>
+
+      {/* Available in Texas Section */}
+      <section className="py-12 border-y bg-muted/30">
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+          <div className="flex flex-col items-center justify-center gap-6">
+            <p className="text-sm font-medium text-muted-foreground">SERVING HOMEOWNERS ACROSS TEXAS</p>
+            <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
+              {["Austin", "Houston", "Dallas", "San Antonio", "Fort Worth"].map((city) => (
+                <div key={city} className="flex items-center gap-2">
+                  <Building className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">{city}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 md:py-24">
+      {/* How It Works Section */}
+      <section className="py-24 md:py-32">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="space-y-2 max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Success Stories</h2>
-              <p className="mx-auto max-w-[700px] text-muted-foreground">
-                See what our customers are saying about their property tax savings.
+          <motion.div
+            className="flex flex-col items-center justify-center gap-4 text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.div variants={fadeIn} className="space-y-2 max-w-3xl mx-auto">
+              <Badge className="mb-4" variant="outline">
+                Simple 3-Step Process
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">How It Works</h2>
+              <p className="text-lg text-muted-foreground">
+                Our guided wizard makes protesting your property taxes simple and effective.
               </p>
-            </div>
-            <div className="w-full max-w-6xl mx-auto">
-              <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-                {[
-                  {
-                    name: "Sarah Johnson",
-                    location: "Austin, TX",
-                    quote:
-                      "I saved over $2,800 on my property taxes this year! The process was so simple and the AI found comparable properties I never would have discovered on my own.",
-                    savings: "$2,800",
-                  },
-                  {
-                    name: "Michael Rodriguez",
-                    location: "Houston, TX",
-                    quote:
-                      "After trying to protest on my own for years with minimal success, I used this service and got a 22% reduction in my assessed value. Worth every penny!",
-                    savings: "$3,450",
-                  },
-                  {
-                    name: "Jennifer Williams",
-                    location: "Dallas, TX",
-                    quote:
-                      "The step-by-step wizard made the process so easy. I was nervous about protesting my taxes, but the AI did all the hard work and I saved thousands.",
-                    savings: "$4,120",
-                  },
-                ].map((testimonial, index) => (
-                  <div
-                    key={index}
-                    className="testimonial-card flex flex-col rounded-xl border bg-card p-6 text-card-foreground shadow-sm mx-auto max-w-sm w-full"
-                  >
-                    <div className="mb-4 flex items-center gap-4">
-                      <div className="h-12 w-12 overflow-hidden rounded-full bg-primary/10">
-                        <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">
-                          {testimonial.name.charAt(0)}
-                        </div>
+            </motion.div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              {
+                step: 1,
+                icon: Building,
+                title: "Enter Property Details",
+                description: "Provide basic information about your property and current assessment.",
+                color: "bg-blue-500/10",
+                textColor: "text-blue-500",
+              },
+              {
+                step: 2,
+                icon: BarChart3,
+                title: "AI Analysis",
+                description: "Our AI finds comparable properties and builds your case automatically.",
+                color: "bg-primary/10",
+                textColor: "text-primary",
+              },
+              {
+                step: 3,
+                icon: Shield,
+                title: "Submit & Win",
+                description: "We prepare and submit your protest with all supporting evidence.",
+                color: "bg-green-500/10",
+                textColor: "text-green-500",
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={index}
+                className="relative"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+              >
+                <Card className="h-full overflow-hidden border-2 hover:border-primary/50 transition-all duration-300">
+                  <div className="absolute -right-12 -top-12 h-24 w-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 blur-2xl" />
+                  <div className="absolute -left-12 -bottom-12 h-24 w-24 rounded-full bg-gradient-to-tr from-primary/20 to-primary/5 blur-2xl" />
+
+                  <CardContent className="p-6 md:p-8 flex flex-col items-center text-center">
+                    <div className="relative mb-6">
+                      <div className={cn("rounded-full p-3", item.color)}>
+                        <item.icon className={cn("h-6 w-6", item.textColor)} />
                       </div>
-                      <div>
-                        <h3 className="font-bold">{testimonial.name}</h3>
-                        <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                      <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                        {item.step}
                       </div>
                     </div>
-                    <p className="flex-1 text-muted-foreground">&quot;{testimonial.quote}&quot;</p>
-                    <div className="mt-4 flex items-center justify-between border-t pt-4">
-                      <span className="text-sm font-medium">Annual Savings:</span>
-                      <span className="font-bold text-primary">{testimonial.savings}</span>
+
+                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                    <p className="text-muted-foreground">{item.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link href="/view-my-property">
+              <Button size="lg" className="gap-2 rounded-full px-8">
+                Start Your Protest <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+          <motion.div
+            className="flex flex-col items-center justify-center gap-4 text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.div variants={fadeIn} className="space-y-2 max-w-3xl mx-auto">
+              <Badge className="mb-4" variant="outline">
+                Why Choose Us
+              </Badge>
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">Built for Success</h2>
+              <p className="text-lg text-muted-foreground">
+                Our platform is designed to give you the best chance at reducing your property taxes.
+              </p>
+            </motion.div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "AI-Powered Analysis",
+                description:
+                  "Our advanced AI analyzes thousands of comparable properties to build the strongest case for your tax reduction.",
+                icon: BarChart3,
+                color: "bg-blue-500/10",
+                textColor: "text-blue-500",
+              },
+              {
+                title: "Expert Guidance",
+                description:
+                  "Step-by-step guidance through the entire protest process, making it simple even for first-time filers.",
+                icon: Shield,
+                color: "bg-primary/10",
+                textColor: "text-primary",
+              },
+              {
+                title: "No Upfront Costs",
+                description:
+                  "Get started with our free analysis. Only pay when you're satisfied with the results we can deliver.",
+                icon: DollarSign,
+                color: "bg-green-500/10",
+                textColor: "text-green-500",
+              },
+            ].map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+              >
+                <Card className="h-full flex flex-col">
+                  <CardContent className="flex flex-col flex-1 p-6 text-center">
+                    <div className={cn("rounded-full p-3 w-fit mx-auto mb-4", benefit.color)}>
+                      <benefit.icon className={cn("h-6 w-6", benefit.textColor)} />
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
+                    <p className="text-muted-foreground flex-1">{benefit.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative overflow-hidden bg-primary py-16 md:py-24">
+      <section className="relative overflow-hidden bg-primary py-24 md:py-32">
         <div className="container mx-auto relative z-10 px-4 md:px-6 max-w-7xl">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="space-y-2 max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold tracking-tighter text-primary-foreground sm:text-4xl md:text-5xl">
+          <motion.div
+            className="flex flex-col items-center justify-center gap-8 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerChildren}
+          >
+            <motion.div variants={fadeIn} className="space-y-4 max-w-3xl mx-auto">
+              <Badge className="bg-primary-foreground text-primary mb-4">Start Saving Today</Badge>
+              <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl md:text-5xl">
                 Ready to Lower Your Property Taxes?
               </h2>
-              <p className="mx-auto max-w-[700px] text-primary-foreground/80">
-                Join thousands of homeowners who have successfully reduced their property tax burden.
+              <p className="text-lg text-primary-foreground/80">
+                Start your journey to lower property taxes with our AI-powered platform.
               </p>
-            </div>
-            <div className="mt-6 mb-8">
+            </motion.div>
+
+            <motion.div variants={fadeIn} className="flex flex-wrap justify-center gap-4">
               <Link href="/view-my-property">
-                <Button size="lg" variant="secondary" className="gap-1 rounded-full px-8">
-                  Start Your Protest Now <ArrowRight className="h-4 w-4" />
+                <Button size="lg" variant="secondary" className="gap-2 rounded-full px-8">
+                  Start Your Protest <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-            </div>
+              <Link href="/purchase">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 rounded-full px-8 bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  Purchase Reports <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
 
-          </div>
+            <motion.div variants={fadeIn} className="flex items-center gap-2 text-primary-foreground/80">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="text-sm">No payment required to start</span>
+            </motion.div>
+          </motion.div>
         </div>
+
+        {/* Background grid pattern */}
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
       </section>
     </div>
