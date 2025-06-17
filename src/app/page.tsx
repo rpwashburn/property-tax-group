@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, BarChart3, Building, Shield, CheckCircle2, ChevronRight, DollarSign, Percent } from "lucide-react"
@@ -45,7 +45,7 @@ export default function HomePage() {
   }
 
   // Calculate savings
-  const calculateSavings = () => {
+  const calculateSavings = useCallback(() => {
     const propertyValue = Number.parseFloat(currentPropertyValue.replace(/,/g, "")) || 0
     const rate = Number.parseFloat(taxRate) || 0
 
@@ -60,12 +60,12 @@ export default function HomePage() {
       newTax,
       annualSavings,
     })
-  }
+  }, [currentPropertyValue, taxRate])
 
   // Calculate savings when inputs change
   useEffect(() => {
     calculateSavings()
-  }, [currentPropertyValue, taxRate])
+  }, [calculateSavings])
 
   // Animation variants
   const fadeIn = {

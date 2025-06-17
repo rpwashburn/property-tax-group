@@ -16,8 +16,5 @@ export {
   getPropertyDataByAccountNumber,
   searchProperties,
   getPropertiesByNeighborhood,
-  getComparableProperties,
-  checkPropertyApiHealth,
-  testPropertyApiConnection,
-  diagnosePropertyApiIssues
+  getComparableProperties
 } from './server'; 

@@ -2,10 +2,8 @@
 
 import type { 
   ApiPropertyResponse, 
-  PropertyApiError, 
   PropertyApiOptions,
-  PropertyApiHealthResponse,
-  PropertySearchResponse
+  PropertySearchResponse 
 } from './types/types';
 
 /**
@@ -78,23 +76,40 @@ function createFetchOptions(options: PropertyApiOptions = {}): RequestInit {
 }
 
 /**
- * Handle API response and errors
+ * Handle API response with proper error handling and logging
  */
-async function handleApiResponse<T>(response: Response, accountNumber?: string): Promise<T | null> {
+async function handleApiResponse<T>(response: Response): Promise<T | null> {
   if (!response.ok) {
-    if (response.status === 404) {
-      console.log(`[PropertyAPI] Property not found${accountNumber ? ` for account: ${accountNumber}` : ''}`);
-      return null;
+    console.log(`[PropertyAPI] Response status: ${response.status}`);
+    console.log(`[PropertyAPI] Response statusText: ${response.statusText}`);
+    
+    // Log response headers for debugging
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    console.log(`[PropertyAPI] Response headers:`, JSON.stringify(headers, null, 2));
+    
+    // Try to get the response body for more details
+    try {
+      const errorBody = await response.text();
+      console.log(`[PropertyAPI] ${response.status} Response body:`, errorBody);
+    } catch (bodyError) {
+      console.log(`[PropertyAPI] Could not read response body:`, bodyError);
     }
     
-    const error: PropertyApiError = new Error(`API request failed: ${response.status} ${response.statusText}`);
-    error.status = response.status;
-    error.statusText = response.statusText;
-    throw error;
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`, {
+      cause: { status: response.status, statusText: response.statusText }
+    });
   }
 
-  const data = await response.json();
-  return data;
+  try {
+    const data = await response.json();
+    return data as T;
+  } catch (parseError) {
+    console.error('[PropertyAPI] Failed to parse JSON response:', parseError);
+    return null;
+  }
 }
 
 /**
@@ -120,53 +135,20 @@ export async function getPropertyByAccount(
       include: includes
     });
     
-    // Enhanced debugging for production
-    console.log(`[PropertyAPI] Environment: ${process.env.NODE_ENV}`);
-    console.log(`[PropertyAPI] PROPERTY_API_BASE_URL: ${process.env.PROPERTY_API_BASE_URL}`);
-    console.log(`[PropertyAPI] Base URL: ${baseUrl}`);
-    console.log(`[PropertyAPI] Account Number: ${accountNumber}`);
-    console.log(`[PropertyAPI] Includes: ${JSON.stringify(includes)}`);
-    console.log(`[PropertyAPI] Final URL: ${url}`);
+    console.log(`[PropertyAPI] Fetching property data from: ${url}`);
     
-    const fetchOptions = createFetchOptions(options);
-    console.log(`[PropertyAPI] Fetch options: ${JSON.stringify(fetchOptions, null, 2)}`);
-    console.log(`[PropertyAPI] Request headers being sent: ${JSON.stringify(fetchOptions.headers)}`);
-    
-    const response = await fetch(url, fetchOptions);
-    
-    // Log response details for debugging
-    console.log(`[PropertyAPI] Response status: ${response.status}`);
-    console.log(`[PropertyAPI] Response statusText: ${response.statusText}`);
-    console.log(`[PropertyAPI] Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
-    
-    // If we get a bad request, try to log the response body for debugging
-    if (response.status === 400) {
-      try {
-        const errorBody = await response.clone().text();
-        console.log(`[PropertyAPI] 400 Response body: ${errorBody}`);
-      } catch (e) {
-        console.log(`[PropertyAPI] Could not read 400 response body: ${e}`);
-      }
-    }
-    
-    const data = await handleApiResponse<ApiPropertyResponse>(response, accountNumber);
+    const response = await fetch(url, createFetchOptions(options));
+    const data = await handleApiResponse<ApiPropertyResponse>(response);
     
     if (data) {
       console.log(`[PropertyAPI] Successfully fetched property data for account: ${accountNumber}`);
+      return data;
     }
     
-    return data;
-    
+    return null;
   } catch (error) {
     console.error(`[PropertyAPI] Error fetching property data for account ${accountNumber}:`, error);
-    
-    if (error instanceof Error && 'status' in error) {
-      // Re-throw API errors as-is
-      throw error;
-    }
-    
-    // Wrap other errors
-    throw new Error(`Failed to fetch property data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error instanceof Error ? error : new Error('Failed to fetch property data');
   }
 }
 
@@ -277,124 +259,7 @@ export async function getComparableProperties(
     return data;
     
   } catch (error) {
-    console.error(`[PropertyAPI] Error fetching comparables for ${accountNumber}:`, error);
+    console.error(`[PropertyAPI] Error fetching comparable properties:`, error);
     throw error instanceof Error ? error : new Error('Failed to fetch comparable properties');
   }
 }
-
-/**
- * Check if the Property API is healthy/reachable
- * @returns Promise<PropertyApiHealthResponse>
- */
-export async function checkPropertyApiHealth(): Promise<PropertyApiHealthResponse> {
-  try {
-    const baseUrl = getApiBaseUrl();
-    const response = await fetch(`${baseUrl}/health`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store'
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        ...data
-      };
-    } else {
-      return {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString()
-      };
-    }
-  } catch (error) {
-    console.error('[PropertyAPI] Health check failed:', error);
-    return {
-      status: 'unhealthy',
-      timestamp: new Date().toISOString()
-    };
-  }
-}
-
-/**
- * Test API connectivity with a known account
- * @param testAccountNumber - Test account number (defaults to a known test account)
- * @returns Promise<boolean>
- */
-export async function testPropertyApiConnection(
-  testAccountNumber: string = '0520860000040'
-): Promise<boolean> {
-  try {
-    const health = await checkPropertyApiHealth();
-    if (health.status !== 'healthy') {
-      return false;
-    }
-    
-    // Try to fetch a test property
-    const testProperty = await getPropertyByAccount(testAccountNumber, { cache: false });
-    return testProperty !== null;
-    
-  } catch (error) {
-    console.error('[PropertyAPI] Connection test failed:', error);
-    return false;
-  }
-}
-
-/**
- * Comprehensive diagnostic function for troubleshooting API issues
- * @returns Promise<object> - Diagnostic information
- */
-export async function diagnosePropertyApiIssues(): Promise<{
-  environment: string;
-  baseUrl: string;
-  envVarSet: boolean;
-  healthCheck: PropertyApiHealthResponse | { status: 'error'; error: string };
-  connectivityTest: boolean;
-  sampleUrl: string;
-  timestamp: string;
-}> {
-  const baseUrl = getApiBaseUrl();
-  const sampleAccountNumber = '0520860000040';
-  
-  console.log('[PropertyAPI] Running comprehensive diagnostics...');
-  
-  // Test health endpoint
-  let healthCheck: PropertyApiHealthResponse | { status: 'error'; error: string };
-  try {
-    healthCheck = await checkPropertyApiHealth();
-  } catch (error) {
-    healthCheck = { 
-      status: 'error', 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    };
-  }
-  
-  // Test basic connectivity
-  let connectivityTest = false;
-  try {
-    const response = await fetch(`${baseUrl}/health`, {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store'
-    });
-    connectivityTest = response.ok;
-  } catch (error) {
-    console.log('[PropertyAPI] Connectivity test failed:', error);
-  }
-  
-  const diagnostics = {
-    environment: process.env.NODE_ENV || 'unknown',
-    baseUrl: baseUrl,
-    envVarSet: !!process.env.PROPERTY_API_BASE_URL,
-    healthCheck,
-    connectivityTest,
-    sampleUrl: buildPropertyApiUrl(baseUrl, `/api/v1/properties/account/${sampleAccountNumber}`, {
-      include: ['buildings', 'owners']
-    }),
-    timestamp: new Date().toISOString()
-  };
-  
-  console.log('[PropertyAPI] Diagnostics results:', JSON.stringify(diagnostics, null, 2));
-  return diagnostics;
-} 
