@@ -91,7 +91,7 @@ VERCEL_AUTOMATION_BYPASS_SECRET=your_secret_here
 ### Important Notes:
 
 1. **Replace `your-app-name` with your actual Vercel app name**
-   - If your app is at `https://property-tax-group.vercel.app`, use that exact URL
+   - If your app is at `https://fightyourtax-ai.vercel.app`, use that exact URL
    - Do NOT include trailing slashes
 
 2. **Generate a secure BETTER_AUTH_SECRET**
@@ -242,7 +242,7 @@ After successful deployment:
 
 If you're seeing this error:
 ```
-Access to fetch at 'http://localhost:3000/api/auth/get-session' from origin 'https://property-tax-group.vercel.app' has been blocked by CORS policy
+Access to fetch at 'http://localhost:3000/api/auth/get-session' from origin 'https://fightyourtax-ai.vercel.app' has been blocked by CORS policy
 ```
 
 1. Go to your Vercel dashboard
@@ -250,8 +250,8 @@ Access to fetch at 'http://localhost:3000/api/auth/get-session' from origin 'htt
 3. Go to Settings > Environment Variables
 4. Add these variables:
    ```
-   BETTER_AUTH_URL = https://property-tax-group.vercel.app
-   NEXT_PUBLIC_BETTER_AUTH_URL = https://property-tax-group.vercel.app
+   BETTER_AUTH_URL = https://fightyourtax-ai.vercel.app
+NEXT_PUBLIC_BETTER_AUTH_URL = https://fightyourtax-ai.vercel.app
    BETTER_AUTH_SECRET = [generate-32-char-secret]
    ```
 5. Redeploy your application

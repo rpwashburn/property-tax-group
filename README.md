@@ -1,4 +1,4 @@
-# property-tax-group
+# FightYourTax.AI
 
 A property tax analysis application.
 

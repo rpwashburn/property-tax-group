@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Property Tax Group",
-  description: "Property Tax Analysis Tool",
+  title: "FightYourTax.AI",
+  description: "AI-powered property tax assessment and analysis platform",
 };
 
 export default function RootLayout({

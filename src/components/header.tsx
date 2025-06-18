@@ -61,7 +61,7 @@ export default function Header() {
               <BarChart3 className="h-5 w-5" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              PropertyTaxGroup
+                              FightYourTax.AI
             </span>
           </Link>
 

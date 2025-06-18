@@ -22,7 +22,7 @@ The script uses environment variables for configuration. Add these to your `.env
 
 ```env
 # Admin Seeding Configuration
-ADMIN_EMAIL="admin@propertytaxgroup.com"     # Default admin email
+ADMIN_EMAIL="admin@fightyourtax.ai"     # Default admin email
 ADMIN_PASSWORD="your-secure-password"        # Default admin password  
 ADMIN_NAME="Admin User"                      # Default admin name
 ```
@@ -52,7 +52,7 @@ ADMIN_NAME="Admin User"                      # Default admin name
 
 If environment variables are not set, the script uses these defaults:
 
-- Email: `admin@propertytaxgroup.com`
+- Email: `admin@fightyourtax.ai`
 - Password: `admin123456` 
 - Name: `Admin User`
 
@@ -65,7 +65,7 @@ Instead of relying on the default hardcoded password, you can use the password r
 ### Steps:
 
 1. **Visit the forgot password page**: Go to `/forgot-password`
-2. **Enter admin email**: Use the admin email (default: `admin@propertytaxgroup.com`)
+2. **Enter admin email**: Use the admin email (default: `admin@fightyourtax.ai`)
 3. **Check console/email**: In development, the reset link will be displayed in the server console
 4. **Click reset link**: Follow the link to set a new secure password
 5. **Log in**: Use your new password to access the admin account

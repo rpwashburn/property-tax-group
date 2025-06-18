@@ -1,6 +1,6 @@
 <context>
 # Overview  
-The "property-tax-group" application is a web-based platform designed to assist property owners and administrators with property tax assessment and analysis.
+The "FightYourTax.AI" application is a web-based platform designed to assist property owners and administrators with property tax assessment and analysis.
 It solves the problem of understanding and potentially challenging property tax assessments by providing data-driven insights and reports.
 It is for property owners (consumers) seeking to understand their property's valuation and tax liabilities, and for administrators who manage the underlying property data.
 The application is valuable because it centralizes property information, automates aspects of property analysis, and empowers users with information to make informed decisions regarding property taxes.

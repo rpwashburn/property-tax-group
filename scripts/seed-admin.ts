@@ -15,7 +15,7 @@ function generateId(): string {
 }
 
 // Configuration from environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@propertytaxgroup.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@fightyourtax.ai';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123456';
 const ADMIN_NAME = process.env.ADMIN_NAME || 'Admin User';
 

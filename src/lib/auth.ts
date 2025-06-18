@@ -19,7 +19,7 @@ async function sendEmail({ to, subject, text, html }: {
   // TODO: Replace with actual email service (Resend, SendGrid, etc.)
   // Example with Resend:
   // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({ from: 'noreply@yourdomain.com', to, subject, html });
+  // await resend.emails.send({ from: 'noreply@fightyourtax.ai', to, subject, html });
 }
 
 // Better URL detection for production environments
@@ -69,12 +69,12 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
-        subject: "Reset your password - Property Tax Group",
+        subject: "Reset your password - FightYourTax.AI",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Password Reset Request</h2>
             <p>Hello ${user.name || 'there'},</p>
-            <p>You requested a password reset for your Property Tax Group account.</p>
+            <p>You requested a password reset for your FightYourTax.AI account.</p>
             <p>If you didn't request this, please ignore this email.</p>
             <div style="margin: 30px 0;">
               <a href="${url}" style="background-color: #007cba; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
@@ -85,7 +85,7 @@ export const auth = betterAuth({
             <p style="word-break: break-all; color: #666;">${url}</p>
             <p>This link will expire in 1 hour.</p>
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">Property Tax Group - Helping you get fair property assessments</p>
+            <p style="color: #666; font-size: 12px;">FightYourTax.AI - AI-powered property tax assessment and analysis</p>
           </div>
         `,
       });
@@ -96,7 +96,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
-        subject: "Verify your email - Property Tax Group",
+        subject: "Verify your email - FightYourTax.AI",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Email Verification</h2>
@@ -110,7 +110,7 @@ export const auth = betterAuth({
             <p>Or copy and paste this link into your browser:</p>
             <p style="word-break: break-all; color: #666;">${url}</p>
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">Property Tax Group - Helping you get fair property assessments</p>
+            <p style="color: #666; font-size: 12px;">FightYourTax.AI - AI-powered property tax assessment and analysis</p>
           </div>
         `,
       });

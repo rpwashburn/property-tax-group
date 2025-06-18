@@ -59,7 +59,7 @@ function createFetchOptions(options: PropertyApiOptions = {}): RequestInit {
       // Add ngrok bypass header to avoid browser warning page
       'ngrok-skip-browser-warning': 'true',
       // Add user agent to look more like a legitimate request
-      'User-Agent': 'Property-Tax-Group-API/1.0',
+      'User-Agent': 'FightYourTax-AI-API/1.0',
     },
   };
 

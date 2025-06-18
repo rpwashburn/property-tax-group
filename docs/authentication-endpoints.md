@@ -1,6 +1,6 @@
 # Authentication API Endpoints
 
-This document outlines the authentication API endpoints available in the Property Tax Group application, powered by Better Auth.
+This document outlines the authentication API endpoints available in the FightYourTax.AI application, powered by Better Auth.
 
 ## Base Configuration
 

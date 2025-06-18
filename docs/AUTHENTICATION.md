@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Property Tax Group application features a comprehensive authentication system built with [Better Auth](https://better-auth.com/), providing secure user registration, login, session management, and password reset functionality.
+This FightYourTax.AI application features a comprehensive authentication system built with [Better Auth](https://better-auth.com/), providing secure user registration, login, session management, and password reset functionality.
 
 ## Table of Contents
 
@@ -91,7 +91,7 @@ BETTER_AUTH_SECRET="your-secret-key-here"
 BETTER_AUTH_URL="http://localhost:3000"
 
 # Admin Seeding (Optional)
-ADMIN_EMAIL="admin@propertytaxgroup.com"
+ADMIN_EMAIL="admin@fightyourtax.ai"
 ADMIN_PASSWORD="your-secure-password"
 ADMIN_NAME="Admin User"
 

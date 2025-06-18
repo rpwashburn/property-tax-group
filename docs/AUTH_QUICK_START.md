@@ -36,7 +36,7 @@ pnpm dev
 
 ## 🔐 Default Admin Credentials
 
-- **Email:** admin@propertytaxgroup.com
+- **Email:** admin@fightyourtax.ai
 - **Password:** admin123456
 
 **⚠️ Change this password immediately using the forgot password flow!**

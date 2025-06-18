@@ -15,13 +15,16 @@ import { cn } from "@/lib/utils"
 
 export default function HomePage() {
   const [currentPropertyValue, setCurrentPropertyValue] = useState("350000")
-  const [taxRate, setTaxRate] = useState("2.5")
+  const [potentialReduction, setPotentialReduction] = useState("15")
   const [savings, setSavings] = useState({
     currentTax: 8750,
     reduction: 15,
     newTax: 7437,
     annualSavings: 1313,
   })
+
+  // Static tax rate for Texas (typical rate)
+  const staticTaxRate = 2.5
 
   // Format number with commas
   const formatNumber = (num: string) => {
@@ -36,21 +39,22 @@ export default function HomePage() {
     }
   }
 
-  // Handle tax rate input
-  const handleTaxRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle potential reduction input
+  const handlePotentialReductionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    if (!isNaN(Number(value)) || value === "") {
-      setTaxRate(value)
+    // Limit to reasonable percentages (0-50%)
+    const numValue = Number.parseFloat(value)
+    if ((!isNaN(numValue) && numValue >= 0 && numValue <= 50) || value === "") {
+      setPotentialReduction(value)
     }
   }
 
   // Calculate savings
   const calculateSavings = useCallback(() => {
     const propertyValue = Number.parseFloat(currentPropertyValue.replace(/,/g, "")) || 0
-    const rate = Number.parseFloat(taxRate) || 0
+    const reduction = Number.parseFloat(potentialReduction) || 0
 
-    const currentTax = Math.round((propertyValue * rate) / 100)
-    const reduction = 15 // 15% reduction
+    const currentTax = Math.round((propertyValue * staticTaxRate) / 100)
     const newTax = Math.round(currentTax * (1 - reduction / 100))
     const annualSavings = currentTax - newTax
 
@@ -60,7 +64,7 @@ export default function HomePage() {
       newTax,
       annualSavings,
     })
-  }, [currentPropertyValue, taxRate])
+  }, [currentPropertyValue, potentialReduction])
 
   // Calculate savings when inputs change
   useEffect(() => {
@@ -108,7 +112,7 @@ export default function HomePage() {
                   Protest
                 </span>{" "}
                 Your Property Taxes
-                <span className="block text-muted-foreground mt-2">Without The Headache</span>
+                <span className="block text-muted-foreground mt-2">You are your best advocate</span>
               </motion.h1>
 
               <motion.p className="text-lg text-muted-foreground md:text-xl max-w-[600px]" variants={fadeIn}>
@@ -154,9 +158,9 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">Estimate Your Potential Savings</h3>
+                    <h3 className="text-xl font-semibold">Calculate Your Tax Savings</h3>
                     <p className="text-sm text-muted-foreground">
-                      See what you might save with a successful property tax protest
+                      Discover how much you could save with FightYourTax.AI
                     </p>
                   </div>
 
@@ -175,10 +179,23 @@ export default function HomePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="tax-rate">Tax Rate (%)</Label>
+                      <Label htmlFor="potential-reduction">Potential Reduction (%)</Label>
                       <div className="relative">
                         <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="tax-rate" value={taxRate} onChange={handleTaxRateChange} className="pl-10" />
+                        <Input 
+                          id="potential-reduction" 
+                          value={potentialReduction} 
+                          onChange={handlePotentialReductionChange} 
+                          className="pl-10"
+                          placeholder="5-50"
+                          min="0"
+                          max="50"
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>Conservative: 5-10%</span>
+                        <span>Typical: 10-20%</span>
+                        <span>Aggressive: 20-35%</span>
                       </div>
                     </div>
                   </div>
@@ -186,24 +203,31 @@ export default function HomePage() {
                   <div className="rounded-xl bg-muted p-4">
                     <div className="space-y-3">
                       <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Tax Rate (Texas Avg):</span>
+                        <span className="font-medium">{staticTaxRate}%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Current Tax Bill:</span>
                         <span className="font-medium">${savings.currentTax.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Potential Reduction:</span>
-                        <span className="font-medium">{savings.reduction}%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Potential New Tax Bill:</span>
+                        <span className="text-muted-foreground">With {savings.reduction}% Reduction:</span>
                         <span className="font-medium">${savings.newTax.toLocaleString()}</span>
                       </div>
                       <div className="mt-3 pt-3 border-t flex justify-between">
-                        <span className="font-semibold">Potential Annual Savings:</span>
-                        <span className="font-bold text-primary">${savings.annualSavings.toLocaleString()}</span>
+                        <span className="font-semibold text-green-700">Your Annual Savings:</span>
+                        <span className="font-bold text-green-600 text-lg">${savings.annualSavings.toLocaleString()}</span>
                       </div>
+                      {savings.annualSavings > 0 && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+                          <p className="text-sm text-green-700 font-medium text-center">
+                            💰 Over 10 years: ${(savings.annualSavings * 10).toLocaleString()} in savings!
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-3 text-center">
-                      *Estimates based on typical successful protests. Results not guaranteed.
+                      *Based on successful protests in Texas. Individual results may vary.
                     </p>
                   </div>
 

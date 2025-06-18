@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between md:gap-8">
             <div className="flex items-center gap-2 text-lg font-bold">
               <Shield className="h-5 w-5 text-primary" />
-              <span>PropertyTaxGroup</span>
+              <span>FightYourTax.AI</span>
             </div>
             <nav className="flex gap-4 sm:gap-6">
               <Link className="text-sm font-medium hover:underline" href="#">
@@ -27,7 +27,7 @@ export default function Footer() {
             </nav>
           </div>
           <div className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} PropertyTaxGroup. All rights reserved.
+            © {new Date().getFullYear()} FightYourTax.AI. All rights reserved.
           </div>
         </div>
       </footer>
