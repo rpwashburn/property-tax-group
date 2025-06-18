@@ -11,11 +11,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
 
 export default function HomePage() {
   const [currentPropertyValue, setCurrentPropertyValue] = useState("350000")
-  const [potentialReduction, setPotentialReduction] = useState("15")
+  const [potentialReduction, setPotentialReduction] = useState([15])
   const [savings, setSavings] = useState({
     currentTax: 8750,
     reduction: 15,
@@ -39,20 +40,15 @@ export default function HomePage() {
     }
   }
 
-  // Handle potential reduction input
-  const handlePotentialReductionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    // Limit to reasonable percentages (0-50%)
-    const numValue = Number.parseFloat(value)
-    if ((!isNaN(numValue) && numValue >= 0 && numValue <= 50) || value === "") {
-      setPotentialReduction(value)
-    }
+  // Handle potential reduction slider change
+  const handlePotentialReductionChange = (value: number[]) => {
+    setPotentialReduction(value)
   }
 
   // Calculate savings
   const calculateSavings = useCallback(() => {
     const propertyValue = Number.parseFloat(currentPropertyValue.replace(/,/g, "")) || 0
-    const reduction = Number.parseFloat(potentialReduction) || 0
+    const reduction = potentialReduction[0] || 0
 
     const currentTax = Math.round((propertyValue * staticTaxRate) / 100)
     const newTax = Math.round(currentTax * (1 - reduction / 100))
@@ -178,24 +174,27 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="potential-reduction">Potential Reduction (%)</Label>
-                      <div className="relative">
-                        <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          id="potential-reduction" 
-                          value={potentialReduction} 
-                          onChange={handlePotentialReductionChange} 
-                          className="pl-10"
-                          placeholder="5-50"
-                          min="0"
-                          max="50"
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <Label htmlFor="potential-reduction">Potential Reduction</Label>
+                        <span className="text-sm font-medium text-primary">{potentialReduction[0]}%</span>
+                      </div>
+                      <div className="px-2">
+                        <Slider
+                          id="potential-reduction"
+                          value={potentialReduction}
+                          onValueChange={handlePotentialReductionChange}
+                          min={5}
+                          max={50}
+                          step={1}
+                          className="w-full"
                         />
                       </div>
-                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>Conservative: 5-10%</span>
-                        <span>Typical: 10-20%</span>
-                        <span>Aggressive: 20-35%</span>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Conservative<br/>5-10%</span>
+                        <span>Typical<br/>10-20%</span>
+                        <span>Aggressive<br/>20-35%</span>
+                        <span>Very Aggressive<br/>35-50%</span>
                       </div>
                     </div>
                   </div>
