@@ -1,9 +1,14 @@
-// This file will contain server-side functions and Server Actions for admin CRUD operations.
+// This file contains server-side functions and Server Actions for admin CRUD operations.
 'use server'
 
-import { db } from '@/drizzle/db';
-import * as schema from '@/drizzle/schema';
-import { eq, desc, asc, count } from 'drizzle-orm';
+// TODO: Property CRUD operations have been disabled - property data moved to backend API
+// Only auth-related admin functions should be implemented here now
+
+// REMOVED: Database imports for property tables
+// import { db } from '@/drizzle/db';
+// import * as schema from '@/drizzle/schema';
+// import { eq, desc, asc, count } from 'drizzle-orm';
+
 import { revalidatePath } from 'next/cache';
 import type {
   NeighborhoodCode,
@@ -22,267 +27,114 @@ function handleError(operation: string, error: unknown) {
   return { success: false, error: `Failed to ${operation}.` };
 }
 
+// Helper function for disabled functionality
+function disabledFunction(functionName: string) {
+  console.warn(`[admin/server.ts] ${functionName} is disabled - property data moved to backend API`);
+  console.warn(`[admin/server.ts] Please implement ${functionName} via your backend API`);
+  return { 
+    success: false, 
+    error: `${functionName} is temporarily disabled - property data moved to backend API`,
+    data: [],
+    totalCount: 0
+  };
+}
+
 // --- Neighborhood Codes --- //
+// DISABLED: These functions used the old database schema
 
 export async function getNeighborhoodCodes(limit: number = 50, offset: number = 0) {
-  try {
-    const codes = await db.select()
-      .from(schema.neighborhoodCodes)
-      .orderBy(asc(schema.neighborhoodCodes.code))
-      .limit(limit)
-      .offset(offset);
-    
-    // Get total count
-    const countResult = await db.select({ total: count() }).from(schema.neighborhoodCodes);
-    const totalCount = countResult[0]?.total ?? 0;
-
-    return { success: true, data: codes as NeighborhoodCode[], totalCount };
-  } catch (error) {
-    // Adjust error handling if needed, ensure it doesn't return data on error
-    const result = handleError('fetch neighborhood codes', error);
-    return { ...result, data: [], totalCount: 0 }; 
-  }
+  return disabledFunction('getNeighborhoodCodes');
 }
 
 export async function createNeighborhoodCode(data: NewNeighborhoodCode) {
-  try {
-    const [newCode] = await db.insert(schema.neighborhoodCodes).values(data).returning();
-    revalidatePath('/admin/neighborhoods');
-    return { success: true, data: newCode as NeighborhoodCode };
-  } catch (error) {
-    return handleError('create neighborhood code', error);
-  }
+  return disabledFunction('createNeighborhoodCode');
 }
 
 export async function updateNeighborhoodCode(id: number, data: Partial<NewNeighborhoodCode>) {
-  if (typeof id !== 'number') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    // Ensure updatedAt is updated
-    const updateData = { ...data, updatedAt: new Date() };
-    const [updatedCode] = await db.update(schema.neighborhoodCodes).set(updateData).where(eq(schema.neighborhoodCodes.id, id)).returning();
-    revalidatePath('/admin/neighborhoods');
-    revalidatePath(`/admin/neighborhoods/${id}`); // Also revalidate specific item page if exists
-    return { success: true, data: updatedCode as NeighborhoodCode };
-  } catch (error) {
-    return handleError('update neighborhood code', error);
-  }
+  return disabledFunction('updateNeighborhoodCode');
 }
 
 export async function deleteNeighborhoodCode(id: number) {
-  if (typeof id !== 'number') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    await db.delete(schema.neighborhoodCodes).where(eq(schema.neighborhoodCodes.id, id));
-    revalidatePath('/admin/neighborhoods');
-    return { success: true };
-  } catch (error) {
-    return handleError('delete neighborhood code', error);
-  }
+  return disabledFunction('deleteNeighborhoodCode');
 }
 
 // --- Property Data --- //
+// DISABLED: These functions used the old database schema
 
 export async function getAllPropertyData(limit: number = 50, offset: number = 0) {
-  try {
-    const data = await db.select()
-      .from(schema.propertyData)
-      .orderBy(desc(schema.propertyData.createdAt)) // Example ordering
-      .limit(limit)
-      .offset(offset);
-    
-    // Get total count
-    const countResult = await db.select({ total: count() }).from(schema.propertyData);
-    const totalCount = countResult[0]?.total ?? 0;
-
-    return { success: true, data: data as PropertyData[], totalCount };
-  } catch (error) {
-    // Ensure consistent return type on error
-    const result = handleError('fetch property data', error);
-    return { ...result, data: [], totalCount: 0 }; 
-  }
+  return disabledFunction('getAllPropertyData');
 }
 
 export async function getPropertyDataById(id: string) {
-  try {
-    const [item] = await db.select().from(schema.propertyData).where(eq(schema.propertyData.id, id));
-    return { success: true, data: item as PropertyData | undefined };
-  } catch (error) {
-    return handleError(`fetch property data by id ${id}`, error);
-  }
+  return {
+    success: false,
+    error: 'getPropertyDataById is disabled - property data moved to backend API',
+    data: undefined
+  };
 }
 
 export async function createPropertyData(data: NewPropertyData) {
-  try {
-    const [newItem] = await db.insert(schema.propertyData).values(data).returning();
-    revalidatePath('/admin/properties');
-    return { success: true, data: newItem as PropertyData };
-  } catch (error) {
-    return handleError('create property data', error);
-  }
+  return disabledFunction('createPropertyData');
 }
 
 export async function updatePropertyData(id: string, data: Partial<NewPropertyData>) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    const updateData = { ...data, updatedAt: new Date() };
-    const [updatedItem] = await db.update(schema.propertyData).set(updateData).where(eq(schema.propertyData.id, id)).returning();
-    revalidatePath('/admin/properties');
-    revalidatePath(`/admin/properties/${id}`);
-    return { success: true, data: updatedItem as PropertyData };
-  } catch (error) {
-    return handleError('update property data', error);
-  }
+  return disabledFunction('updatePropertyData');
 }
 
 export async function deletePropertyData(id: string) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    await db.delete(schema.propertyData).where(eq(schema.propertyData.id, id));
-    revalidatePath('/admin/properties');
-    return { success: true };
-  } catch (error) {
-    return handleError('delete property data', error);
-  }
+  return disabledFunction('deletePropertyData');
 }
 
-export async function getAllStructuralElements(limit: number = 50, offset: number = 0) {
-  try {
-    const data = await db.select()
-      .from(schema.structuralElements)
-      .orderBy(desc(schema.structuralElements.createdAt)) // Example ordering
-      .limit(limit)
-      .offset(offset);
-    
-    // Get total count
-    const countResult = await db.select({ total: count() }).from(schema.structuralElements);
-    const totalCount = countResult[0]?.total ?? 0;
+// --- Structural Elements --- //
+// DISABLED: These functions used the old database schema
 
-    return { success: true, data: data as StructuralElement[], totalCount };
-  } catch (error) {
-    const result = handleError('fetch structural elements', error);
-    return { ...result, data: [], totalCount: 0 };
-  }
+export async function getAllStructuralElements(limit: number = 50, offset: number = 0) {
+  return disabledFunction('getAllStructuralElements');
 }
 
 export async function getStructuralElementById(id: string) {
-  try {
-    const [item] = await db.select().from(schema.structuralElements).where(eq(schema.structuralElements.id, id));
-    return { success: true, data: item as StructuralElement | undefined };
-  } catch (error) {
-    return handleError(`fetch structural element by id ${id}`, error);
-  }
+  return {
+    success: false,
+    error: 'getStructuralElementById is disabled - property data moved to backend API',
+    data: undefined
+  };
 }
 
 export async function createStructuralElement(data: NewStructuralElement) {
-  try {
-    const [newItem] = await db.insert(schema.structuralElements).values(data).returning();
-    revalidatePath('/admin/structural-elements');
-    return { success: true, data: newItem as StructuralElement };
-  } catch (error) {
-    return handleError('create structural element', error);
-  }
+  return disabledFunction('createStructuralElement');
 }
 
 export async function updateStructuralElement(id: string, data: Partial<NewStructuralElement>) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    const updateData = { ...data, updatedAt: new Date() };
-    const [updatedItem] = await db.update(schema.structuralElements).set(updateData).where(eq(schema.structuralElements.id, id)).returning();
-    revalidatePath('/admin/structural-elements');
-    revalidatePath(`/admin/structural-elements/${id}`);
-    return { success: true, data: updatedItem as StructuralElement };
-  } catch (error) {
-    return handleError('update structural element', error);
-  }
+  return disabledFunction('updateStructuralElement');
 }
 
 export async function deleteStructuralElement(id: string) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    await db.delete(schema.structuralElements).where(eq(schema.structuralElements.id, id));
-    revalidatePath('/admin/structural-elements');
-    return { success: true };
-  } catch (error) {
-    return handleError('delete structural element', error);
-  }
+  return disabledFunction('deleteStructuralElement');
 }
 
 // --- Fixtures --- //
+// DISABLED: These functions used the old database schema
 
 export async function getAllFixtures(limit: number = 50, offset: number = 0) {
-  try {
-    const data = await db.select()
-      .from(schema.fixtures)
-      .orderBy(desc(schema.fixtures.createdAt)) // Example ordering
-      .limit(limit)
-      .offset(offset);
-    
-    // Get total count
-    const countResult = await db.select({ total: count() }).from(schema.fixtures);
-    const totalCount = countResult[0]?.total ?? 0;
-
-    return { success: true, data: data as Fixture[], totalCount };
-  } catch (error) {
-    // Ensure consistent return type on error if needed, though current page checks success first
-    const result = handleError('fetch fixtures', error);
-    return { ...result, data: [], totalCount: 0 }; // Added data and totalCount for consistency
-  }
+  return disabledFunction('getAllFixtures');
 }
 
 export async function getFixtureById(id: string) {
-  try {
-    const [item] = await db.select().from(schema.fixtures).where(eq(schema.fixtures.id, id));
-    return { success: true, data: item as Fixture | undefined };
-  } catch (error) {
-    return handleError(`fetch fixture by id ${id}`, error);
-  }
+  return {
+    success: false,
+    error: 'getFixtureById is disabled - property data moved to backend API',
+    data: undefined
+  };
 }
 
 export async function createFixture(data: NewFixture) {
-  try {
-    const [newItem] = await db.insert(schema.fixtures).values(data).returning();
-    revalidatePath('/admin/fixtures');
-    return { success: true, data: newItem as Fixture };
-  } catch (error) {
-    return handleError('create fixture', error);
-  }
+  return disabledFunction('createFixture');
 }
 
 export async function updateFixture(id: string, data: Partial<NewFixture>) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    const updateData = { ...data, updatedAt: new Date() };
-    const [updatedItem] = await db.update(schema.fixtures).set(updateData).where(eq(schema.fixtures.id, id)).returning();
-    revalidatePath('/admin/fixtures');
-    revalidatePath(`/admin/fixtures/${id}`);
-    return { success: true, data: updatedItem as Fixture };
-  } catch (error) {
-    return handleError('update fixture', error);
-  }
+  return disabledFunction('updateFixture');
 }
 
 export async function deleteFixture(id: string) {
-  if (typeof id !== 'string') {
-    return { success: false, error: 'Invalid ID provided.' };
-  }
-  try {
-    await db.delete(schema.fixtures).where(eq(schema.fixtures.id, id));
-    revalidatePath('/admin/fixtures');
-    return { success: true };
-  } catch (error) {
-    return handleError('delete fixture', error);
-  }
+  return disabledFunction('deleteFixture');
 } 

@@ -102,68 +102,74 @@ export function PropertyDetailsGrid({ propertyData }: PropertyDetailsGridProps) 
         </Card>
       )}
 
-      {/* Assessment Status & Timeline */}
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            Assessment Status & Timeline
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
-              <span className="text-muted-foreground font-medium">Status:</span>
-              <Badge variant={propertyData.status.valueStatus === "Noticed" ? "destructive" : "secondary"}>
-                {propertyData.status.valueStatus}
-              </Badge>
-            </div>
-
-            {[
-              ...(propertyData.status.noticeDate
-                ? [
-                    {
-                      label: "Notice Date",
-                      value: new Date(propertyData.status.noticeDate).toLocaleDateString(),
-                    },
-                  ]
-                : []),
-              ...(propertyData.status.newOwnerDate
-                ? [
-                    {
-                      label: "New Owner Date",
-                      value: new Date(propertyData.status.newOwnerDate).toLocaleDateString(),
-                    },
-                  ]
-                : []),
-              ...(propertyData.status.revisionDate
-                ? [
-                    {
-                      label: "Last Revision",
-                      value: new Date(propertyData.status.revisionDate).toLocaleDateString(),
-                    },
-                  ]
-                : []),
-            ].map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
-                <span className="text-muted-foreground font-medium">{item.label}:</span>
-                <span className="font-semibold">{item.value}</span>
-              </div>
-            ))}
-
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              {propertyData.status.protested === "Y" ? (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+      {/* Assessment Status & Timeline - Only show if status data is available */}
+      {propertyData.status && (
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Assessment Status & Timeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {propertyData.status.valueStatus && (
+                <div className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                  <span className="text-muted-foreground font-medium">Status:</span>
+                  <Badge variant={propertyData.status.valueStatus === "Noticed" ? "destructive" : "secondary"}>
+                    {propertyData.status.valueStatus}
+                  </Badge>
+                </div>
               )}
-              <span className="font-medium">
-                {propertyData.status.protested === "Y" ? "Protest Filed" : "No Protest Filed"}
-              </span>
+
+              {[
+                ...(propertyData.status.noticeDate
+                  ? [
+                      {
+                        label: "Notice Date",
+                        value: new Date(propertyData.status.noticeDate).toLocaleDateString(),
+                      },
+                    ]
+                  : []),
+                ...(propertyData.status.newOwnerDate
+                  ? [
+                      {
+                        label: "New Owner Date",
+                        value: new Date(propertyData.status.newOwnerDate).toLocaleDateString(),
+                      },
+                    ]
+                  : []),
+                ...(propertyData.status.revisionDate
+                  ? [
+                      {
+                        label: "Last Revision",
+                        value: new Date(propertyData.status.revisionDate).toLocaleDateString(),
+                      },
+                    ]
+                  : []),
+              ].map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-3 rounded-lg bg-muted/30">
+                  <span className="text-muted-foreground font-medium">{item.label}:</span>
+                  <span className="font-semibold">{item.value}</span>
+                </div>
+              ))}
+
+              {propertyData.status.protested && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  {propertyData.status.protested === "Y" ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="font-medium">
+                    {propertyData.status.protested === "Y" ? "Protest Filed" : "No Protest Filed"}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

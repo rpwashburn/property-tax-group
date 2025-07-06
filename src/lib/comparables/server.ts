@@ -1,188 +1,78 @@
 "use server"; // Mark exports as Server Actions
 
-import { db } from '@/drizzle/db';
-import { propertyData, structuralElements } from '@/drizzle/schema';
 import type { ComparableProperty, AdjustedComparable } from '@/lib/comparables/types';
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
-import { sql, ilike, and, gte, lte, type SQL, eq, ne, like, isNotNull } from 'drizzle-orm';
-import { calculateAdjustments } from './calculations';
-import { getComparablePropertyData } from '@/lib/property-analysis/services/property-service';
 
 import { ComparablesAPIResponse, ComparablesSearchCriteria } from './types'
 import { extractSearchCriteriaFromProperty } from './utils'
 import type { ApiPropertyResponse } from "@/lib/properties";
 
-// Select specific columns for efficiency
-const selectedColumns = {
-    id: propertyData.id,
-    acct: propertyData.acct,
-    siteAddr1: propertyData.siteAddr1,
-    siteAddr3: propertyData.siteAddr3,
-    stateClass: propertyData.stateClass,
-    neighborhoodCode: propertyData.neighborhoodCode,
-    yrImpr: propertyData.yrImpr,
-    bldAr: propertyData.bldAr,
-    bldVal: propertyData.bldVal,
-    landAr: propertyData.landAr,
-    landVal: propertyData.landVal,
-    acreage: propertyData.acreage,
-    totMktVal: propertyData.totMktVal,
-    totApprVal: propertyData.totApprVal,
-    xFeaturesVal: propertyData.xFeaturesVal,
-};
+// New types for the properties search response
+export interface SimilarProperty {
+  accountId: string;
+  address: string;
+  assessedValue: string;
+  landValue: string;
+  sqFt: string;
+  yearBuilt: number;
+  condition: string;
+  quality: string;
+}
 
-// Main search function
+export interface PropertiesSearchSummary {
+  totalProperties: number;
+  avgAssessedValue: string;
+  medianAssessedValue: string;
+  minAssessedValue: string;
+  maxAssessedValue: string;
+  avgValuePerSqFt: string;
+  medianValuePerSqFt: string;
+  avgYearBuilt: number;
+  medianYearBuilt: number;
+  avgSquareFeet: string;
+  medianSquareFeet: string;
+  avgLandValue: string;
+  medianLandValue: string;
+  avgLandArea: string;
+  qualityDistribution: Record<string, number>;
+  conditionDistribution: Record<string, number>;
+}
+
+export interface PropertiesSearchResponse {
+  results: SimilarProperty[];
+  summary: PropertiesSearchSummary;
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+// TEMPORARY: Disabled database functions - need to implement via backend API
 export async function searchProperties(
     criteria: PropertySearchCriteria,
     limit: number = 1000,
     excludeAcct?: string | null
-): Promise<ComparableProperty[]> { // Return type now includes grade/condition
-    
-    // Subquery for Grade (Building 1 only)
-    const gradeSubquery = db.$with('grade_sq').as(
-      db.select({
-        acct: structuralElements.acct,
-        grade: structuralElements.categoryDscr // Alias happens implicitly via key name
-      })
-      .from(structuralElements)
-      .where(and(
-          eq(structuralElements.typeDscr, 'Grade Adjustment'),
-          eq(structuralElements.bldNum, '1')
-      ))
-    );
-    
-    // Subquery for Condition (Building 1 only)
-    const conditionSubquery = db.$with('condition_sq').as(
-      db.select({
-        acct: structuralElements.acct,
-        condition: structuralElements.categoryDscr // Alias happens implicitly via key name
-      })
-      .from(structuralElements)
-      .where(and(
-          eq(structuralElements.typeDscr, 'Cond / Desir / Util'),
-          eq(structuralElements.bldNum, '1')
-      ))
-    );
-
-    // Base query selecting from propertyData
-    let query = db
-        .with(gradeSubquery, conditionSubquery) // Include CTEs
-        .select({ 
-            ...selectedColumns, // Spread the base columns
-            // Select grade and condition from the joined CTEs
-            grade: gradeSubquery.grade,
-            condition: conditionSubquery.condition
-        })
-        .from(propertyData)
-        .leftJoin(gradeSubquery, eq(propertyData.acct, gradeSubquery.acct))
-        .leftJoin(conditionSubquery, eq(propertyData.acct, conditionSubquery.acct))
-        .$dynamic();
-
-    const conditions: SQL[] = [];
-
-    // Exclude subject account if provided
-    if (excludeAcct) {
-        conditions.push(ne(propertyData.acct, excludeAcct));
-    }
-
-    // Exclude properties with 0, empty, or NULL land/building values
-    conditions.push(isNotNull(propertyData.landVal));
-    conditions.push(ne(propertyData.landVal, '0')); 
-    conditions.push(ne(propertyData.landVal, '')); 
-    conditions.push(isNotNull(propertyData.bldVal)); 
-    conditions.push(ne(propertyData.bldVal, '0')); 
-    conditions.push(ne(propertyData.bldVal, ''));
-
-    // Address filter
-    if (criteria.address) {
-        conditions.push(ilike(propertyData.siteAddr1, `%${criteria.address}%`));
-    }
-
-    // Neighborhood filter
-    if (criteria.neighborhoodCode) {
-        conditions.push(eq(propertyData.neighborhoodCode, criteria.neighborhoodCode));
-    }
-
-    // Year Built filters (with casting)
-    if (criteria.minYearBuilt) {
-        conditions.push(gte(sql`CAST(${propertyData.yrImpr} AS INTEGER)`, criteria.minYearBuilt));
-    }
-    if (criteria.maxYearBuilt) {
-        conditions.push(lte(sql`CAST(${propertyData.yrImpr} AS INTEGER)`, criteria.maxYearBuilt));
-    }
-
-    // Grade Filter - Match base grade (strip +/-)
-    if (criteria.grade) {
-        // Extract base grade (remove trailing + or -)
-        const baseGrade = criteria.grade.replace(/[+-]$/, ''); 
-        // Use LIKE to match grades starting with the base grade
-        conditions.push(like(gradeSubquery.grade, `${baseGrade}%`)); 
-    }
-
-    // Condition Filter - Now filter on the joined subquery result
-    if (criteria.condition) {
-        conditions.push(eq(conditionSubquery.condition, criteria.condition));
-    }
-
-    // Apply conditions if any exist
-    if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-    }
-
-    // Add limit and order
-    // Ordering might need adjustment if joining changes the available columns for order by
-    query = query.orderBy(propertyData.acct).limit(limit);
-
-    try {
-        const results = await query;
-        // The result objects should now include grade and condition directly
-        return results as ComparableProperty[];
-    } catch (error) {
-        console.error("Error searching properties:", error);
-        throw new Error("Failed to search properties.");
-    }
+): Promise<ComparableProperty[]> {
+    console.warn('[comparables/server.ts] searchProperties is temporarily disabled - property data moved to backend API');
+    console.warn('[comparables/server.ts] Please implement this functionality in your backend API');
+    return [];
 } 
 
 /**
- * Fetches a subject property, finds comparable properties based on criteria,
- * and calculates adjustments for each comparable.
+ * TEMPORARY: Disabled function - needs backend API implementation
  * @param subjectAcct Account number of the subject property.
  * @param criteria Search criteria for finding comparables.
  * @param limit Maximum number of comparables to return.
- * @returns A promise resolving to an array of adjusted comparable properties.
+ * @returns A promise resolving to an empty array (temporarily disabled).
  */
 export async function fetchAndAdjustComparables(
     subjectAcct: string, 
     criteria: PropertySearchCriteria,
-    limit: number = 50 // Default limit
+    limit: number = 50
 ): Promise<AdjustedComparable[]> {
-    console.log(`[comparables/server.ts] Fetching & adjusting comparables for: ${subjectAcct}`);
-    try {
-        // 1. Fetch the subject property using unified service
-        const subjectProperty = await getComparablePropertyData(subjectAcct);
-        if (!subjectProperty) {
-            console.error(`[comparables/server.ts] Subject property not found: ${subjectAcct}`);
-            return [];
-        }
-        console.log(`[comparables/server.ts] Fetched subject: ${subjectProperty.acct}`);
-
-        // 2. Search for comparable properties, excluding the subject
-        const comparableProperties = await searchProperties(criteria, limit, subjectAcct);
-        console.log(`[comparables/server.ts] Found ${comparableProperties.length} raw comparables.`);
-
-        // 3. Calculate adjustments for each comparable
-        const adjustedComparables: AdjustedComparable[] = comparableProperties.map(prop => ({
-            ...prop,
-            adjustments: calculateAdjustments(subjectProperty, prop)
-        }));
-        console.log(`[comparables/server.ts] Calculated adjustments for ${adjustedComparables.length} comps.`);
-
-        return adjustedComparables;
-
-    } catch (error) {
-        console.error('[comparables/server.ts] Error in fetchAndAdjustComparables:', error);
-        return []; // Return empty array on error
-    }
+    console.warn('[comparables/server.ts] fetchAndAdjustComparables is temporarily disabled - property data moved to backend API');
+    console.warn('[comparables/server.ts] Please implement this functionality in your backend API');
+    return []; // Return empty array temporarily
 } 
 
 interface ComparablesApiError extends Error {
@@ -198,81 +88,220 @@ function getApiBaseUrl(): string {
 }
 
 /**
- * Fetch comparable properties from the backend API
- * @param searchCriteria - The criteria to search for comparable properties
- * @returns Promise<ComparablesAPIResponse | null>
+ * Search for similar properties using the new properties endpoint
+ */
+export async function searchSimilarProperties(
+  stateClass: string,
+  neighborhoodCode: string,
+  buildingQualityCode: string,
+  gradeAdjustment: string
+): Promise<PropertiesSearchResponse | null> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    
+    // Build the URL with query parameters
+    const url = new URL(`${baseUrl}/api/v1/properties`);
+    url.searchParams.set('state_class', stateClass);
+    url.searchParams.set('neighborhood_code', neighborhoodCode);
+    url.searchParams.set('building_quality_code', buildingQualityCode);
+    url.searchParams.set('grade_adjustment', gradeAdjustment);
+    url.searchParams.set('include', 'buildings');
+    url.searchParams.set('include', 'owners');
+    
+    console.log(`[PropertiesAPI] Searching similar properties from: ${url.toString()}`);
+    
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+
+    if (!response.ok) {
+      console.error(`[PropertiesAPI] Request failed: ${response.status} ${response.statusText}`);
+      
+      if (response.status === 404) {
+        console.warn('[PropertiesAPI] Properties endpoint not found');
+        return null;
+      }
+      
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data: PropertiesSearchResponse = await response.json();
+    console.log(`[PropertiesAPI] Received ${data.results?.length || 0} similar properties`);
+    
+    return data;
+  } catch (error) {
+    console.error('[PropertiesAPI] Error searching similar properties:', error);
+    return null;
+  }
+}
+
+/**
+ * Get comparables data via the backend API
+ * This function makes API calls instead of direct database queries
  */
 export async function getComparablesData(
   searchCriteria: ComparablesSearchCriteria
 ): Promise<ComparablesAPIResponse | null> {
   try {
     const baseUrl = getApiBaseUrl();
+    
+    // TODO: Update this endpoint URL to match your backend API
+    const url = `${baseUrl}/api/v1/comparables/search`;
+    
+    console.log(`[ComparablesAPI] Fetching comparables from: ${url}`);
+    console.log(`[ComparablesAPI] Search criteria:`, searchCriteria);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body: JSON.stringify(searchCriteria),
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
+
+    if (!response.ok) {
+      console.error(`[ComparablesAPI] Request failed: ${response.status} ${response.statusText}`);
+      
+      // If the endpoint doesn't exist yet, return a helpful message
+      if (response.status === 404) {
+        console.warn('[ComparablesAPI] Comparables endpoint not implemented in backend API yet');
+        return {
+          comparables: [],
+          total_count: 0,
+          median_comparable_value: 0
+        };
+      }
+      
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data: ComparablesAPIResponse = await response.json();
+    console.log(`[ComparablesAPI] Received ${data.comparables?.length || 0} comparables`);
+    
+    return data;
+  } catch (error) {
+    console.error('[ComparablesAPI] Error fetching comparables:', error);
+    
+    // Return empty result instead of throwing to prevent app crashes
+    return {
+      comparables: [],
+      total_count: 0,
+      median_comparable_value: 0
+    };
+  }
+}
+
+/**
+ * Get similar properties for a specific property via the backend API
+ * Updated to use the new properties search endpoint
+ */
+export async function getComparablesForProperty(
+  accountId: string,
+  propertyData: ApiPropertyResponse
+): Promise<PropertiesSearchResponse | null> {
+  try {
+    // Extract the correct parameters from property data
+    const stateClass = propertyData.classification?.stateClass || 'A1';
+    const neighborhoodCode = propertyData.classification?.neighborhoodCode || '';
+    
+    // Get building quality parameters from the first building
+    const firstBuilding = propertyData.buildings?.[0];
+    const buildingQualityCode = firstBuilding?.code || 'A';
+    const gradeAdjustment = firstBuilding?.adj || 'A';
+    
+    console.log(`[PropertiesAPI] Getting similar properties for: ${accountId}`);
+    console.log(`[PropertiesAPI] Parameters:`, {
+      state_class: stateClass,
+      neighborhood_code: neighborhoodCode,
+      building_quality_code: buildingQualityCode,
+      grade_adjustment: gradeAdjustment
+    });
+    
+    // Use the new properties search endpoint
+    return await searchSimilarProperties(
+      stateClass,
+      neighborhoodCode,
+      buildingQualityCode,
+      gradeAdjustment
+    );
+  } catch (error) {
+    console.error(`[PropertiesAPI] Error getting similar properties for ${accountId}:`, error);
+    return null;
+  }
+} 
+
+/**
+ * Get comparables using specific search parameters (direct API call)
+ * This matches the curl command parameters exactly
+ */
+export async function getComparablesWithParams(
+  subjectAccountId: string,
+  stateClass: string,
+  neighborhoodCode: string,
+  buildingQualityCode: string,
+  gradeAdjustment: string
+): Promise<ComparablesAPIResponse | null> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    
+    // Build the URL with query parameters exactly as shown in the curl command
     const url = new URL(`${baseUrl}/api/v1/comparables`);
+    url.searchParams.set('subject_account_id', subjectAccountId);
+    url.searchParams.set('state_class', stateClass);
+    url.searchParams.set('neighborhood_code', neighborhoodCode);
+    url.searchParams.set('building_quality_code', buildingQualityCode);
+    url.searchParams.set('grade_adjustment', gradeAdjustment);
     
-    // Add search parameters
-    url.searchParams.set("subject_account_id", searchCriteria.subject_account_id);
-    url.searchParams.set("state_class", searchCriteria.state_class);
-    url.searchParams.set("neighborhood_code", searchCriteria.neighborhood_code);
-    url.searchParams.set("quality_condition", searchCriteria.quality_condition);
-    
-    console.log(`[ComparablesApiClient] Fetching comparables data from: ${url.toString()}`);
+    console.log(`[ComparablesAPI] Fetching comparables from: ${url.toString()}`);
     
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
-      // Add cache control for server-side rendering
-      next: { revalidate: 300 } // Revalidate every 5 minutes
+      next: { revalidate: 300 } // Cache for 5 minutes
     });
-    
+
     if (!response.ok) {
+      console.error(`[ComparablesAPI] Request failed: ${response.status} ${response.statusText}`);
+      
       if (response.status === 404) {
-        console.log(`[ComparablesApiClient] No comparables found for criteria: ${JSON.stringify(searchCriteria)}`);
-        return null;
+        console.warn('[ComparablesAPI] Comparables endpoint not found');
+        return {
+          comparables: [],
+          total_count: 0,
+          median_comparable_value: 0
+        };
       }
       
-      const error: ComparablesApiError = new Error(`API request failed: ${response.status} ${response.statusText}`);
-      error.status = response.status;
-      error.statusText = response.statusText;
-      throw error;
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-    
-    const data: ComparablesAPIResponse = await response.json();
-    
-    // Validate the response structure
-    if (!data.comparables || !Array.isArray(data.comparables)) {
-      console.error('[ComparablesApiClient] Invalid comparables API response structure:', data);
-      return null;
-    }
-    
-    console.log(`[ComparablesApiClient] Successfully fetched ${data.comparables.length} comparables for account: ${searchCriteria.subject_account_id}`);
-    return data;
-    
-  } catch (error) {
-    console.error(`[ComparablesApiClient] Error fetching comparables data for account ${searchCriteria.subject_account_id}:`, error);
-    
-    if (error instanceof Error && 'status' in error) {
-      // Re-throw API errors as-is
-      throw error;
-    }
-    
-    // Wrap other errors
-    throw new Error(`Failed to fetch comparables data: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-}
 
-/**
- * Get comparable properties for a specific property
- * @param accountId - The account ID of the subject property
- * @param propertyData - The property data for the subject property
- * @returns Promise<ComparablesAPIResponse | null>
- */
-export async function getComparablesForProperty(
-  accountId: string,
-  propertyData: ApiPropertyResponse
-): Promise<ComparablesAPIResponse | null> {
-  const searchCriteria = extractSearchCriteriaFromProperty(propertyData, accountId)
-  return await getComparablesData(searchCriteria)
+    const data = await response.json();
+    console.log(`[ComparablesAPI] Received ${data.comparables?.length || 0} comparables`);
+    
+    // Map the response to our expected format
+    return {
+      comparables: data.comparables || [],
+      total_count: data.total_found || data.total_count || 0,
+      median_comparable_value: data.median_comparable_value || 0
+    };
+  } catch (error) {
+    console.error('[ComparablesAPI] Error fetching comparables:', error);
+    
+    return {
+      comparables: [],
+      total_count: 0,
+      median_comparable_value: 0
+    };
+  }
 } 

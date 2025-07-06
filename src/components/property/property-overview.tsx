@@ -7,6 +7,12 @@ interface PropertyOverviewProps {
 }
 
 export function PropertyOverview({ propertyData }: PropertyOverviewProps) {
+  // Build additional address info from available fields
+  const additionalAddress = [
+    propertyData.address.siteAddress2,
+    propertyData.address.siteAddress3
+  ].filter(Boolean).join(', ')
+
   return (
     <Card className="overflow-hidden border-2">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/60" />
@@ -21,11 +27,13 @@ export function PropertyOverview({ propertyData }: PropertyOverviewProps) {
           {/* Address Section - Takes 2 columns on large screens */}
           <div className="lg:col-span-2 space-y-2">
             <div className="text-lg sm:text-xl font-bold text-primary">
-              {propertyData.address.formattedAddress || propertyData.address.siteAddress1}
+              {propertyData.address.formattedAddress}
             </div>
-            <div className="text-sm text-muted-foreground">
-              {propertyData.address.siteAddress2}, {propertyData.address.siteAddress3}
-            </div>
+            {additionalAddress && (
+              <div className="text-sm text-muted-foreground">
+                {additionalAddress}
+              </div>
+            )}
             {propertyData.legal.description && (
               <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
                 <span className="font-medium">Legal:</span> {propertyData.legal.description}
@@ -37,9 +45,16 @@ export function PropertyOverview({ propertyData }: PropertyOverviewProps) {
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-2 text-sm">
             {[
               { label: "Type", value: propertyData.classification.stateClass },
-              { label: "School District", value: propertyData.classification.schoolDistrict },
+              ...(propertyData.classification.schoolDistrict 
+                ? [{ label: "School District", value: propertyData.classification.schoolDistrict }] 
+                : []),
               { label: "Neighborhood", value: propertyData.classification.neighborhoodCode },
-              { label: "Data Year", value: propertyData.characteristics.dataYear },
+              ...(propertyData.characteristics.yearImproved 
+                ? [{ label: "Year Improved", value: propertyData.characteristics.yearImproved.toString() }] 
+                : []),
+              ...(propertyData.characteristics.dataYear 
+                ? [{ label: "Data Year", value: propertyData.characteristics.dataYear }] 
+                : []),
             ].map((item, index) => (
               <div key={index} className="flex justify-between items-center">
                 <span className="text-muted-foreground">{item.label}:</span>

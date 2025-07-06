@@ -1,7 +1,7 @@
 import { safeParseInt } from '@/lib/comparables/calculations';
-import { fetchAndAdjustComparables } from '@/lib/comparables/server';
-import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
+import type { SubjectProperty, AdjustedComparable, ComparableFromAPI } from "@/lib/comparables/types";
 import type { PropertySearchCriteria } from '@/lib/comparables/types';
+import type { AdjustmentCalculations } from '@/lib/comparables/calculations';
 
 export interface ComparableData {
   groupedComparables: GroupedComparables;
@@ -140,24 +140,25 @@ function createGroupMembershipIds(
 }
 
 /**
- * Fetches and processes comparable properties for analysis
+ * Stub implementation for fetching comparables from API
+ * TODO: Implement with actual backend API call
+ */
+async function fetchComparablesFromAPI(
+  effectiveSubjectProperty: SubjectProperty
+): Promise<AdjustedComparable[]> {
+  console.warn('[comparable-service] fetchComparablesFromAPI is temporarily disabled - property data moved to backend API');
+  console.warn('[comparable-service] Please implement this functionality in your backend API');
+  return []; // Return empty array temporarily
+}
+
+/**
+ * Fetches and processes comparable properties for analysis using the new backend API
  */
 export async function fetchAndProcessComparables(
   effectiveSubjectProperty: SubjectProperty
 ): Promise<ComparableData> {
-  // Step 1: Create default search criteria based on subject property
-  const searchCriteria: PropertySearchCriteria = {
-    neighborhoodCode: effectiveSubjectProperty.neighborhoodCode ?? undefined,
-    grade: effectiveSubjectProperty.grade ?? undefined,
-    condition: effectiveSubjectProperty.condition ?? undefined,
-  };
-
-  // Step 2: Get all adjusted comparables
-  const allAdjustedComparables = await fetchAndAdjustComparables(
-    effectiveSubjectProperty.acct, 
-    searchCriteria, 
-    50 // Limit to 50 comparables
-  );
+  // Step 1: Get all adjusted comparables from the new API
+  const allAdjustedComparables = await fetchComparablesFromAPI(effectiveSubjectProperty);
   
   if (!allAdjustedComparables || allAdjustedComparables.length === 0) {
     throw new Error('No initial comparable data found to analyze.');

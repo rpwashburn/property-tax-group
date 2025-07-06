@@ -9,7 +9,7 @@ import { CurrentAssessmentValues } from "./current-assessment-values"
 import { YearOverYearComparison } from "./year-over-year-comparison"
 import { PropertyDetailsGrid } from "./property-details-grid"
 import { MarketInformation } from "./market-information"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, safeParseFloat } from "@/lib/utils"
 import type { ApiPropertyResponse } from "@/lib/properties/types/types"
 
 interface PropertyDetailsViewProps {
@@ -19,34 +19,26 @@ interface PropertyDetailsViewProps {
 
 export function PropertyDetailsView({ accountId, propertyData }: PropertyDetailsViewProps) {
   // Calculate year-over-year changes
-  const currentMarket = Number.parseFloat(propertyData.currentValues.totalMarketValue?.replace(/[^0-9.-]+/g, "") || "0")
-  const priorMarket = Number.parseFloat(propertyData.priorValues.totalMarketValue?.replace(/[^0-9.-]+/g, "") || "0")
+  const currentMarket = safeParseFloat(propertyData.currentValues.totalMarketValue)
+  const priorMarket = safeParseFloat(propertyData.priorValues.totalMarketValue)
   const marketChange = currentMarket - priorMarket
   const marketPercentChange = priorMarket > 0 ? (marketChange / priorMarket) * 100 : 0
 
-  const currentAppraised = Number.parseFloat(
-    propertyData.currentValues.totalAppraisedValue?.replace(/[^0-9.-]+/g, "") || "0",
-  )
-  const priorAppraised = Number.parseFloat(
-    propertyData.priorValues.totalAppraisedValue?.replace(/[^0-9.-]+/g, "") || "0",
-  )
+  const currentAppraised = safeParseFloat(propertyData.currentValues.totalAppraisedValue)
+  const priorAppraised = safeParseFloat(propertyData.priorValues.totalAppraisedValue)
   const appraisedChange = currentAppraised - priorAppraised
   const appraisedPercentChange = priorAppraised > 0 ? (appraisedChange / priorAppraised) * 100 : 0
 
-  const currentLand = Number.parseFloat(propertyData.currentValues.landValue?.replace(/[^0-9.-]+/g, "") || "0")
-  const priorLand = Number.parseFloat(propertyData.priorValues.landValue?.replace(/[^0-9.-]+/g, "") || "0")
+  const currentLand = safeParseFloat(propertyData.currentValues.landValue)
+  const priorLand = safeParseFloat(propertyData.priorValues.landValue)
   const landChange = currentLand - priorLand
 
-  const currentBuilding = Number.parseFloat(propertyData.currentValues.buildingValue?.replace(/[^0-9.-]+/g, "") || "0")
-  const priorBuilding = Number.parseFloat(propertyData.priorValues.buildingValue?.replace(/[^0-9.-]+/g, "") || "0")
+  const currentBuilding = safeParseFloat(propertyData.currentValues.buildingValue)
+  const priorBuilding = safeParseFloat(propertyData.priorValues.buildingValue)
   const buildingChange = currentBuilding - priorBuilding
 
-  const currentExtraFeatures = Number.parseFloat(
-    propertyData.currentValues.extraFeaturesValue?.replace(/[^0-9.-]+/g, "") || "0",
-  )
-  const priorExtraFeatures = Number.parseFloat(
-    propertyData.priorValues.extraFeaturesValue?.replace(/[^0-9.-]+/g, "") || "0",
-  )
+  const currentExtraFeatures = safeParseFloat(propertyData.currentValues.extraFeaturesValue)
+  const priorExtraFeatures = safeParseFloat(propertyData.priorValues.extraFeaturesValue)
   const extraFeaturesChange = currentExtraFeatures - priorExtraFeatures
 
   const hasSignificantIncrease = appraisedChange > 0 && appraisedPercentChange > 5
@@ -106,7 +98,7 @@ export function PropertyDetailsView({ accountId, propertyData }: PropertyDetails
 
             <PropertyDetailsGrid propertyData={propertyData} />
 
-            {propertyData.marketInfo.marketArea1Description && <MarketInformation propertyData={propertyData} />}
+            {propertyData.marketInfo?.marketArea1Description && <MarketInformation propertyData={propertyData} />}
           </motion.div>
         </div>
       </div>

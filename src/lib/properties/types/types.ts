@@ -1,11 +1,64 @@
 // Consolidated Property Types
 // This file contains all property-related types for the application
 
-import type { InferSelectModel } from 'drizzle-orm';
-import type { propertyData } from '@/drizzle/schema';
+// REMOVED: import type { InferSelectModel } from 'drizzle-orm';
+// REMOVED: import type { propertyData } from '@/drizzle/schema';
 
 // Base type from database schema (keeping for backward compatibility)
-export type PropertyData = InferSelectModel<typeof propertyData>;
+// Note: Property data is now handled by the backend API, but keeping this type for legacy compatibility
+export type PropertyData = {
+  id: string;
+  acct: string;
+  strNum: string | null;
+  str: string | null;
+  strSfx: string | null;
+  strSfxDir: string | null;
+  siteAddr1: string | null;
+  siteAddr2: string | null;
+  siteAddr3: string | null;
+  stateClass: string | null;
+  schoolDist: string | null;
+  neighborhoodCode: string | null;
+  neighborhoodGrp: string | null;
+  marketArea1: string | null;
+  marketArea1Dscr: string | null;
+  marketArea2: string | null;
+  marketArea2Dscr: string | null;
+  econArea: string | null;
+  econBldClass: string | null;
+  yrImpr: string | null;
+  yrAnnexed: string | null;
+  bldAr: string | null;
+  landAr: string | null;
+  acreage: string | null;
+  landVal: string | null;
+  bldVal: string | null;
+  xFeaturesVal: string | null;
+  agVal: string | null;
+  assessedVal: string | null;
+  totApprVal: string | null;
+  totMktVal: string | null;
+  priorLandVal: string | null;
+  priorBldVal: string | null;
+  priorXFeaturesVal: string | null;
+  priorAgVal: string | null;
+  priorTotApprVal: string | null;
+  priorTotMktVal: string | null;
+  newConstructionVal: string | null;
+  totRcnVal: string | null;
+  valueStatus: string | null;
+  noticed: string | null;
+  noticeDt: string | null;
+  protested: string | null;
+  certifiedDate: string | null;
+  revDt: string | null;
+  revBy: string | null;
+  newOwnDt: string | null;
+  lgl1: string | null;
+  jurs: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 // New API Response Structure from Property API
 export interface ApiPropertyResponse {
@@ -280,4 +333,78 @@ export interface PropertyApiHealthResponse {
   status: 'healthy' | 'unhealthy';
   timestamp: string;
   version?: string;
+}
+
+// New API types for the updated admin comparables functionality
+
+export interface AddressInfo {
+  streetNumber?: string | null;
+  streetPrefix?: string | null;
+  streetName?: string | null;
+  streetSuffix?: string | null;
+  streetSuffixDirection?: string | null;
+  unitNumber?: string | null;
+  siteAddress1?: string | null;
+  siteAddress2?: string | null;
+  siteAddress3?: string | null;
+  formattedAddress?: string | null;
+}
+
+export interface ClassificationInfo {
+  stateClass?: string | null;
+  schoolDistrict?: string | null;
+  neighborhoodCode?: string | null;
+  neighborhoodGroup?: string | null;
+  neighborhoodDescription?: string | null;
+  jurisdiction?: string | null;
+}
+
+export interface ValuationInfo {
+  landValue?: string | null;
+  buildingValue?: string | null;
+  extraFeaturesValue?: string | null;
+  agriculturalValue?: string | null;
+  assessedValue?: string | null;
+  totalAppraisedValue?: string | null;
+  totalMarketValue?: string | null;
+  newConstructionValue?: string | null;
+  totalReplacementCostValue?: string | null;
+}
+
+export interface PropertySummaryResponse {
+  // Basic identification
+  id?: string | null;
+  accountId: string;
+
+  // Structured data groups
+  address: AddressInfo;
+  classification: ClassificationInfo;
+  currentValues: ValuationInfo;
+  priorValues: ValuationInfo;
+
+  // Primary building quality information
+  buildingQualityCode?: string | null;
+  gradeAdjustment?: string | null;
+}
+
+export interface ComparablesResponse {
+  comparables: Array<{
+    accountId: string;
+    address: AddressInfo;
+    classification: ClassificationInfo;
+    currentValues: ValuationInfo;
+    buildingQualityCode?: string | null;
+    gradeAdjustment?: string | null;
+    adjustments?: {
+      [key: string]: number;
+    };
+  }>;
+  total: number;
+  searchCriteria: {
+    subject_account_id: string;
+    state_class: string;
+    neighborhood_code: string;
+    building_quality_code: string;
+    grade_adjustment: string;
+  };
 } 

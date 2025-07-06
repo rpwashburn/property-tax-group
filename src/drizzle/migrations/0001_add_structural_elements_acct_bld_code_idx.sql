@@ -1,1 +1,0 @@
-CREATE INDEX "se_acct_bld_code_idx" ON "structural_elements" USING btree ("acct","bld_num","code");

@@ -20,4 +20,6 @@ export default defineConfig({
     out: './src/drizzle/migrations',
     verbose: true,
     strict: true,
+    // Ignore tables from other migration systems (like Alembic)
+    tablesFilter: ["!alembic_version"],
 });

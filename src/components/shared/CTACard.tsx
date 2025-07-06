@@ -74,16 +74,26 @@ export function CTACard({
     const size = isPrimary ? "lg" : "sm"
     const variant = isPrimary ? undefined : "outline"
     
-    return buttonConfig.href ? (
-      <Button className={buttonClasses} size={size} variant={variant} asChild>
-        <Link href={buttonConfig.href}>
-          {buttonConfig.icon}
-          {buttonConfig.text}
-          {!buttonConfig.icon && <ArrowRight className="h-4 w-4 ml-2" />}
-        </Link>
-      </Button>
-    ) : (
-      <Button className={buttonClasses} size={size} variant={variant} onClick={buttonConfig.onClick}>
+    if (buttonConfig.href) {
+      return (
+        <Button className={buttonClasses} size={size} variant={variant} asChild>
+          <Link href={buttonConfig.href}>
+            {buttonConfig.icon}
+            {buttonConfig.text}
+            {!buttonConfig.icon && <ArrowRight className="h-4 w-4 ml-2" />}
+          </Link>
+        </Button>
+      )
+    }
+    
+    return (
+      <Button 
+        className={buttonClasses} 
+        size={size} 
+        variant={variant} 
+        onClick={buttonConfig.onClick}
+        disabled={buttonConfig.onClick === undefined}
+      >
         {buttonConfig.icon}
         {buttonConfig.text}
         {!buttonConfig.icon && <ArrowRight className="h-4 w-4 ml-2" />}

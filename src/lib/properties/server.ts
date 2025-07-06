@@ -3,7 +3,9 @@
 import type { 
   ApiPropertyResponse, 
   PropertyApiOptions,
-  PropertySearchResponse 
+  PropertySearchResponse,
+  PropertySummaryResponse,
+  ComparablesResponse
 } from './types/types';
 
 /**
@@ -128,10 +130,10 @@ export async function getPropertyByAccount(
 
   try {
     const baseUrl = getApiBaseUrl();
-    const defaultIncludes = ['buildings', 'owners', 'assessments', 'geographic'];
+    const defaultIncludes = ['buildings', 'owners', 'assessments', 'geographic', 'extraFeatures'];
     const includes = options.include || defaultIncludes;
     
-    const url = buildPropertyApiUrl(baseUrl, `/api/v1/properties/account/${accountNumber}`, {
+    const url = buildPropertyApiUrl(baseUrl, `/api/v1/properties/${accountNumber}`, {
       include: includes
     });
     
@@ -162,7 +164,7 @@ export async function getPropertyDataForAnalysis(
   accountNumber: string,
   options: PropertyApiOptions = {}
 ): Promise<ApiPropertyResponse | null> {
-  const analysisIncludes: Array<'buildings' | 'owners' | 'assessments' | 'geographic' | 'extraFeatures'> = ['buildings', 'owners', 'extraFeatures'];
+  const analysisIncludes: Array<'buildings' | 'owners' | 'assessments' | 'geographic' | 'extraFeatures'> = ['buildings', 'owners', 'assessments', 'geographic', 'extraFeatures'];
   return getPropertyByAccount(accountNumber, {
     ...options,
     include: options.include || analysisIncludes
@@ -261,5 +263,85 @@ export async function getComparableProperties(
   } catch (error) {
     console.error(`[PropertyAPI] Error fetching comparable properties:`, error);
     throw error instanceof Error ? error : new Error('Failed to fetch comparable properties');
+  }
+}
+
+/**
+ * Fetch property summary by account number
+ * @param accountNumber - The property account number
+ * @param options - API options
+ * @returns Promise<PropertySummaryResponse | null>
+ */
+export async function getPropertySummary(
+  accountNumber: string,
+  options: PropertyApiOptions = {}
+): Promise<PropertySummaryResponse | null> {
+  if (!accountNumber?.trim()) {
+    throw new Error('Account number is required');
+  }
+
+  try {
+    const baseUrl = getApiBaseUrl();
+    const url = buildPropertyApiUrl(baseUrl, `/api/v1/properties/account/${accountNumber}/summary`, {});
+    
+    console.log(`[PropertyAPI] Fetching property summary from: ${url}`);
+    
+    const response = await fetch(url, createFetchOptions(options));
+    const data = await handleApiResponse<PropertySummaryResponse>(response);
+    
+    if (data) {
+      console.log(`[PropertyAPI] Successfully fetched property summary for account: ${accountNumber}`);
+      return data;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`[PropertyAPI] Error fetching property summary for account ${accountNumber}:`, error);
+    throw error instanceof Error ? error : new Error('Failed to fetch property summary');
+  }
+}
+
+/**
+ * Fetch comparables data using the new comparables endpoint
+ * @param subjectAccountId - The subject property account ID
+ * @param stateClass - State class from property classification
+ * @param neighborhoodCode - Neighborhood code
+ * @param buildingQualityCode - Building quality code
+ * @param gradeAdjustment - Grade adjustment
+ * @param options - API options
+ * @returns Promise<ComparablesResponse | null>
+ */
+export async function getComparablesData(
+  subjectAccountId: string,
+  stateClass: string,
+  neighborhoodCode: string,
+  buildingQualityCode: string,
+  gradeAdjustment: string,
+  options: PropertyApiOptions = {}
+): Promise<ComparablesResponse | null> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    const url = buildPropertyApiUrl(baseUrl, '/api/v1/comparables', {
+      subject_account_id: subjectAccountId,
+      state_class: stateClass,
+      neighborhood_code: neighborhoodCode,
+      building_quality_code: buildingQualityCode,
+      grade_adjustment: gradeAdjustment
+    });
+    
+    console.log(`[PropertyAPI] Fetching comparables from: ${url}`);
+    
+    const response = await fetch(url, createFetchOptions(options));
+    const data = await handleApiResponse<ComparablesResponse>(response);
+    
+    if (data) {
+      console.log(`[PropertyAPI] Successfully fetched ${data.comparables?.length || 0} comparables`);
+      return data;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error(`[PropertyAPI] Error fetching comparables:`, error);
+    throw error instanceof Error ? error : new Error('Failed to fetch comparables');
   }
 }

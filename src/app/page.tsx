@@ -122,14 +122,14 @@ export default function HomePage() {
                     Start Your Protest <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline" className="gap-2 rounded-full px-8">
-                  How It Works <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Link href="/purchase">
+                <Link href="/comparables">
                   <Button size="lg" variant="secondary" className="gap-2 rounded-full px-8">
-                    Purchase Reports <ArrowRight className="h-4 w-4" />
+                    Find Comparables <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
+                <Button size="lg" variant="ghost" className="gap-2 rounded-full px-8">
+                  How It Works <ChevronRight className="h-4 w-4" />
+                </Button>
               </motion.div>
 
               <motion.div className="flex items-center gap-4 mt-4" variants={fadeIn}>
@@ -253,7 +253,7 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center gap-6">
             <p className="text-sm font-medium text-muted-foreground">SERVING HOMEOWNERS ACROSS TEXAS</p>
             <div className="flex flex-wrap justify-center gap-x-12 gap-y-6">
-              {["Austin", "Houston", "Dallas", "San Antonio", "Fort Worth"].map((city) => (
+              {["Houston"].map((city) => (
                 <div key={city} className="flex items-center gap-2">
                   <Building className="h-4 w-4 text-primary" />
                   <span className="text-sm font-medium">{city}</span>

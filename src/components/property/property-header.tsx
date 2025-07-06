@@ -33,13 +33,13 @@ export function PropertyHeader({ accountId, propertyData }: PropertyHeaderProps)
             <MapPin className="h-3 w-3" />
             Houston, TX (HCAD)
           </Badge>
-          {propertyData.status.protested === "Y" && (
+          {propertyData.status?.protested === "Y" && (
             <Badge variant="destructive" className="gap-2">
               <AlertCircle className="h-3 w-3" />
               Protested
             </Badge>
           )}
-          {propertyData.status.noticed === "Y" && (
+          {propertyData.status?.noticed === "Y" && (
             <Badge variant="outline" className="gap-2">
               <Clock className="h-3 w-3" />
               Noticed

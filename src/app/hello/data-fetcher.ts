@@ -26,8 +26,8 @@ export async function fetchHelloMessage() {
       }
       
       const response = await fetch(`${baseUrl}/api/v1/hello`, {
-        // Important: disable caching for dynamic content
-        cache: 'no-store',
+        // Use ISR with 60 second revalidation instead of no-store
+        next: { revalidate: 60 },
         headers
       });
       
@@ -62,8 +62,8 @@ export async function fetchPropertyData() {
     }
     
     const response = await fetch(`${baseUrl}/api/v1/properties/sample`, {
-      // Important: disable caching for dynamic content
-      cache: 'no-store',
+      // Use ISR with 60 second revalidation instead of no-store
+      next: { revalidate: 60 },
       headers
     });
     

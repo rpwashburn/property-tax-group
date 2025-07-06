@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1745074493483,
-      "tag": "0000_new_edwin_jarvis",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747276476845,
-      "tag": "0001_add_structural_elements_acct_bld_code_idx",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1748144342674,
-      "tag": "0002_add_extra_features_detail_table",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1748145061760,
-      "tag": "0003_add_timestamps_to_extra_features_detail",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1748145203090,
-      "tag": "0004_update_extra_features_detail_column_types",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1748912768090,
-      "tag": "0005_add-auth-tables",
+      "when": 1750534637284,
+      "tag": "0000_init-auth-tables",
       "breakpoints": true
     }
   ]

@@ -89,7 +89,7 @@ export interface ComparableFromAPI {
 }
 
 export interface ComparablesAPIResponse {
-  total_found: number
+  total_count: number
   median_comparable_value: number
   comparables: ComparableFromAPI[]
 }

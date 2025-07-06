@@ -35,6 +35,17 @@ export const formatPercent = (value: number | string | null | undefined, options
   return new Intl.NumberFormat('en-US', defaultOptions).format(numericValue)
 }
 
+// Helper function to safely convert values that could be numbers or strings
+export const safeParseFloat = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^0-9.-]+/g, "")
+    return Number.parseFloat(cleaned) || 0
+  }
+  return 0
+}
+
 // File utility functions
 export const fileUtils = {
   /**

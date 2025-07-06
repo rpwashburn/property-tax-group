@@ -1,8 +1,12 @@
 "use server"
 
-import { db } from '@/drizzle/db';
-import { propertyData, structuralElements, extraFeaturesDetail } from '@/drizzle/schema';
-import { eq, and, sql } from 'drizzle-orm';
+// TODO: Updated to use backend API instead of direct database queries
+// Property data has been moved to a backend API service
+
+// REMOVED: import { db } from '@/drizzle/db';
+// REMOVED: import { propertyData, structuralElements, extraFeaturesDetail } from '@/drizzle/schema';
+// REMOVED: import { eq, and, sql } from 'drizzle-orm';
+
 import type { SubjectProperty } from "@/lib/comparables/types";
 import type { EnrichedPropertyData } from '@/lib/property-analysis/types/index';
 import { extractGradeAndCondition, convertPropertyDataToSubjectProperty, transformApiToEnriched } from '@/lib/property-analysis/utils/property-utils';
@@ -69,100 +73,70 @@ export async function getSubjectProperty(accountNumber: string): Promise<Subject
 }
 
 /**
- * Lightweight function to get just the basic property fields for comparables
- * This replaces the selectedColumns logic in comparables/server.ts
+ * TEMPORARY: Disabled function - needs backend API implementation
+ * This function used to query the database directly for comparable property data.
+ * It should be replaced with API calls to your backend service.
  */
 export async function getComparablePropertyData(accountNumber: string): Promise<SubjectProperty | null> {
+  console.warn('[property-service.ts] getComparablePropertyData is temporarily disabled - property data moved to backend API');
+  console.warn('[property-service.ts] Please implement comparable property data retrieval in your backend API');
+  
+  // Fallback: Try to get the data through the unified API and convert it
   try {
-    // Query 1: Fetch base property data
-    const propertyResult = await db
-      .select({
-        id: propertyData.id,
-        acct: propertyData.acct,
-        siteAddr1: propertyData.siteAddr1,
-        siteAddr3: propertyData.siteAddr3,
-        stateClass: propertyData.stateClass,
-        neighborhoodCode: propertyData.neighborhoodCode,
-        yrImpr: propertyData.yrImpr,
-        bldAr: propertyData.bldAr,
-        bldVal: propertyData.bldVal,
-        landAr: propertyData.landAr,
-        landVal: propertyData.landVal,
-        acreage: propertyData.acreage,
-        totMktVal: propertyData.totMktVal,
-        totApprVal: propertyData.totApprVal,
-        xFeaturesVal: propertyData.xFeaturesVal,
-      })
-      .from(propertyData)
-      .where(eq(propertyData.acct, accountNumber))
-      .limit(1);
-
-    if (propertyResult.length === 0) return null;
-    const baseProperty = propertyResult[0];
-
-    // Query 2: Fetch relevant structural elements separately for Building 1
-    const elementsResult = await db
-      .select({
-        typeDscr: structuralElements.typeDscr,
-        categoryDscr: structuralElements.categoryDscr
-      })
-      .from(structuralElements)
-      .where(and(
-        eq(structuralElements.acct, accountNumber),
-        eq(structuralElements.bldNum, '1'),
-        // Only fetch the types we care about
-        sql`${structuralElements.typeDscr} IN ('Grade Adjustment', 'Cond / Desir / Util')` 
-      ));
-
-    // Extract Grade and Condition using unified function
-    const { grade, condition } = extractGradeAndCondition(elementsResult);
-
-    // Construct the final SubjectProperty object
-    return {
-      ...baseProperty,
-      grade,
-      condition,
-    };
-
+    const propertyData = await getUnifiedPropertyData(accountNumber);
+    if (!propertyData) return null;
+    
+    return convertPropertyDataToSubjectProperty(propertyData);
   } catch (error) {
-    console.error(`Error fetching comparable property data for ${accountNumber}:`, error);
-    return null; 
+    console.error(`Error in fallback getComparablePropertyData for ${accountNumber}:`, error);
+    return null;
   }
 }
 
 /**
- * Fetches extra features detail for a property
+ * TEMPORARY: Disabled function - needs backend API implementation  
+ * Extra features detail should be retrieved via the backend API.
  */
 export async function getExtraFeaturesDetail(accountNumber: string) {
+  console.warn('[property-service.ts] getExtraFeaturesDetail is temporarily disabled - property data moved to backend API');
+  console.warn('[property-service.ts] Extra features are now included in the main property API response');
+  
+  // Fallback: Get extra features from the main API response
   try {
-    const extraFeatures = await db
-      .select()
-      .from(extraFeaturesDetail)
-      .where(eq(extraFeaturesDetail.acct, accountNumber));
+    const apiData = await getPropertyDataForAnalysis(accountNumber, {
+      include: ['extraFeatures'],
+      cache: true,
+      revalidate: 300
+    });
 
-    return extraFeatures.map(feature => ({
-      type: feature.cd,
-      description: feature.dscr,
+    if (!apiData?.extraFeatures) {
+      return [];
+    }
+
+    // Transform API format to expected format
+    return apiData.extraFeatures.map(feature => ({
+      type: feature.type,
+      description: feature.description,
       grade: feature.grade,
-      condition: feature.condCd,
-      buildingNumber: feature.bldNum,
+      condition: feature.condition,
+      buildingNumber: feature.buildingNumber,
       length: feature.length,
       width: feature.width,
       units: feature.units,
       unitPrice: feature.unitPrice,
-      adjustedUnitPrice: feature.adjUnitPrice,
-      percentComplete: feature.pctComp,
-      actualYear: feature.actYr,
-      effectiveYear: feature.effYr,
-      rollYear: feature.rollYr,
-      date: feature.dt,
-      percentCondition: feature.pctCond,
-      depreciatedValue: feature.dprVal,
+      adjustedUnitPrice: feature.adjustedUnitPrice,
+      percentComplete: feature.percentComplete,
+      actualYear: feature.actualYear,
+      effectiveYear: feature.effectiveYear,
+      rollYear: feature.rollYear,
+      date: feature.date,
+      percentCondition: feature.percentCondition,
+      depreciatedValue: feature.depreciatedValue,
       note: feature.note,
-      assessedValue: feature.asdVal,
+      assessedValue: feature.assessedValue,
     }));
   } catch (error) {
-    console.error('Error fetching extra features detail:', error);
-    throw error;
+    console.error('Error fetching extra features detail via API:', error);
+    return [];
   }
 } 
