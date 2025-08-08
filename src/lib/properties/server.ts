@@ -27,8 +27,10 @@ function buildPropertyApiUrl(baseUrl: string, endpoint: string, options: {
     const url = new URL(`${baseUrl}${endpoint}`);
     
     if (options.include && options.include.length > 0) {
-      // Use comma-separated includes instead of multiple include parameters
-      url.searchParams.set('include', options.include.join(','));
+      // Use separate include parameters as expected by the API
+      options.include.forEach(includeValue => {
+        url.searchParams.append('include', includeValue);
+      });
     }
     
     // Add any other query parameters
@@ -308,6 +310,7 @@ export async function getPropertySummary(
  * @param neighborhoodCode - Neighborhood code
  * @param buildingQualityCode - Building quality code
  * @param gradeAdjustment - Grade adjustment
+ * @param includeProtestAnalysis - Whether to include detailed protest analysis
  * @param options - API options
  * @returns Promise<ComparablesResponse | null>
  */
@@ -317,6 +320,7 @@ export async function getComparablesData(
   neighborhoodCode: string,
   buildingQualityCode: string,
   gradeAdjustment: string,
+  includeProtestAnalysis: boolean = true,
   options: PropertyApiOptions = {}
 ): Promise<ComparablesResponse | null> {
   try {
@@ -326,7 +330,8 @@ export async function getComparablesData(
       state_class: stateClass,
       neighborhood_code: neighborhoodCode,
       building_quality_code: buildingQualityCode,
-      grade_adjustment: gradeAdjustment
+      grade_adjustment: gradeAdjustment,
+      include_protest_analysis: includeProtestAnalysis
     });
     
     console.log(`[PropertyAPI] Fetching comparables from: ${url}`);

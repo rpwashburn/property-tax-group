@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Building, MapPin, DollarSign, Calendar, Search } from 'lucide-react';
+import { Loader2, Building, MapPin, DollarSign, Calendar, Search, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 import type { PropertySummaryResponse, ComparablesResponse } from '@/lib/properties/types/types';
+import { formatCurrency } from '@/lib/utils';
 
 interface PropertySummaryViewProps {
   propertySummary: PropertySummaryResponse;
@@ -17,17 +19,7 @@ interface ComparablesTableProps {
 }
 
 function ComparablesTable({ comparables }: ComparablesTableProps) {
-  const formatCurrency = (value: string | null | undefined) => {
-    if (!value || value === '0' || value === 'null' || value === 'undefined') return 'N/A';
-    const cleanValue = String(value).replace(/[^0-9.-]+/g, '');
-    const num = parseFloat(cleanValue);
-    if (isNaN(num)) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(num);
-  };
+  // Using shared formatCurrency utility
 
   return (
     <Card className="mt-6">
@@ -127,17 +119,7 @@ export function PropertySummaryView({ propertySummary }: PropertySummaryViewProp
   const [isLoadingComparables, setIsLoadingComparables] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formatCurrency = (value: string | null | undefined) => {
-    if (!value || value === '0' || value === 'null' || value === 'undefined') return 'N/A';
-    const cleanValue = String(value).replace(/[^0-9.-]+/g, '');
-    const num = parseFloat(cleanValue);
-    if (isNaN(num)) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(num);
-  };
+  // Using shared formatCurrency utility
 
   const handleGetComparablesWithOverrides = async (
     stateClass: string,
@@ -195,10 +177,18 @@ export function PropertySummaryView({ propertySummary }: PropertySummaryViewProp
       {/* Property Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Property Summary - {propertySummary.accountId}
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              Property Summary - {propertySummary.accountId}
+            </CardTitle>
+            <Button asChild>
+              <Link href={`/admin/comparables/${propertySummary.accountId}`}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                View Detailed Analysis
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

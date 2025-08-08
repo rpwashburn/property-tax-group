@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
-import { FloatingAdminButton } from '@/components/floating-admin-button';
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,13 +33,8 @@ export default function RootLayout({
           "antialiased relative bg-background"
         )}
       >
-        <Header />
-        <main className="flex flex-col flex-grow">
-          {children}
-        </main>
-        <Footer />
+        {children}
         <Toaster richColors />
-        <FloatingAdminButton />
       </body>
     </html>
   );

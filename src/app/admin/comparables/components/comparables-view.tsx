@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatCurrency, formatPercentage } from '@/lib/utils';
 import type { ComparablesAPIResponse } from '@/lib/comparables/types';
 
 interface ComparablesViewProps {
@@ -10,18 +11,7 @@ interface ComparablesViewProps {
 export function ComparablesView({ comparablesData }: ComparablesViewProps) {
   const { comparables, total_count, median_comparable_value } = comparablesData;
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const formatPercentage = (value: number) => {
-    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
-  };
+  // Using shared utilities from utils
 
   return (
     <div className="space-y-6">
@@ -66,7 +56,7 @@ export function ComparablesView({ comparablesData }: ComparablesViewProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {comparables.map((comp, index) => (
+                {comparables.map((comp) => (
                   <TableRow key={comp.account_id}>
                     <TableCell className="font-medium">
                       {comp.address}
@@ -114,7 +104,7 @@ export function ComparablesView({ comparablesData }: ComparablesViewProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {comparables.map((comp, index) => (
+            {comparables.map((comp) => (
               <div key={comp.account_id} className="border rounded-lg p-4">
                 <h4 className="font-semibold mb-2">{comp.address} ({comp.account_id})</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

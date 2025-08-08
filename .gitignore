@@ -75,3 +75,5 @@ tasks/
 .cursor/mcp.json
 # Example code (causes build conflicts)
 example-code/
+# PDF cache directory (development only)
+.pdf-cache/

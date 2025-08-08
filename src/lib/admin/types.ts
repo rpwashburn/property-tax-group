@@ -115,4 +115,33 @@ export type NewFixture = Omit<Fixture, 'id' | 'createdAt' | 'updatedAt'> & {
   updatedAt?: Date;
 };
 
+// Order types for admin management
+export type Order = {
+  id: string;
+  stripe_session_id: string;
+  product_type: string;
+  amount: number;
+  customer_email: string;
+  customer_name: string;
+  jurisdiction: string;
+  account_number: string;
+  status: 'payment_completed' | 'payment_pending' | 'payment_failed' | 'cancelled';
+  report_generated: boolean;
+  report_url: string | null;
+  created_at: string;
+};
+
+export type OrdersResponse = {
+  orders: Order[];
+  total_count: number;
+  page: number;
+  page_size: number;
+  has_next: boolean;
+  has_previous: boolean;
+  status_summary: Array<{
+    status: string;
+    count: number;
+  }>;
+};
+
 // You can add more specific types for forms or display if needed 

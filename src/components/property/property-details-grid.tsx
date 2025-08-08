@@ -22,16 +22,21 @@ export function PropertyDetailsGrid({ propertyData }: PropertyDetailsGridProps) 
           <CardContent>
             <div className="space-y-4">
               {propertyData.buildings.map((building) => (
-                <div key={`building-${building.bldNum}-${building.code}`} className="p-4 rounded-lg border bg-muted/30">
+                <div key={`building-${building.buildingNumber}-${building.improvementModelCode}`} className="p-4 rounded-lg border bg-muted/30">
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <Badge variant="outline">Building {building.bldNum}</Badge>
-                    <Badge variant="secondary">{building.categoryDscr}</Badge>
+                    <Badge variant="outline">Building {building.buildingNumber}</Badge>
+                    <Badge variant="secondary">{building.typeDescription}</Badge>
                   </div>
                   <div className="space-y-2 text-sm">
                     {[
-                      { label: "Type", value: building.typeDscr },
-                      { label: "Code", value: building.code || building.type },
-                      ...(building.adj ? [{ label: "Adjustment", value: building.adj }] : []),
+                      { label: "Type", value: building.buildingType },
+                      { label: "Quality", value: building.buildingQuality },
+                      { label: "Quality Code", value: building.buildingQualityCode },
+                      { label: "Condition", value: building.buildingCondition },
+                      { label: "Year Built", value: building.yearBuilt?.toString() },
+                      { label: "Effective Year", value: building.effectiveYear?.toString() },
+                      { label: "Square Feet", value: building.squareFeet?.toLocaleString() },
+                      { label: "Replacement Cost", value: building.replacementCost?.toLocaleString() },
                     ].map((item, idx) => (
                       <div key={idx} className="flex justify-between items-center">
                         <span className="text-muted-foreground">{item.label}:</span>

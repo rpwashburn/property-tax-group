@@ -6,9 +6,16 @@ export async function middleware(request: NextRequest) {
   
   console.log('🛡️ Middleware triggered for:', pathname);
 
-  // Only apply middleware to /admin routes
-  if (!pathname.startsWith('/admin')) {
-    console.log('✅ Not an admin route, allowing access');
+  // Check if auth is disabled via environment variable
+  // DEFAULT: Auth is ENABLED (isAuthDisabled = false) unless explicitly set to 'true'
+  const isAuthDisabled = process.env.DISABLE_AUTH === 'true';
+  
+  // Only apply middleware to /admin routes (unless auth is disabled)
+  if (!pathname.startsWith('/admin') || isAuthDisabled) {
+    if (isAuthDisabled) {
+      console.log('⚠️  Auth disabled via DISABLE_AUTH environment variable');
+    }
+    console.log('✅ Not an admin route (or auth disabled), allowing access');
     return NextResponse.next();
   }
 
@@ -60,4 +67,8 @@ export const config = {
     '/admin',
     '/admin/(.*)'
   ]
-}; 
+};
+
+// Force middleware to run in Node.js runtime instead of Edge Runtime
+// This is needed because Better Auth uses Node.js modules not available in Edge Runtime
+export const runtime = 'nodejs'; 

@@ -9,7 +9,7 @@
 
 import type { SubjectProperty } from "@/lib/comparables/types";
 import type { EnrichedPropertyData } from '@/lib/property-analysis/types/index';
-import { extractGradeAndCondition, convertPropertyDataToSubjectProperty, transformApiToEnriched } from '@/lib/property-analysis/utils/property-utils';
+import { convertPropertyDataToSubjectProperty, transformApiToEnriched } from '@/lib/property-analysis/utils/property-utils';
 import { notFound } from 'next/navigation';
 import { getPropertyDataForAnalysis } from '@/lib/properties/server';
 

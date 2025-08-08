@@ -9,17 +9,17 @@
 // import * as schema from '@/drizzle/schema';
 // import { eq, desc, asc, count } from 'drizzle-orm';
 
-import { revalidatePath } from 'next/cache';
-import type {
-  NeighborhoodCode,
-  NewNeighborhoodCode,
-  PropertyData,
-  NewPropertyData,
-  StructuralElement,
-  NewStructuralElement,
-  Fixture,
-  NewFixture,
-} from './types';
+// import { revalidatePath } from 'next/cache';
+// import type {
+//   NeighborhoodCode,
+//   NewNeighborhoodCode,
+//   PropertyData,
+//   NewPropertyData,
+//   StructuralElement,
+//   NewStructuralElement,
+//   Fixture,
+//   NewFixture,
+// } from './types';
 
 // Helper function for error handling
 function handleError(operation: string, error: unknown) {
@@ -46,11 +46,11 @@ export async function getNeighborhoodCodes(limit: number = 50, offset: number = 
   return disabledFunction('getNeighborhoodCodes');
 }
 
-export async function createNeighborhoodCode(data: NewNeighborhoodCode) {
+export async function createNeighborhoodCode(_data: unknown) {
   return disabledFunction('createNeighborhoodCode');
 }
 
-export async function updateNeighborhoodCode(id: number, data: Partial<NewNeighborhoodCode>) {
+export async function updateNeighborhoodCode(_id: number, _data: unknown) {
   return disabledFunction('updateNeighborhoodCode');
 }
 
@@ -73,11 +73,11 @@ export async function getPropertyDataById(id: string) {
   };
 }
 
-export async function createPropertyData(data: NewPropertyData) {
+export async function createPropertyData(_data: unknown) {
   return disabledFunction('createPropertyData');
 }
 
-export async function updatePropertyData(id: string, data: Partial<NewPropertyData>) {
+export async function updatePropertyData(_id: string, _data: unknown) {
   return disabledFunction('updatePropertyData');
 }
 
@@ -100,11 +100,11 @@ export async function getStructuralElementById(id: string) {
   };
 }
 
-export async function createStructuralElement(data: NewStructuralElement) {
+export async function createStructuralElement(_data: unknown) {
   return disabledFunction('createStructuralElement');
 }
 
-export async function updateStructuralElement(id: string, data: Partial<NewStructuralElement>) {
+export async function updateStructuralElement(_id: string, _data: unknown) {
   return disabledFunction('updateStructuralElement');
 }
 
@@ -127,14 +127,79 @@ export async function getFixtureById(id: string) {
   };
 }
 
-export async function createFixture(data: NewFixture) {
+export async function createFixture(_data: unknown) {
   return disabledFunction('createFixture');
 }
 
-export async function updateFixture(id: string, data: Partial<NewFixture>) {
+export async function updateFixture(_id: string, _data: unknown) {
   return disabledFunction('updateFixture');
 }
 
 export async function deleteFixture(id: string) {
   return disabledFunction('deleteFixture');
-} 
+}
+
+// --- Orders Management (Backend API) --- //
+
+/**
+ * Get orders from the backend API with optional filtering by status
+ */
+export async function getOrders(
+  page: number = 1, 
+  pageSize: number = 20, 
+  status?: string
+): Promise<{ success: boolean; data?: import('./types').OrdersResponse; error?: string; }> {
+  try {
+    const baseUrl = process.env.PROPERTY_API_BASE_URL || 'http://localhost:9000';
+    const url = new URL(`${baseUrl}/api/v1/admin/orders`);
+    
+    // Add query parameters
+    url.searchParams.set('page', page.toString());
+    url.searchParams.set('page_size', pageSize.toString());
+    
+    if (status) {
+      url.searchParams.set('status', status);
+    }
+
+    console.log(`[AdminAPI] Fetching orders from: ${url.toString()}`);
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'User-Agent': 'FightYourTax-AI-Admin/1.0',
+      },
+      // No cache for admin data
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error(`[AdminAPI] Orders API error: ${response.status} ${response.statusText}`);
+      return { 
+        success: false, 
+        error: `Failed to fetch orders: ${response.status} ${response.statusText}` 
+      };
+    }
+
+    const data = await response.json();
+    console.log(`[AdminAPI] Successfully fetched ${data.total_count} orders`);
+    
+    return { success: true, data };
+  } catch (error) {
+    console.error('[AdminAPI] Error fetching orders:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to fetch orders' 
+    };
+  }
+}
+
+/**
+ * Get orders with payment_completed status specifically
+ */
+export async function getCompletedOrders(page: number = 1, pageSize: number = 20) {
+  return getOrders(page, pageSize, 'payment_completed');
+}
+
+ 

@@ -145,13 +145,28 @@ export interface ApiPropertyResponse {
     updatedAt: string;
   };
   buildings: Array<{
-    bldNum: string;
-    code: string;
-    adj: string | null;
-    type: string;
-    typeDscr: string;
-    categoryDscr: string;
-    dorCd: string;
+    buildingNumber: number;
+    buildingType: string;
+    typeDescription: string;
+    buildingQualityCode: string;
+    buildingQuality: string;
+    gradeAdjustment: string;
+    buildingCondition: string;
+    yearBuilt: number;
+    squareFeet: number;
+    actualArea: number;
+    heatedArea: number;
+    grossArea: number;
+    effectiveArea: number;
+    baseArea: number;
+    improvementType: string;
+    improvementModelCode: string;
+    depreciationValue: number;
+    replacementCost: number;
+    depreciationPercent: number;
+    effectiveYear: number;
+    yearRemodeled: number;
+    notes: string;
   }>;
   fixtures: Array<{
     bldNum: string;
@@ -408,3 +423,58 @@ export interface ComparablesResponse {
     grade_adjustment: string;
   };
 } 
+
+// Enhanced Comparables API Response Types (matching actual API response)
+export interface DetailedComparablesResponse {
+  comparables: DetailedComparable[];
+  total_count: number;
+  original_total_count: number;
+  median_comparable_value: number;
+}
+
+export interface DetailedComparable {
+  account_id: string;
+  address: string;
+  basic_info: {
+    square_footage: number;
+    year_built: number;
+    neighborhood_code: string;
+    state_class: string;
+    building_condition: string;
+    building_quality_code: string;
+    building_quality: string;
+  };
+  financial_data: {
+    original_market_value: number;
+    original_appraised_value: number;
+    adjusted_value: number;
+    adjusted_price_per_sqft: number;
+    original_price_per_sqft: number;
+  };
+  adjustments: {
+    size_adjustment_pct: number;
+    age_adjustment_pct: number;
+    features_adjustment_pct: number;
+    land_adjustment_pct: number;
+    total_adjustment_pct: number;
+    size_adjustment_amount: number;
+    age_adjustment_amount: number;
+    features_adjustment_amount: number;
+    land_adjustment_amount: number;
+    comp_improvement_psf: number;
+    adjusted_improvement_value: number;
+  };
+  analysis: {
+    comparable_score: number;
+    adjustment_notes: string[];
+    protest_justification?: {
+      market_argument: string;
+      supporting_factors: string[];
+      market_context: string;
+      summary: string;
+      confidence_level: string;
+    };
+  };
+} 
+
+ 

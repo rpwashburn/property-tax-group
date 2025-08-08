@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowRight, BarChart3, Building, Shield, CheckCircle2, ChevronRight, DollarSign, Percent } from "lucide-react"
+import { ArrowRight, BarChart3, Building, Shield, CheckCircle2, ChevronRight, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
+import { MainLayout } from "@/components/main-layout"
 
 export default function HomePage() {
   const [currentPropertyValue, setCurrentPropertyValue] = useState("350000")
@@ -88,7 +89,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <MainLayout>
+      <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/50 pt-16 pb-24 md:pt-24 md:pb-32 lg:pt-32 lg:pb-40">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
@@ -117,7 +119,7 @@ export default function HomePage() {
               </motion.p>
 
               <motion.div className="flex flex-wrap gap-3 mt-2" variants={fadeIn}>
-                <Link href="/view-my-property">
+                <Link href="/comparables">
                   <Button size="lg" className="gap-2 rounded-full px-8">
                     Start Your Protest <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -230,7 +232,7 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <Link href="/view-my-property" className="block">
+                  <Link href="/comparables" className="block">
                     <Button className="w-full gap-2 rounded-full">
                       Start Your Protest <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -343,7 +345,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/view-my-property">
+            <Link href="/comparables">
               <Button size="lg" className="gap-2 rounded-full px-8">
                 Start Your Protest <ArrowRight className="h-4 w-4" />
               </Button>
@@ -443,9 +445,18 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div variants={fadeIn} className="flex flex-wrap justify-center gap-4">
-              <Link href="/view-my-property">
+              <Link href="/comparables">
                 <Button size="lg" variant="secondary" className="gap-2 rounded-full px-8">
                   Start Your Protest <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/full-report-demo">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 rounded-full px-8 bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
+                >
+                  Try Full Report Demo <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/purchase">
@@ -470,5 +481,6 @@ export default function HomePage() {
         <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
       </section>
     </div>
+    </MainLayout>
   )
 }

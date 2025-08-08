@@ -1,9 +1,17 @@
 import React from 'react';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
+import { FloatingAdminButton } from '@/components/floating-admin-button';
 
-export default function ConsumerPagesLayout({ children }: { children: React.ReactNode }) {
+export default function ConsumerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {children}
-    </main>
+    <>
+      <Header />
+      <main className="flex flex-col flex-grow">
+        {children}
+      </main>
+      <Footer />
+      <FloatingAdminButton />
+    </>
   );
 } 

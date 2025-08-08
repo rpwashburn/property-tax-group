@@ -156,3 +156,5 @@
 ::placeholder {
   @apply text-muted-foreground/70;
 }
+
+/* Print-specific styles have been removed - now using @react-pdf/renderer for PDF generation */

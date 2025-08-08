@@ -214,8 +214,8 @@ export async function getComparablesForProperty(
     
     // Get building quality parameters from the first building
     const firstBuilding = propertyData.buildings?.[0];
-    const buildingQualityCode = firstBuilding?.code || 'A';
-    const gradeAdjustment = firstBuilding?.adj || 'A';
+    const buildingQualityCode = firstBuilding?.buildingQualityCode || 'A';
+    const gradeAdjustment = firstBuilding?.gradeAdjustment || 'A';
     
     console.log(`[PropertiesAPI] Getting similar properties for: ${accountId}`);
     console.log(`[PropertiesAPI] Parameters:`, {

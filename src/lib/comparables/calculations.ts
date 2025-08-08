@@ -1,4 +1,5 @@
 import type { ComparableProperty, SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
+import { safeParseInt } from "@/lib/utils";
 
 // --- Interfaces ---
 
@@ -48,12 +49,7 @@ export interface GroupMembershipIds {
 
 // --- Helper Functions ---
 
-// Helper function to safely parse numbers
-export const safeParseInt = (value: string | null | undefined, defaultValue = 0): number => {
-    if (value === null || value === undefined) return defaultValue;
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? defaultValue : parsed;
-};
+// safeParseInt moved to @/lib/utils for better reusability
 
 // Helper function to calculate comparable score
 /**

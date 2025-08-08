@@ -1,6 +1,6 @@
 import type { ComparablesSearchCriteria } from './types'
 import type { ApiPropertyResponse } from '@/lib/properties'
-import { extractGradeAndCondition } from '@/lib/property-analysis/utils/property-utils'
+// import { extractGradeAndCondition } from '@/lib/property-analysis/utils/property-utils'
 
 /**
  * Extract search criteria from property data
@@ -12,7 +12,9 @@ export function extractSearchCriteriaFromProperty(
   propertyData: ApiPropertyResponse,
   accountId: string
 ): ComparablesSearchCriteria {
-  const { condition } = extractGradeAndCondition(propertyData.buildings || []);
+  // Derive condition directly from primary building if available; fall back to 'C'
+  const primaryBuilding = propertyData.buildings?.[0]
+  const condition = primaryBuilding?.buildingCondition || 'C'
 
   return {
     subject_account_id: accountId,

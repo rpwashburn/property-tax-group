@@ -9,6 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex flex-col space-y-2">
           <Link href="/" className="text-sm text-blue-600 hover:underline">← Back to Home</Link>
           <Link href="/admin" className="text-sm text-slate-700 hover:text-slate-900">Dashboard</Link>
+          <Link href="/admin/orders" className="text-sm text-slate-700 hover:text-slate-900">Orders</Link>
           <Link href="/admin/properties" className="text-sm text-slate-700 hover:text-slate-900">Properties</Link>
           <Link href="/admin/comparables" className="text-sm text-slate-700 hover:text-slate-900">Comparables</Link>
           <Link href="/admin/neighborhoods" className="text-sm text-slate-700 hover:text-slate-900">Neighborhoods</Link>

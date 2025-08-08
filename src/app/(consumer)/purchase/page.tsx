@@ -1,7 +1,7 @@
 "use client"
 import { Suspense } from "react"
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,16 +17,15 @@ import {
   AlertCircle,
   User,
   Mail,
-  Clock,
-  Users,
+  // Clock,
   Star,
-  Zap,
 } from "lucide-react"
 import { CTACard } from "@/components/shared/CTACard"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { usePurchase } from "@/hooks/use-purchase"
+import { emailUtils } from "@/lib/utils"
 
 const jurisdictions = ["Harris County (HCAD)"]
 
@@ -37,6 +36,7 @@ const jurisdictionMapping: Record<string, string> = {
 // Client component that handles search params
 function PurchaseContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { initiatePurchase, isLoading, error, clearError } = usePurchase()
 
   // Form state
@@ -46,17 +46,30 @@ function PurchaseContent() {
   const [accountNumber, setAccountNumber] = useState("")
   const [productType, setProductType] = useState<"comparables" | "full_report" | null>(null)
   const [showCheckout, setShowCheckout] = useState(false)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [isEmailTouched, setIsEmailTouched] = useState(false)
 
   // Initialize from URL params
   useEffect(() => {
     const jurisdictionParam = searchParams.get("jurisdiction")
     const accountParam = searchParams.get("account")
+    const productParam = searchParams.get("product")
+    // const isDemoParam = searchParams.get("demo")
 
     if (jurisdictionParam) {
       const mappedJurisdiction = jurisdictionMapping[jurisdictionParam] || jurisdictionParam
       setJurisdiction(mappedJurisdiction)
     }
     if (accountParam) setAccountNumber(accountParam)
+    
+    // Handle demo flow - pre-select product type
+    if (productParam === "full_report") {
+      setProductType("full_report")
+      setShowCheckout(true)
+    } else if (productParam === "comparables") {
+      setProductType("comparables")
+      setShowCheckout(true)
+    }
   }, [searchParams])
 
   // Clear error when form data changes
@@ -66,7 +79,42 @@ function PurchaseContent() {
     }
   }, [customerName, customerEmail, jurisdiction, accountNumber, productType, clearError, error])
 
+  // Handle email validation
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value
+    setCustomerEmail(email)
+    
+    // Only validate if the field has been touched and has content
+    if (isEmailTouched && email.trim()) {
+      const validation = emailUtils.validateEmail(email)
+      setEmailError(validation.isValid ? null : validation.error || null)
+    } else if (isEmailTouched && !email.trim()) {
+      setEmailError("Email address is required")
+    }
+  }
+
+  const handleEmailBlur = () => {
+    setIsEmailTouched(true)
+    if (customerEmail.trim()) {
+      const validation = emailUtils.validateEmail(customerEmail)
+      setEmailError(validation.isValid ? null : validation.error || null)
+    } else {
+      setEmailError("Email address is required")
+    }
+  }
+
   const handleProductSelect = (product: "comparables" | "full_report") => {
+    if (product === "full_report" && !isFromDemo) {
+      // For full report, redirect to demo form first (unless they already completed it)
+      const params = new URLSearchParams()
+      if (accountNumber) params.set('account', accountNumber)
+      if (jurisdiction) params.set('jurisdiction', jurisdiction === "Harris County (HCAD)" ? "HCAD" : jurisdiction)
+      
+      router.push(`/full-report-demo?${params.toString()}`)
+      return
+    }
+    
+    // For comparables or demo completed full report, show checkout
     setProductType(product)
     setShowCheckout(true)
     // Smooth scroll to checkout form
@@ -79,7 +127,15 @@ function PurchaseContent() {
   }
 
   const handlePurchase = async () => {
-    if (!productType || !customerName.trim() || !customerEmail.trim() || !jurisdiction || !accountNumber.trim()) {
+    // Validate all fields including email format
+    const emailValidation = emailUtils.validateEmail(customerEmail)
+    
+    if (!productType || !customerName.trim() || !emailValidation.isValid || !jurisdiction || !accountNumber.trim()) {
+      // Show email error if invalid
+      if (!emailValidation.isValid) {
+        setEmailError(emailValidation.error || null)
+        setIsEmailTouched(true)
+      }
       return
     }
 
@@ -88,11 +144,16 @@ function PurchaseContent() {
       jurisdiction,
       accountNumber: accountNumber.trim(),
       customerName: customerName.trim(),
-      customerEmail: customerEmail.trim(),
+      customerEmail: emailUtils.normalizeEmail(customerEmail),
     })
   }
 
-  const isFormValid = customerName.trim() && customerEmail.trim() && jurisdiction && accountNumber.trim()
+  const isEmailValid = emailUtils.isValidEmail(customerEmail)
+  const isFormValid = customerName.trim() && 
+                     customerEmail.trim() && 
+                     isEmailValid && 
+                     jurisdiction && 
+                     accountNumber.trim()
 
   const getProductInfo = (type: "comparables" | "full_report") => {
     return type === "comparables"
@@ -100,47 +161,49 @@ function PurchaseContent() {
       : { name: "Full Tax Protest Report", price: "$99", color: "blue", savings: "Save $200+" }
   }
 
+  // Check if this is coming from demo
+  const isFromDemo = searchParams.get("demo") === "true"
+
   return (
     <div className="py-6 px-4 sm:py-12">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header with Social Proof */}
         <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
-            <Users className="h-4 w-4" />
-            <span>Join 2,847+ homeowners who've saved on their property taxes</span>
-          </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Choose Your Tax Savings Report</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Professional property tax analysis delivered in 3-5 business days. Most clients save $500-2000+ annually.
+            Professional property tax analysis to help reduce your property tax burden.
           </p>
 
           {/* Trust Indicators */}
           <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span>4.9/5 rating</span>
-            </div>
-            <div className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
-              <span>30-day guarantee</span>
+              <span>Secure checkout</span>
             </div>
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>3-5 day delivery</span>
+              <FileText className="h-4 w-4" />
+              <span>Professional analysis</span>
             </div>
           </div>
         </div>
 
-        {/* Urgency Banner */}
-        <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-orange-800">
-            <Zap className="h-4 w-4" />
-            <span className="font-medium">Filing deadline approaching!</span>
-          </div>
-          <p className="text-sm text-orange-700 mt-1">
-            Property tax protests must be filed by May 15th. Get your report now to meet the deadline.
-          </p>
-        </div>
+        {/* Demo Flow Message */}
+        {isFromDemo && (
+          <Card className="border-green-200 bg-green-50/50">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-green-900 mb-2">Property Information Completed</h3>
+                  <p className="text-sm text-green-800">
+                    Great! You've provided detailed information about your property. Now complete your order 
+                    to receive a comprehensive tax protest report with your custom details included.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Error Alert */}
         {error && (
@@ -154,7 +217,7 @@ function PurchaseContent() {
         <div className="grid gap-6 lg:grid-cols-2">
           <CTACard
             title="Comparables Report"
-            description="Professional analysis of comparable properties - most popular for first-time filers"
+            description="Professional analysis of comparable properties - most popular for those doing research"
             icon={<FileText className="h-5 w-5 text-green-600" />}
             badge={{
               text: "Most Popular",
@@ -193,7 +256,7 @@ function PurchaseContent() {
 
           <CTACard
             title="Full Tax Protest Report"
-            description="Complete protest package with everything you need to file - highest success rate"
+            description={isFromDemo ? "Complete protest package with everything you need to file" : "Complete protest package with everything you need to file (requires property details form)"}
             icon={<Shield className="h-5 w-5 text-blue-600" />}
             badge={{
               text: "Best Value",
@@ -203,14 +266,23 @@ function PurchaseContent() {
               amount: "$99",
               subtitle: "One-time payment",
             }}
-            features={[
-              "<strong>Everything in Comparables Report</strong>",
-              "Ready-to-file protest documents",
-              "Step-by-step filing instructions",
-              "Evidence package with supporting documentation",
-            ]}
+            features={
+              isFromDemo ? [
+                "<strong>Everything in Comparables Report</strong>",
+                "Ready-to-file protest documents", 
+                "Step-by-step filing instructions",
+                "Evidence package with supporting documentation",
+              ] : [
+                "<strong>Everything in Comparables Report</strong>",
+                "Detailed property information form",
+                "Ready-to-file protest documents",
+                "Step-by-step filing instructions",
+                "Evidence package with supporting documentation",
+              ]
+            }
             button={{
-              text: productType === "full_report" ? "✓ Selected" : "Get Full Protest Report",
+              text: productType === "full_report" ? "✓ Selected" : 
+                    isFromDemo ? "Get Full Protest Report" : "Start Property Details Form",
               variant: productType === "full_report" ? "default" : "blue",
               icon:
                 productType === "full_report" ? (
@@ -257,7 +329,7 @@ function PurchaseContent() {
                     <div>
                       <CardTitle className="text-lg">{getProductInfo(productType).name}</CardTitle>
                       <CardDescription className="flex items-center gap-2">
-                        Professional analysis • 3-5 day delivery
+                        Professional analysis
                         <Badge variant="secondary" className="text-xs">
                           {getProductInfo(productType).savings}
                         </Badge>
@@ -311,12 +383,19 @@ function PurchaseContent() {
                           id="customerEmail"
                           type="email"
                           value={customerEmail}
-                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          onChange={handleEmailChange}
+                          onBlur={handleEmailBlur}
                           placeholder="Enter your email address"
-                          className="pl-10"
+                          className={`pl-10 ${emailError && isEmailTouched ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                           required
                         />
                       </div>
+                      {emailError && isEmailTouched && (
+                        <p className="text-xs text-red-600 flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" />
+                          {emailError}
+                        </p>
+                      )}
                       <p className="text-xs text-muted-foreground">Your report will be emailed to this address</p>
                     </div>
                   </div>
@@ -384,11 +463,7 @@ function PurchaseContent() {
                     </div>
                     <div className="flex items-center gap-1">
                       <CheckCircle className="h-3 w-3" />
-                      <span>30-day guarantee</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      <span>Delivered in 3-5 days</span>
+                      <span>Professional service</span>
                     </div>
                   </div>
                 </div>
@@ -400,7 +475,7 @@ function PurchaseContent() {
         {/* Social Proof & Benefits - Always visible */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg text-center">Why 2,847+ Homeowners Trust Our Reports</CardTitle>
+            <CardTitle className="text-lg text-center">Professional Property Tax Analysis</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 sm:grid-cols-3 text-sm">
@@ -422,8 +497,8 @@ function PurchaseContent() {
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
                   <Star className="h-6 w-6 text-purple-600" />
                 </div>
-                <div className="font-semibold">Proven Results</div>
-                <div className="text-muted-foreground">Average savings of $500-2000+ per year on property taxes</div>
+                <div className="font-semibold">Comprehensive Reports</div>
+                <div className="text-muted-foreground">Detailed analysis to help you challenge your property assessment</div>
               </div>
             </div>
           </CardContent>
@@ -433,7 +508,7 @@ function PurchaseContent() {
         <div className="text-center space-y-2">
           <p className="text-sm font-medium">🔒 Secure payment • ⚡ Instant confirmation • 📧 Email delivery</p>
           <p className="text-xs text-muted-foreground">
-            Reports are professionally prepared by our experts and emailed within 3-5 business days.
+            Reports are professionally prepared by our experts and delivered via email.
           </p>
         </div>
       </div>

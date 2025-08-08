@@ -10,6 +10,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { MainLayout } from "@/components/main-layout";
 
 export default function DashboardPage() {
   const { data: session, isPending, error } = useSession();
@@ -104,17 +105,21 @@ export default function DashboardPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </MainLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-500">Error loading session</div>
-      </div>
+      <MainLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-lg text-red-500">Error loading session</div>
+        </div>
+      </MainLayout>
     );
   }
 
@@ -123,7 +128,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <MainLayout>
+      <div className="container mx-auto py-8">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* User Information Card */}
         <Card>
@@ -234,5 +240,6 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
+    </MainLayout>
   );
 } 

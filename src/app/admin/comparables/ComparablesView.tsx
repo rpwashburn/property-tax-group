@@ -20,10 +20,10 @@ import type { PropertySearchCriteria } from "@/lib/comparables/types";
 import type { SubjectProperty, ComparableProperty, AdjustedComparable } from "@/lib/comparables/types";
 // Import calculation functions and types
 import { 
-    safeParseInt, // <<< Import safeParseInt
     type MedianCalculationResult,
     type GroupMembershipIds, // <<< Import GroupMembershipIds type
 } from "@/lib/comparables/calculations"; // Removed calculateAdjustments, calculateMedianAdjustedValue, AdjustmentCalculations
+import { formatCurrency, safeParseInt } from "@/lib/utils"
 
 // Props interface
 interface ComparablesViewProps {
@@ -67,20 +67,10 @@ export function ComparablesView({
   const gradeOptions = ["Excellent", "Good", "Average", "Fair", "Poor", "Low"]; // Example
   const conditionOptions = ["Excellent", "Good", "Average", "Fair", "Poor"]; // Example
 
-  // Function to format currency
-  const formatCurrency = (value: number | null | undefined) => { // Allow null/undefined
-      if (value === null || value === undefined) return 'N/A';
-      return value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-  }
-  
-  // Function to format numbers with sign
+  // Function to format numbers with sign (using shared formatCurrency)
   const formatSignedCurrency = (value: number | null | undefined) => { // Allow null/undefined
       if (value === null || value === undefined) return 'N/A';
-      // const sign = value >= 0 ? '+' : ''; // Removed unused variable 'sign'
-      // Use formatCurrency which already handles locale and options
-      // const formatted = (value === 0 ? 0 : value).toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }); // Removed unused variable 'formatted'
-      // Remove currency symbol if present before adding sign, then re-add if needed (or adjust formatCurrency)
-      // Simpler: rely on browser default for sign placement with currency format
+      // Use browser's built-in sign display for currency formatting
       return value.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0, signDisplay: 'exceptZero' });
   }
 

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Menu, X, User, LogOut, BarChart3 } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,13 +57,12 @@ export default function Header() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                              FightYourTax.AI
-            </span>
+          <Link href="/" className="flex items-center">
+            <Logo 
+              width={300} 
+              height={75} 
+              className="h-12 w-auto" 
+            />
           </Link>
 
           {/* Desktop Navigation */}

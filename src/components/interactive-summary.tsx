@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Building2, DollarSign, Target, Calendar, BarChart3, TrendingUp, X, ChevronRight, Sparkles, Ruler } from "lucide-react"
+import { Building2, DollarSign, Target, Calendar, BarChart3, TrendingUp, X, ChevronRight, Sparkles } from "lucide-react"
 import { formatCurrency, safeParseFloat } from "@/lib/utils"
 import type { PropertiesSearchSummary } from "@/lib/comparables/server"
 
@@ -37,26 +37,35 @@ export function InteractiveSummary({ summary }: InteractiveSummaryProps) {
         ],
       },
     },
-    {
-      id: "values",
-      icon: DollarSign,
-      title: "Average Assessment",
-      value: formatCurrency(safeParseFloat(summary.avgAssessedValue)),
-      subtitle: `Median: ${formatCurrency(safeParseFloat(summary.medianAssessedValue))}`,
-      color: "green",
-      details: {
-        title: "Property Values Analysis",
-        description: "Comprehensive breakdown of neighborhood property assessments",
-        stats: [
-          { label: "Average Assessment", value: formatCurrency(safeParseFloat(summary.avgAssessedValue)) },
-          { label: "Median Assessment", value: formatCurrency(safeParseFloat(summary.medianAssessedValue)) },
-          { label: "Lowest Assessment", value: formatCurrency(safeParseFloat(summary.minAssessedValue)) },
-          { label: "Highest Assessment", value: formatCurrency(safeParseFloat(summary.maxAssessedValue)) },
-          { label: "Average Land Value", value: formatCurrency(safeParseFloat(summary.avgLandValue)) },
-          { label: "Median Land Value", value: formatCurrency(safeParseFloat(summary.medianLandValue)) },
-        ],
-      },
-    },
+    (() => {
+      const avgValue = safeParseFloat(summary.avgAssessedValue)
+      const medianValue = safeParseFloat(summary.medianAssessedValue)
+      const isAvgLower = avgValue <= medianValue
+      
+      return {
+        id: "values",
+        icon: DollarSign,
+        title: isAvgLower ? "Average Assessment" : "Median Assessment",
+        value: formatCurrency(isAvgLower ? avgValue : medianValue),
+        subtitle: isAvgLower 
+          ? `Median: ${formatCurrency(medianValue)}`
+          : `Average: ${formatCurrency(avgValue)}`,
+        color: "green",
+        details: {
+          title: "Property Values Analysis",
+          description: "Comprehensive breakdown of neighborhood property assessments",
+          stats: [
+            { label: "Average Assessment", value: formatCurrency(avgValue) },
+            { label: "Median Assessment", value: formatCurrency(medianValue) },
+            { label: "Lower Value", value: formatCurrency(Math.min(avgValue, medianValue)) },
+            { label: "Lowest Assessment", value: formatCurrency(safeParseFloat(summary.minAssessedValue)) },
+            { label: "Highest Assessment", value: formatCurrency(safeParseFloat(summary.maxAssessedValue)) },
+            { label: "Average Land Value", value: formatCurrency(safeParseFloat(summary.avgLandValue)) },
+            { label: "Median Land Value", value: formatCurrency(safeParseFloat(summary.medianLandValue)) },
+          ],
+        },
+      }
+    })(),
     {
       id: "pricing",
       icon: Target,

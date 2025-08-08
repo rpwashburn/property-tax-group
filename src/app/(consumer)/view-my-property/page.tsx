@@ -31,7 +31,8 @@ export default function ViewMyPropertyPage() {
 
   return (
     <div className="py-12">
-      <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">View My Property</h1>
@@ -187,6 +188,7 @@ export default function ViewMyPropertyPage() {
               </p>
             </CardFooter>
           </Card>
+        </div>
         </div>
       </div>
     </div>

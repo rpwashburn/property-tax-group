@@ -1,14 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { formatCurrency, formatPercent } from "@/lib/utils"
+import type { Comparable } from "@/lib/comparables/types"
 
-// Define the shape of a comparable property expected by this component
-interface ComparableProperty {
-  adjusted_value: string // Expecting format like "$1,234,567"
-}
+// Use the existing Comparable type from the comparables lib
 
 interface IndicatedValueAnalysisCardProps {
-  comparables: ComparableProperty[]
+  comparables: Comparable[]
   subjectPropertyValue: number
 }
 
@@ -106,16 +104,4 @@ export function IndicatedValueAnalysisCard({ comparables, subjectPropertyValue }
   )
 }
 
-// Helper function (ensure this exists or is imported from your utils)
-// Assuming you have a utils file with formatCurrency and formatPercent
-/*
-Example in lib/utils.ts:
-
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-};
-
-export const formatPercent = (value: number, options?: Intl.NumberFormatOptions): string => {
-  return new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1, ...options }).format(value);
-};
-*/ 
+// Helper utilities are now imported from shared utils 

@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['@react-pdf/renderer'],
+  experimental: {
+    nodeMiddleware: true, // Enable Node.js middleware support
+  },
   rewrites: async () => {
     return [
       // FastAPI docs - these go first since they're not under /api

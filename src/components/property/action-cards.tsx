@@ -65,8 +65,8 @@ export function ActionCards({ accountId, hasSignificantIncrease, appraisedPercen
                 "Ready-to-file protest materials"
               ]}
               button={{
-                text: "Get Your Report",
-                href: `/report/${accountId}`,
+                text: "Start Full Report Demo",
+                href: `/full-report-demo?account=${accountId}&jurisdiction=HCAD`,
                 variant: "secondary"
               }}
               borderColor="border-emerald-400"

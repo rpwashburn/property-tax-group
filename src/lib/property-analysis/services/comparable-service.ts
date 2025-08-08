@@ -1,7 +1,5 @@
-import { safeParseInt } from '@/lib/comparables/calculations';
-import type { SubjectProperty, AdjustedComparable, ComparableFromAPI } from "@/lib/comparables/types";
-import type { PropertySearchCriteria } from '@/lib/comparables/types';
-import type { AdjustmentCalculations } from '@/lib/comparables/calculations';
+import { safeParseInt } from '@/lib/utils';
+import type { SubjectProperty, AdjustedComparable } from "@/lib/comparables/types";
 
 export interface ComparableData {
   groupedComparables: GroupedComparables;
@@ -144,7 +142,7 @@ function createGroupMembershipIds(
  * TODO: Implement with actual backend API call
  */
 async function fetchComparablesFromAPI(
-  effectiveSubjectProperty: SubjectProperty
+  _effectiveSubjectProperty: SubjectProperty
 ): Promise<AdjustedComparable[]> {
   console.warn('[comparable-service] fetchComparablesFromAPI is temporarily disabled - property data moved to backend API');
   console.warn('[comparable-service] Please implement this functionality in your backend API');

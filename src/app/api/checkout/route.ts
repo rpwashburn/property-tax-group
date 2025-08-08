@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, PRODUCT_CONFIGS, type ProductType } from '@/lib/stripe';
 import type { CheckoutRequest, CheckoutResponse } from '@/lib/stripe-client';
+import { emailUtils } from '@/lib/utils';
 
 /**
  * Get the API base URL from environment or default
@@ -81,6 +82,15 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Validate email format
+    const emailValidation = emailUtils.validateEmail(customerEmail);
+    if (!emailValidation.isValid) {
+      return NextResponse.json(
+        { error: emailValidation.error || 'Invalid email address format' },
+        { status: 400 }
+      );
+    }
+    
     // Validate product type
     if (!PRODUCT_CONFIGS[productType as ProductType]) {
       return NextResponse.json(
@@ -90,6 +100,9 @@ export async function POST(request: NextRequest) {
     }
     
     const product = PRODUCT_CONFIGS[productType as ProductType];
+    
+    // Normalize email address
+    const normalizedEmail = emailUtils.normalizeEmail(customerEmail);
     
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -113,7 +126,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      customer_email: customerEmail,
+      customer_email: normalizedEmail,
       metadata: {
         productType,
         jurisdiction,
@@ -134,7 +147,7 @@ export async function POST(request: NextRequest) {
         stripeSessionId: session.id,
         productType: productType as ProductType,
         amount: product.price,
-        customerEmail,
+        customerEmail: normalizedEmail,
         customerName,
         jurisdiction,
         accountNumber,

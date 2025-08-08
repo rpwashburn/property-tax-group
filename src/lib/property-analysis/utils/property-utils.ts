@@ -78,8 +78,8 @@ export function transformApiToEnriched(apiData: ApiPropertyResponse): EnrichedPr
     createdAt: new Date(apiData.metadata.createdAt),
     updatedAt: new Date(apiData.metadata.updatedAt),
     
-    // Related data (direct mapping)
-    structuralElements: apiData.buildings,
+    // Related data: legacy structural elements not available from API; leave empty
+    structuralElements: [],
     fixtures: apiData.fixtures || undefined,
     extraFeatures: apiData.extraFeatures,
   };

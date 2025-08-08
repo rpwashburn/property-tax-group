@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from 'react';
-import { stripePromise } from '@/lib/stripe-client';
+// import { stripePromise } from '@/lib/stripe-client';
 import type { CheckoutRequest, CheckoutResponse } from '@/lib/stripe-client';
 
 interface PurchaseError {
