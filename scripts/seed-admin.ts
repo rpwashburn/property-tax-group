@@ -16,11 +16,14 @@ function generateId(): string {
 
 // Configuration from environment variables
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@fightyourtax.ai';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123456';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'thisIsOurProdPa55!!';
 const ADMIN_NAME = process.env.ADMIN_NAME || 'Admin User';
+// load .env file
+
 
 async function seedAdminUser() {
   console.log('🌱 Starting admin user seeding...');
+  console.log('🌱 POSTGRES_URL:', process.env.POSTGRES_URL);
 
   // Connect to database
   const client = postgres(process.env.POSTGRES_URL!);
